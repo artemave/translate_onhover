@@ -5,23 +5,42 @@ $(function() {
   $(document.body).mousemove(function(e){
 
     var onmousestop = function() {
-      //get element under cursor
-      var hit_element = $(document.elementFromPoint(e.clientX, e.clientY));
+      //TODO skip entirely if users is selecting text (so that selection is not dropped)
+
+      function ContentSnapshot(element) {
+        var original_html = $(element).html();
+        var original_input_vals = $('input', element)
+          .map(function(idx, input) { $(input).val(); })
+          .get();
+
+        this.restore = function() {
+          $(element).html(original_html);
+
+          $('input', element).each(function(idx, input) {
+            console.log('restoring: '+original_html[idx]);
+            $(input).val(original_input_vals[idx]);
+          });
+        }
+        return this;
+      }
 
       function getHitWord(hit_elem) {
         var hit_word = '';
+        hit_elem = $(hit_elem);
 
         //text contents of hit element
-        var text_nodes = hit_elem.contents()
-          .filter(function(){ return this.nodeType == Node.TEXT_NODE && this.nodeValue != "" });
+        var text_nodes = hit_elem.contents().filter(function(){
+          return this.nodeType == Node.TEXT_NODE && this.nodeValue.match(/[a-zA-Z]{2,}/)
+        });
 
+        //bunch of text under cursor? break it into words
         if (text_nodes.length > 0) {
 
-          var old_contents = hit_elem.html();//TODO discard form inputs
+          var original_content = new ContentSnapshot(hit_elem);
 
           //wrap every word in every node in a dom element
           text_nodes.replaceWith(function(i) {
-            return $(this).text().replace(/([a-zA-Z-]*)/, "<transover>$1</transover>")
+            return $(this).text().replace(/([a-zA-Z-]*)/g, "<transover>$1</transover>")
           });
 
           //get the exact word under cursor
@@ -36,23 +55,22 @@ $(function() {
             console.log("got it: "+hit_word);
           }
 
-          hit_element.html(old_contents);
+          original_content.restore();
         }
 
         return hit_word;
       }
 
       var last_related_mousemove = mousemove_cnt;
-      var hit_word = getHitWord(hit_element);
+      var hit_word = getHitWord(document.elementFromPoint(e.clientX, e.clientY));
 
-      //call api
-
-      if (last_related_mousemove == mousemove_cnt && hit_word != '') {
-        //draw result
-        console.log('hit word: '+hit_word);
-      }
-
-    };
+      //call google translation through background page
+      chrome.extension.sendRequest({word: hit_word}, function(response){
+        if (last_related_mousemove == mousemove_cnt && hit_word != '') {
+          console.log('response: '+response.translation);
+        }
+      });
+    }
 
     //hide result
     mousemove_cnt++;

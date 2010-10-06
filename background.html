@@ -1,4 +1,16 @@
 <html>
-  <script>
+  <script type="text/javascript" src="http://www.google.com/jsapi">
+  </script>
+
+  <script type="text/javascript">
+    google.load("language", "1");
+
+    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+      console.log("bg: received to translate: " + request.word);
+
+      google.language.translate(request.word, "en", "ru", function(result) {
+        sendResponse({translation: result.translation});
+      });
+    });
   </script>
 </html>
