@@ -1,79 +1,72 @@
 $(function() {
-  var timer25;
-  var mousemove_cnt = 0;
+  var timer25, last_x, last_y;
+  var tooltip = new Tooltip();
 
   $(document.body).mousemove(function(e){
 
     var onmousestop = function() {
       //TODO skip entirely if users is selecting text (so that selection is not dropped)
 
-      function ContentSnapshot(element) {
-        var original_html = $(element).html();
-        var original_input_vals = $('input', element)
-          .map(function(idx, input) { $(input).val(); })
-          .get();
+      function translate() {
+        function getHitWord(hit_elem) {
+          var hit_word = '';
+          hit_elem = $(hit_elem);
 
-        this.restore = function() {
-          $(element).html(original_html);
-
-          $('input', element).each(function(idx, input) {
-            console.log('restoring: '+original_html[idx]);
-            $(input).val(original_input_vals[idx]);
-          });
-        }
-        return this;
-      }
-
-      function getHitWord(hit_elem) {
-        var hit_word = '';
-        hit_elem = $(hit_elem);
-
-        //text contents of hit element
-        var text_nodes = hit_elem.contents().filter(function(){
-          return this.nodeType == Node.TEXT_NODE && this.nodeValue.match(/[a-zA-Z]{2,}/)
-        });
-
-        //bunch of text under cursor? break it into words
-        if (text_nodes.length > 0) {
-
-          var original_content = new ContentSnapshot(hit_elem);
-
-          //wrap every word in every node in a dom element
-          text_nodes.replaceWith(function(i) {
-            return $(this).text().replace(/([a-zA-Z-]*)/g, "<transover>$1</transover>")
+          //text contents of hit element
+          var text_nodes = hit_elem.contents().filter(function(){
+            return this.nodeType == Node.TEXT_NODE && this.nodeValue.match(/[a-zA-Z]{2,}/)
           });
 
-          //get the exact word under cursor
-          var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
+          //bunch of text under cursor? break it into words
+          if (text_nodes.length > 0) {
+            var original_content = hit_elem.clone();
 
-          //no word under cursor? we are done
-          if (hit_word_elem.nodeName != 'TRANSOVER') {
-            console.log("missed!");
-          }
-          else  {
-            hit_word = $(hit_word_elem).text();
-            console.log("got it: "+hit_word);
+            //wrap every word in every node in a dom element (real magic happens here)
+            text_nodes.replaceWith(function(i) {
+              return $(this).text().replace(/([a-zA-Z-]*)/g, "<transover>$1</transover>")
+            });
+
+            //get the exact word under cursor
+            var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
+
+            //no word under cursor? we are done
+            if (hit_word_elem.nodeName != 'TRANSOVER') {
+              console.log("missed!");
+            }
+            else  {
+              hit_word = $(hit_word_elem).text();
+              console.log("got it: "+hit_word);
+            }
+
+            hit_elem.replaceWith(original_content);
           }
 
-          original_content.restore();
+          return hit_word;
         }
 
-        return hit_word;
+        if (last_x != e.clientX && last_y != e.clientY) { return }
+
+        var hit_word = getHitWord(document.elementFromPoint(e.clientX, e.clientY));
+
+        if (last_x == e.clientX && last_y == e.clientY && hit_word != '') {
+          //call google translation through background page
+          chrome.extension.sendRequest({word: hit_word}, function(response){
+            console.log('response: '+response.translation);
+            tooltip.show(e.clientX, e.clientY, response.translation);
+            setTimeout(function() { tooltip.hide() }, 5000);
+          });
+        }
       }
 
-      var last_related_mousemove = mousemove_cnt;
-      var hit_word = getHitWord(document.elementFromPoint(e.clientX, e.clientY));
-
-      //call google translation through background page
-      chrome.extension.sendRequest({word: hit_word}, function(response){
-        if (last_related_mousemove == mousemove_cnt && hit_word != '') {
-          console.log('response: '+response.translation);
-        }
-      });
+      setTimeout(translate, 1000);
     }
 
-    //hide result
-    mousemove_cnt++;
+    if (last_x != e.clientX || last_y != e.clientY) {
+      tooltip.hide();
+    }
+
+    last_x = e.clientX;
+    last_y = e.clientY;
 
     clearTimeout(timer25);
     timer25 = setTimeout(onmousestop, 25);
