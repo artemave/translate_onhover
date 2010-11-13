@@ -1,16 +1,38 @@
 <html>
-  <script type="text/javascript" src="http://www.google.com/jsapi">
-  </script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
 
   <script type="text/javascript">
-    google.load("language", "1");
-
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       console.log("bg: received to translate: " + request.word);
 
-      google.language.translate(request.word, "en", "ru", function(result) {
-        sendResponse({translation: result.translation});
-      });
+      $.getJSON("http://www.google.com/translate_a/t",
+        {
+          client: 'ig',
+          text: request.word,
+          sl: 'en',
+          tl: 'ru',
+          ie: 'UTF8',
+          oe: 'UTF8'
+        },
+        function (data) {
+          var output = [];
+
+          if (data instanceof Array) {
+            data.pop().forEach(function(translation) {
+              var part_of_speech = translation.shift();
+              var trs = translation.slice(0,5);
+              output.push('<b>'+part_of_speech+'</b>: '+trs.join(', '));
+            });
+          }
+          else {
+            output = [data];
+          }
+
+          sendResponse({translation: output.join('; ')});
+        }
+      );
+
     });
   </script>
 </html>
