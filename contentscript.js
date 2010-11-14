@@ -45,7 +45,6 @@ $(function() {
       chrome.extension.sendRequest({word: word}, function(response){
         console.log('response: '+response.translation);
         tooltip.show(e.clientX, e.clientY, response.translation);
-        setTimeout(function() { tooltip.hide() }, 6000);
       });
     }
 

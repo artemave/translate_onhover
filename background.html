@@ -3,33 +3,47 @@
   <script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
 
   <script type="text/javascript">
-    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-      console.log("bg: received to translate: " + request.word);
+    var pos_translations = {};
 
+    function translate(word, onresonse) {
       $.getJSON("http://www.google.com/translate_a/t",
         {
           client: 'ig',
-          text: request.word,
+          text: word,
           sl: 'en',
           tl: 'ru',
           ie: 'UTF8',
           oe: 'UTF8'
         },
+        onresonse
+      );
+    }
+
+    ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection'].forEach(function(pos) {
+      translate(pos, function(data) { pos_translations[pos] = data.shift(); });
+    });
+
+    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+      console.log("bg: received to translate: " + request.word);
+
+      translate(
+        request.word,
         function (data) {
           var output = [];
 
           if (data instanceof Array) {
             data.pop().forEach(function(translation) {
               var part_of_speech = translation.shift();
+
               var trs = translation.slice(0,5);
-              output.push('<b>'+part_of_speech+'</b>: '+trs.join(', '));
+              output.push('<b>'+(pos_translations[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
             });
           }
           else {
             output = [data];
           }
 
-          sendResponse({translation: output.join('; ')});
+          sendResponse({translation: output.join('<br/>')});
         }
       );
 
