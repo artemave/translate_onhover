@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <title>TransOver Extension Options</title>
+    <script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
+  </head>
+  <script type="text/javascript">
+
+    var lang_map = [
+      ["sq","Albanian"],
+      ["ar","Arabic"],
+      ["bg","Bulgarian"],
+      ["ca","Catalan"],
+      ["zh-CN","Chinese Simplified"],
+      ["zh-TW","Chinese Traditional"],
+      ["hr","Croatian"],
+      ["cs","Czech"],
+      ["da","Danish"],
+      ["nl","Dutch"],
+      ["en","English"],
+      ["et","Estonian"],
+      ["tl","Filipino"],
+      ["fi","Finnish"],
+      ["fr","French"],
+      ["de","German"],
+      ["el","Greek"],
+      ["iw","Hebrew"],
+      ["hi","Hindi"],
+      ["hu","Hungarian"],
+      ["id","Indonesian"],
+      ["it","Italian"],
+      ["ja","Japanese"],
+      ["lv","Latvian"],
+      ["lt","Lithuanian"],
+      ["no","Norwegian"],
+      ["fa","Persian"],
+      ["pl","Polish"],
+      ["pt","Portuguese"],
+      ["ro","Romanian"],
+      ["ru","Russian"],
+      ["sr","Serbian"],
+      ["sk","Slovak"],
+      ["sl","Slovenian"],
+      ["es","Spanish"],
+      ["sv","Swedish"],
+      ["th","Thai"],
+      ["tr","Turkish"],
+      ["uk","Ukranian"],
+      ["vi","Vietnamese"],
+    ];
+
+    function save_options() {
+      var except_langs = [];
+      $('input:checked', $('#except_langs')).each(function(i, input) {
+        except_langs.push($(input).val());
+      });
+
+      localStorage['except_langs'] = except_langs.join(',');
+      localStorage['target_lang'] = $('#target_lang').val();
+      localStorage['shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
+
+      $('#status').html("Options saved.");
+      setTimeout(function() { $('#status').html("") }, 1000);
+    }
+
+    $(function() {
+        var saved_target_lang = localStorage['target_lang'];
+        var saved_except_langs = (localStorage['except_langs'] || '').split(',');
+
+        lang_map.forEach(function(lang) {
+          $('#target_lang').append('<option value="'+lang[0]+'"'+(saved_target_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
+
+          var inp = $('<input id="ex'+lang[0]+'" type="checkbox" value="'+lang[0]+'"/>');
+          if (saved_except_langs.some(function(lang_code) { return lang_code == lang[0] }))  {
+            inp.attr('checked', true);
+          }
+          $('#except_langs')
+            .append('<label for="ex'+lang[0]+'">'+lang[1]+'</label>')
+            .append(inp);
+        });
+
+        if (localStorage['shift_only'] == 1) {
+          $('#shift_only').attr('checked', true);
+        }
+
+        $('#save_button').click(function() {save_options()});
+    });
+
+  </script>
+
+  <body>
+    <div id="status"></div>
+
+    Translate into:
+    <select id="target_lang"></select>
+    <br>
+    <fieldset id='except_langs'>
+      <legend>Don't translate words in these languages:</legend>
+    </fieldset>
+
+    <label for="shift_only">Only show translation when I hold the shift key</label>
+    <input type="checkbox" id="shift_only" name="shift_only"/>
+    <br>
+    <button id="save_button">Save</button>
+  </body>
+</html>

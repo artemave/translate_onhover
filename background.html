@@ -19,7 +19,7 @@
       );
     }
 
-    ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection'].forEach(function(pos) {
+    ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
       translate(pos, function(data) { pos_translations[pos] = data.shift(); });
     });
 

@@ -5,6 +5,7 @@ $(function() {
 
     //TODO skip entirely if user is selecting text (so that selection is not dropped)
     //TODO make it not messing around with links
+    //TODO make it skip translating into the same language
 
     function getHitWord(e) {
       var hit_word = '';
