@@ -43,7 +43,7 @@ $(function() {
     }
 
     function translate_and_show(word, e) {
-      chrome.extension.sendRequest({word: word}, function(response){
+      chrome.extension.sendRequest({handler: 'translate', word: word}, function(response){
         console.log('response: '+response.translation);
         tooltip.show(e.clientX, e.clientY, response.translation);
       });
@@ -87,4 +87,7 @@ $(function() {
     last_x = e.clientX;
     last_y = e.clientY;
   });
-})
+
+  chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
+  chrome.extension.sendRequest({handler: 'detect_lang', content: $('body').text().replace(/\s{2,}/g, ' ').slice(0,500)});
+});

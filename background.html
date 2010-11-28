@@ -5,48 +5,70 @@
   <script type="text/javascript">
     var pos_translations = {};
 
-    function translate(word, onresonse) {
+    google.load('language', 1);
+
+    function translate(word, onresponse) {
       $.getJSON("http://www.google.com/translate_a/t",
         {
           client: 'ig',
           text: word,
-          sl: 'en',
-          tl: 'ru',
-          ie: 'UTF8',
-          oe: 'UTF8'
+          sl: localStorage['to_source_lang'],
+          tl: localStorage['to_target_lang'],
+          ie: localStorage['to_encoding'] || 'UTF8',
+          oe: localStorage['to_encoding'] || 'UTF8'
         },
-        onresonse
+        onresponse
       );
     }
 
     ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
-      translate(pos, function(data) { pos_translations[pos] = data.shift(); });
+      translate(pos, function(data) { pos_translations[pos] = data instanceof Array ? data.shift() : data; });
     });
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-      console.log("bg: received to translate: " + request.word);
+      switch (request.handler) {
+        case 'detect_lang':
+          google.language.detect(request.content, function(result) {
+            if (!result.error) {
+              console.log("bg: detected lang: "+result.language);
+              localStorage['to_source_lang'] = result.language;
+              sendResponse({});
+            }
+          });
+          break;
+        case 'set_encoding':
+          console.log('bg: setting encoding: '+ request.encoding);
+          localStorage['to_encoding'] = request.encoding;
+          sendResponse({});
+          break;
+        case 'translate':
+          console.log("bg: received to translate: " + request.word);
 
-      translate(
-        request.word,
-        function (data) {
-          var output = [];
+          translate(
+            request.word,
+            function (data) {
+              var output = [];
 
-          if (data instanceof Array) {
-            data.pop().forEach(function(translation) {
-              var part_of_speech = translation.shift();
+              if (data instanceof Array) {
+                data.pop().forEach(function(translation) {
+                  var part_of_speech = translation.shift();
 
-              var trs = translation.slice(0,5);
-              output.push('<b>'+(pos_translations[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
-            });
-          }
-          else {
-            output = [data];
-          }
+                  var trs = translation.slice(0,5);
+                  output.push('<b>'+(pos_translations[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                });
+              }
+              else {
+                output = [data];
+              }
 
-          sendResponse({translation: output.join('<br/>')});
-        }
-      );
-
+              sendResponse({translation: output.join('<br/>')});
+            }
+          );
+          break;
+        default:
+          console.log("bg: Error! Unknown handler");
+          sendResponse({});
+      }
     });
   </script>
 </html>
