@@ -13,7 +13,7 @@ $(function() {
 
       //text contents of hit element
       var text_nodes = hit_elem.contents().filter(function(){
-        return this.nodeType == Node.TEXT_NODE && this.nodeValue.match(/[a-zA-Z]{2,}/)
+        return this.nodeType == Node.TEXT_NODE && XRegExp("\\p{L}{2,}").test( this.nodeValue )
       });
 
       //bunch of text under cursor? break it into words
@@ -22,7 +22,7 @@ $(function() {
 
         //wrap every word in every node in a dom element (real magic happens here)
         text_nodes.replaceWith(function(i) {
-          return $(this).text().replace(/([a-zA-Z-]*)/g, "<transover>$1</transover>")
+          return $(this).text().replace(XRegExp("(\\p{L}*)", 'g'), "<transover>$1</transover>")
         });
 
         //get the exact word under cursor (and here)
@@ -39,6 +39,8 @@ $(function() {
 
         hit_elem.replaceWith(original_content);
       }
+      else { console.log("no text")}
+
       return hit_word;
     }
 
@@ -89,5 +91,5 @@ $(function() {
   });
 
   chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
-  chrome.extension.sendRequest({handler: 'detect_lang', content: $('body').text().replace(/\s{2,}/g, ' ').slice(0,500)});
+  chrome.extension.sendRequest({handler: 'detect_lang', content: $('body').text().replace(/\s{2,}/g, ' ').slice(500,800)});
 });
