@@ -91,6 +91,6 @@ $(function() {
     last_y = e.clientY;
   });
 
-  chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
+  //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
   chrome.extension.sendRequest({handler: 'detect_lang', content: $('body').realText().replace(/\s{2,}/g, ' ').slice(200,500)});
 });

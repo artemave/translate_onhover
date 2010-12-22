@@ -14,26 +14,29 @@
           text: word,
           sl: localStorage['to_source_lang'],
           tl: localStorage['to_target_lang'],
-          //ie: localStorage['to_encoding'] || 'UTF8',
           ie: 'UTF8',
-          oe: localStorage['to_encoding'] || 'UTF8'
+          oe: 'UTF8'
         },
         onresponse
       );
     }
 
-    ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
-      translate(pos, function(data) { pos_translations[pos] = data instanceof Array ? data.shift() : data; });
-    });
-
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       switch (request.handler) {
         case 'detect_lang':
-          console.log('bg: body: ' + request.content);
-
           google.language.detect(request.content, function(result) {
             if (!result.error) {
               console.log("bg: detected lang: "+result.language);
+
+              if (!pos_translations[result.language]) {
+                pos_translations[result.language] = {};
+              }
+              ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
+                if (!pos_translations[result.language][pos]) {
+                  translate(pos, function(data) { pos_translations[result.language][pos] = data instanceof Array ? data.shift() : data; });
+                }
+              });
+
               localStorage['to_source_lang'] = result.language;
             }
           });
@@ -58,7 +61,7 @@
                   var part_of_speech = translation.shift();
 
                   var trs = translation.slice(0,5);
-                  output.push('<b>'+(pos_translations[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                  output.push('<b>'+(pos_translations[localStorage['to_source_lang']][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
                 });
               }
               else {
