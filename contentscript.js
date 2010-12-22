@@ -1,3 +1,4 @@
+
 $(function() {
   var tooltip = new Tooltip();
 
@@ -91,5 +92,5 @@ $(function() {
   });
 
   chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
-  chrome.extension.sendRequest({handler: 'detect_lang', content: $('body').text().replace(/\s{2,}/g, ' ').slice(500,800)});
+  chrome.extension.sendRequest({handler: 'detect_lang', content: $('body').realText().replace(/\s{2,}/g, ' ').slice(200,500)});
 });

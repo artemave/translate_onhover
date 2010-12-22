@@ -4,6 +4,17 @@
   "description": "Translates a word on mouse hover",
   "background_page": "background.html",
   "options_page": "options.html",
-  "content_scripts": [ { "matches": [ "<all_urls>" ], "js": [ "lib/jquery-1.4.2.min.js", "lib/xregexp-min.js", "lib/xregexp-unicode-base.js", "lib/tooltip.js", "contentscript.js" ], "all_frames": true } ],
+  "content_scripts": [{
+    "matches": [ "<all_urls>" ],
+    "js": [
+      "lib/jquery-1.4.2.min.js",
+      "lib/real_text.jquery.js",
+      "lib/xregexp-min.js",
+      "lib/xregexp-unicode-base.js",
+      "lib/tooltip.js",
+      "contentscript.js"
+    ],
+    "all_frames": true
+  }],
   "permissions": [ "http://*.google.com/" ]
 }

@@ -14,8 +14,9 @@
           text: word,
           sl: localStorage['to_source_lang'],
           tl: localStorage['to_target_lang'],
-          ie: localStorage['to_encoding'] || 'UTF8',
-          oe: 'UTF8'
+          //ie: localStorage['to_encoding'] || 'UTF8',
+          ie: 'UTF8',
+          oe: localStorage['to_encoding'] || 'UTF8'
         },
         onresponse
       );
@@ -28,13 +29,16 @@
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       switch (request.handler) {
         case 'detect_lang':
+          console.log('bg: body: ' + request.content);
+
           google.language.detect(request.content, function(result) {
             if (!result.error) {
               console.log("bg: detected lang: "+result.language);
               localStorage['to_source_lang'] = result.language;
-              sendResponse({});
             }
           });
+
+          sendResponse({});
           break;
         case 'set_encoding':
           console.log('bg: setting encoding: '+ request.encoding);
