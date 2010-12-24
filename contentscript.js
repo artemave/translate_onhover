@@ -6,6 +6,7 @@ $(function() {
 
     //TODO make it not messing around with links
     //TODO make it skip translating into the same language
+    //TODO option to show translation in a growl type popup (in the corner)
 
     function getHitWord(e) {
       var hit_word = '';
@@ -52,6 +53,7 @@ $(function() {
     }
 
     //skip entirely if user is selecting text (so that selection is not dropped)
+    //TODO make it translate the selection
     if (window.getSelection() != '') { return }
 
     var word = getHitWord(e);
