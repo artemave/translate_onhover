@@ -24,22 +24,23 @@
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       switch (request.handler) {
         case 'detect_lang':
-          google.language.detect(request.content, function(result) {
-            if (!result.error) {
-              console.log("bg: detected lang: "+result.language);
+          if (request.content) { //for some reason detect_lang gets called 3 times, 1 as expected and 2 others with empty content. This 'if' is a workaround. TODO investigate
+            google.language.detect(request.content, function(result) {
+              if (!result.error) {
+                console.log("bg: detected lang: "+result.language);
 
-              if (!pos_translations[result.language]) {
-                pos_translations[result.language] = {};
+                pos_translations[result.language] = pos_translations[result.language] || {};
+
+                ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
+                  if (!pos_translations[result.language][pos]) {
+                    translate(pos, function(data) { pos_translations[result.language][pos] = data instanceof Array ? data.shift() : data; });
+                  }
+                });
+
+                localStorage['to_source_lang'] = result.language;
               }
-              ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
-                if (!pos_translations[result.language][pos]) {
-                  translate(pos, function(data) { pos_translations[result.language][pos] = data instanceof Array ? data.shift() : data; });
-                }
-              });
-
-              localStorage['to_source_lang'] = result.language;
-            }
-          });
+            });
+          }
 
           sendResponse({});
           break;
