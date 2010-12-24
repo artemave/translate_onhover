@@ -58,16 +58,7 @@ $(function() {
 
     var word = getHitWord(e);
 
-    if (word == '') { return }
-
-    //little gap between mousestop and translation
-    setTimeout(function() {
-      //moved away from the word during gap? halt translation
-      if (last_x != e.clientX && last_y != e.clientY) { return }
-
-      translate_and_show(word, e);
-    }, 1000);
-
+    if (word != '') { translate_and_show(word, e); }
   });
 
   var timer25;
@@ -78,11 +69,13 @@ $(function() {
     clearTimeout(timer25);
 
     timer25 = setTimeout(function() {
+      if (last_x != e.clientX && last_y != e.clientY) { return }
+
       var mousestop = new $.Event("mousestop");
       mousestop.clientX = e.clientX;
       mousestop.clientY = e.clientY;
       $(document).trigger(mousestop);
-    }, 25);
+    }, 1000);
   });
 
   var last_x, last_y;
