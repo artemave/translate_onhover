@@ -4,7 +4,6 @@ $(function() {
 
   $(document).bind('mousestop', function(e) {
 
-    //TODO skip entirely if user is selecting text (so that selection is not dropped)
     //TODO make it not messing around with links
     //TODO make it skip translating into the same language
 
@@ -52,6 +51,9 @@ $(function() {
       });
     }
 
+    //skip entirely if user is selecting text (so that selection is not dropped)
+    if (window.getSelection() != '') { return }
+
     var word = getHitWord(e);
 
     if (word == '') { return }
@@ -69,6 +71,7 @@ $(function() {
   var timer25;
 
   // setup mousestop event
+  // mousestop triggers the entire thing - it is an entry point
   $(document).mousemove(function(e){
     clearTimeout(timer25);
 
