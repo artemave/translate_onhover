@@ -8,7 +8,6 @@
     "matches": [ "<all_urls>" ],
     "js": [
       "lib/jquery-1.4.2.min.js",
-      "lib/real_text.jquery.js",
       "lib/xregexp-min.js",
       "lib/xregexp-unicode-base.js",
       "lib/tooltip.js",
@@ -16,5 +15,5 @@
     ],
     "all_frames": true
   }],
-  "permissions": [ "http://*.google.com/" ]
+  "permissions": [ "tabs", "http://*.google.com/" ]
 }
