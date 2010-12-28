@@ -2,6 +2,39 @@
   <head>
     <title>TransOver Extension Options</title>
     <script type="text/javascript" src="lib/jquery-1.4.4.min.js"></script>
+    <style type="text/css">
+      body, table {
+        color: #4f4f4f;
+        font: normal normal normal 12px Verdana, Tahoma, sans-serif;
+      }
+
+      td {
+        width: 140px;
+      }
+
+      div.content {
+        text-align: left;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #ccc;
+        padding: 5px;
+        border-radius: 5px;
+      }
+
+      .option {
+        margin-top: 10px;
+      }
+
+      fieldset.option {
+        border-width: 1px;
+        border-radius: 5px;
+        border-style: solid;
+      }
+
+      #status {
+        color: green;
+      }
+    </style>
   </head>
   <script type="text/javascript">
 
@@ -58,7 +91,7 @@
       localStorage['target_lang'] = $('#target_lang').val();
       localStorage['shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
 
-      $('#status').html("Options saved.");
+      $('#status').html("Options saved!");
       setTimeout(function() { $('#status').html("") }, 1000);
     }
 
@@ -66,17 +99,25 @@
         var saved_target_lang = localStorage['target_lang'];
         var saved_except_langs = (localStorage['except_langs'] || '').split(',');
 
-        lang_map.forEach(function(lang) {
+        lang_map.forEach(function(lang, i) {
           $('#target_lang').append('<option value="'+lang[0]+'"'+(saved_target_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
 
           var inp = $('<input id="ex'+lang[0]+'" type="checkbox" value="'+lang[0]+'"/>');
           if (saved_except_langs.some(function(lang_code) { return lang_code == lang[0] }))  {
             inp.attr('checked', true);
           }
-          $('#except_langs')
-            .append('<label for="ex'+lang[0]+'">'+lang[1]+'</label>')
-            .append(inp);
+
+          if (i % 5 == 0) {
+            $('#exc_lang_table').append('<tr></tr>');
+          }
+          $('tr:last', $('#exc_lang_table'))
+            .append($('<td></td>')
+              .append('<label for="ex'+lang[0]+'">'+lang[1]+'</label>')
+              .append(inp)
+            );
         });
+
+        $('#except_langs').append($('#exc_lang_table'));
 
         if (localStorage['shift_only'] == 1) {
           $('#shift_only').attr('checked', true);
@@ -88,18 +129,24 @@
   </script>
 
   <body>
-    <div id="status"></div>
+    <div class="content">
+      <div id="status"></div>
+  
+      <div class="option">
+        Translate into: <select id="target_lang"></select>
+      </div>
 
-    Translate into:
-    <select id="target_lang"></select>
-    <br>
-    <fieldset id='except_langs'>
-      <legend>Don't translate words in these languages:</legend>
-    </fieldset>
-
-    <label for="shift_only">Only show translation when I hold the shift key</label>
-    <input type="checkbox" id="shift_only" name="shift_only"/>
-    <br>
-    <button id="save_button">Save</button>
+      <fieldset class="option" id='except_langs'>
+        <legend>Don't translate words in these languages:</legend>
+        <table id='exc_lang_table'></table>
+      </fieldset>
+  
+      <div class="option">
+        <label for="shift_only">Only show translation when I hold the shift key</label>
+        <input type="checkbox" id="shift_only" name="shift_only"/>
+      </div>
+      <br>
+      <button id="save_button">Save</button>
+    </div>
   </body>
 </html>
