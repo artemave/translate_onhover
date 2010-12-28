@@ -31,8 +31,20 @@
         border-style: solid;
       }
 
+      div.button {
+        float: left;
+      }
+
+      div.button_group {
+        margin-top: 10px;
+      }
+
       #status {
+        display: none;
         color: green;
+        float: left;
+        margin-top: 4px;
+        margin-left: 8px;
       }
     </style>
   </head>
@@ -91,8 +103,7 @@
       localStorage['target_lang'] = $('#target_lang').val();
       localStorage['shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
 
-      $('#status').html("Options saved!");
-      setTimeout(function() { $('#status').html("") }, 1000);
+      $('#status').fadeIn().delay(2000).fadeOut();
     }
 
     $(function() {
@@ -130,8 +141,6 @@
 
   <body>
     <div class="content">
-      <div id="status"></div>
-  
       <div class="option">
         Translate into: <select id="target_lang"></select>
       </div>
@@ -145,8 +154,14 @@
         <label for="shift_only">Only show translation when I hold the shift key</label>
         <input type="checkbox" id="shift_only" name="shift_only"/>
       </div>
-      <br>
-      <button id="save_button">Save</button>
+
+      <div class="button_group">
+        <div class="button">
+          <button id="save_button">Save</button>
+        </div>
+        <div id="status">Options saved!</div>
+        <div style="clear: both"></div>
+      </div>
     </div>
   </body>
 </html>
