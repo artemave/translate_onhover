@@ -3,9 +3,7 @@ var tooltip = new Tooltip();
 
 $(document).bind('mousestop', function(e) {
 
-  //TODO make it skip translating into the same language
   //TODO option to show translation in a growl type popup (in the corner)
-  //TODO don't let tooltip show up outside visible screen
 
   function getHitWord(e) {
     var hit_word = '';
