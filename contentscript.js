@@ -61,13 +61,27 @@ $(document).bind('mousestop', function(e) {
   //respect 'don't translate into these languages' option
   if ((new RegExp(source_lang).test(options.except_langs))) { return }
 
+  //respect 'translate only when shift pressed' option
+  if (options.shift_only == 1 && !shift_pressed) { return }
+
   var word = getHitWord(e);
 
   if (word != '') { translate_and_show(word, e); }
 });
 
-var timer25;
+var shift_pressed = false;
+$(document)
+  .keydown(function(event) {
+    if (event.keyCode == 16) {
+      shift_pressed = true;
+    }
+  }).keyup(function(event) {
+    if (event.keyCode == 16) {
+      shift_pressed = false;
+    }
+  });
 
+var timer25;
 // setup mousestop event
 // mousestop triggers the entire thing - it is an entry point
 $(document).mousemove(function(e){
