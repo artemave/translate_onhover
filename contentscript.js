@@ -47,7 +47,9 @@ $(document).bind('mousestop', function(e) {
   function translate_and_show(word, e) {
     chrome.extension.sendRequest({handler: 'translate', word: word}, function(response){
       console.log('response: '+response.translation);
-      tooltip.show(e.clientX, e.clientY, response.translation);
+      if (response.translation && response.translation != '') {
+        tooltip.show(e.clientX, e.clientY, response.translation);
+      }
     });
   }
 
@@ -89,12 +91,4 @@ $(document).mousemove(function(e) {
 });
 
 //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
-chrome.tabs.getCurrent(function(this_tab) {
-  chrome.windows.getCurrent(function(current_window) {
-    chrome.tabs.getSelected(current_window.id, function(selected_tab) {
-      if (selected_tab.id == this_tab.id) {
-        chrome.extension.sendRequest({handler: 'detect_lang_lite'});
-      }
-    });
-  });
-});
+chrome.extension.sendRequest({handler: 'detect_lang'});

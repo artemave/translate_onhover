@@ -1,6 +1,6 @@
 <html>
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-  <script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="lib/jquery-1.4.4.min.js"></script>
 
   <script type="text/javascript">
     var pos_translations = {},
@@ -44,7 +44,13 @@
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       switch (request.handler) {
         case 'detect_lang':
-          setup_source_lang(sender.tab.id);
+          chrome.windows.getCurrent(function(current_window) {
+            chrome.tabs.getSelected(current_window.id, function(selected_tab) {
+              if (selected_tab.id == sender.tab.id) {
+                setup_source_lang(sender.tab.id);
+              }
+            });
+          });
           sendResponse({});
           break;
         case 'set_encoding':
@@ -55,26 +61,32 @@
         case 'translate':
           console.log("bg: received to translate: " + request.word);
 
-          translate(
-            request.word,
-            function (data) {
-              var output = [];
+          if (localStorage['to_target_lang'] == source_lang) {
+            console.log("bg: not translating into the same language");
+            sendResponse({});
+          }
+          else {
+            translate(
+              request.word,
+              function (data) {
+                var output = [];
 
-              if (data instanceof Array) {
-                data.pop().forEach(function(translation) {
-                  var part_of_speech = translation.shift();
+                if (data instanceof Array) {
+                  data.pop().forEach(function(translation) {
+                    var part_of_speech = translation.shift();
 
-                  var trs = translation.slice(0,5);
-                  output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
-                });
+                    var trs = translation.slice(0,5);
+                    output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                  });
+                }
+                else {
+                  output = [data];
+                }
+
+                sendResponse({translation: output.join('<br/>')});
               }
-              else {
-                output = [data];
-              }
-
-              sendResponse({translation: output.join('<br/>')});
-            }
-          );
+            );
+          }
           break;
         default:
           console.log("bg: Error! Unknown handler");
