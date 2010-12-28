@@ -59,10 +59,14 @@
           sendResponse({});
           break;
         case 'translate':
-          console.log("bg: received to translate: " + request.word);
+          console.log("received to translate: " + request.word);
 
           if (localStorage['to_target_lang'] == source_lang) {
-            console.log("bg: not translating into the same language");
+            console.log("not translating into the same language");
+            sendResponse({});
+          }
+          else if ((new RegExp(source_lang)).test( localStorage['to_except_langs'] )) {
+            console.log("as set in options, skipping "+source_lang);
             sendResponse({});
           }
           else {
@@ -89,7 +93,7 @@
           }
           break;
         default:
-          console.log("bg: Error! Unknown handler");
+          console.log("Error! Unknown handler");
           sendResponse({});
       }
     });
