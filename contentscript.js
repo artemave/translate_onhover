@@ -55,6 +55,12 @@ $(document).bind('mousestop', function(e) {
   //TODO make it translate the selection
   if (window.getSelection() != '') { return }
 
+  //don't bother translating into the same language
+  if (source_lang == options.target_lang) { return }
+
+  //respect 'don't translate into these languages' option
+  if ((new RegExp(source_lang).test(options.except_langs))) { return }
+
   var word = getHitWord(e);
 
   if (word != '') { translate_and_show(word, e); }
@@ -89,4 +95,13 @@ $(document).mousemove(function(e) {
 });
 
 //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
-chrome.extension.sendRequest({handler: 'detect_lang'});
+
+var options = {};
+chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
+  options = response.options;
+});
+
+var source_lang;
+chrome.extension.sendRequest({handler: 'detect_lang'}, function(response) {
+  source_lang = response.source_lang;
+});

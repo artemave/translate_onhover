@@ -54,17 +54,17 @@
         except_langs.push($(input).val());
       });
 
-      localStorage['to_except_langs'] = except_langs.join(',');
-      localStorage['to_target_lang'] = $('#target_lang').val();
-      localStorage['to_shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
+      localStorage['except_langs'] = except_langs.join(',');
+      localStorage['target_lang'] = $('#target_lang').val();
+      localStorage['shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
 
       $('#status').html("Options saved.");
       setTimeout(function() { $('#status').html("") }, 1000);
     }
 
     $(function() {
-        var saved_target_lang = localStorage['to_target_lang'];
-        var saved_except_langs = (localStorage['to_except_langs'] || '').split(',');
+        var saved_target_lang = localStorage['target_lang'];
+        var saved_except_langs = (localStorage['except_langs'] || '').split(',');
 
         lang_map.forEach(function(lang) {
           $('#target_lang').append('<option value="'+lang[0]+'"'+(saved_target_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
@@ -78,7 +78,7 @@
             .append(inp);
         });
 
-        if (localStorage['to_shift_only'] == 1) {
+        if (localStorage['shift_only'] == 1) {
           $('#shift_only').attr('checked', true);
         }
 

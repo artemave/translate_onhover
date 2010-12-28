@@ -14,7 +14,7 @@
           client: 'ig',
           text: word,
           sl: source_lang,
-          tl: localStorage['to_target_lang'],
+          tl: localStorage['target_lang'],
           ie: 'UTF8',
           oe: 'UTF8'
         },
@@ -22,7 +22,7 @@
       );
     }
 
-    function setup_source_lang(tab_id) {
+    function setup_source_lang(tab_id, callback) {
       chrome.tabs.detectLanguage(tab_id, function(lang) {
         console.log('bg: detected: ' + lang);
         source_lang = lang;
@@ -34,6 +34,10 @@
             translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
           }
         });
+
+        if (callback instanceof Function) {
+          callback(source_lang);
+        }
       });
     }
 
@@ -47,50 +51,45 @@
           chrome.windows.getCurrent(function(current_window) {
             chrome.tabs.getSelected(current_window.id, function(selected_tab) {
               if (selected_tab.id == sender.tab.id) {
-                setup_source_lang(sender.tab.id);
+                setup_source_lang(sender.tab.id, function(lang) { sendResponse({source_lang: lang}); });
               }
             });
           });
-          sendResponse({});
           break;
         case 'set_encoding':
           console.log('bg: setting encoding: '+ request.encoding);
-          localStorage['to_encoding'] = request.encoding;
+          localStorage['encoding'] = request.encoding;
           sendResponse({});
+          break;
+        case 'get_options':
+          sendResponse({options: {
+            target_lang: localStorage['target_lang'],
+            shift_only: localStorage['shift_only'],
+            except_langs: localStorage['except_langs']
+          }});
           break;
         case 'translate':
           console.log("received to translate: " + request.word);
+          translate(
+            request.word,
+            function (data) {
+              var output = [];
 
-          if (localStorage['to_target_lang'] == source_lang) {
-            console.log("not translating into the same language");
-            sendResponse({});
-          }
-          else if ((new RegExp(source_lang)).test( localStorage['to_except_langs'] )) {
-            console.log("as set in options, skipping "+source_lang);
-            sendResponse({});
-          }
-          else {
-            translate(
-              request.word,
-              function (data) {
-                var output = [];
+              if (data instanceof Array) {
+                data.pop().forEach(function(translation) {
+                  var part_of_speech = translation.shift();
 
-                if (data instanceof Array) {
-                  data.pop().forEach(function(translation) {
-                    var part_of_speech = translation.shift();
-
-                    var trs = translation.slice(0,5);
-                    output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
-                  });
-                }
-                else {
-                  output = [data];
-                }
-
-                sendResponse({translation: output.join('<br/>')});
+                  var trs = translation.slice(0,5);
+                  output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                });
               }
-            );
-          }
+              else {
+                output = [data];
+              }
+
+              sendResponse({translation: output.join('<br/>')});
+            }
+          );
           break;
         default:
           console.log("Error! Unknown handler");
