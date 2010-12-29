@@ -9,6 +9,11 @@ $(document).bind('mousestop', function(e) {
     var hit_word = '';
     var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
 
+    //don't mess with html inputs
+    if (/INPUT|TEXTAREA/.test( hit_elem.get(0).nodeName )) {
+      return '';
+    }
+
     //text contents of hit element
     var text_nodes = hit_elem.contents().filter(function(){
       return this.nodeType == Node.TEXT_NODE && XRegExp("\\p{L}{2,}").test( this.nodeValue )
