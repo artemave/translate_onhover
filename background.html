@@ -24,16 +24,18 @@
 
     function setup_source_lang(tab_id, callback) {
       chrome.tabs.detectLanguage(tab_id, function(lang) {
-        console.log('bg: detected: ' + lang);
+        console.log('detected: ' + lang);
         source_lang = lang;
 
-        pos_translations[lang] = pos_translations[lang] || {};
+        if (lang) {
+          pos_translations[lang] = pos_translations[lang] || {};
 
-        ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
-          if (!pos_translations[lang][pos]) {
-            translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
-          }
-        });
+          ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
+            if (!pos_translations[lang][pos]) {
+              translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
+            }
+          });
+        }
 
         if (callback instanceof Function) {
           callback(source_lang);
@@ -57,7 +59,7 @@
           });
           break;
         case 'set_encoding':
-          console.log('bg: setting encoding: '+ request.encoding);
+          console.log('setting encoding: '+ request.encoding);
           localStorage['encoding'] = request.encoding;
           sendResponse({});
           break;
@@ -70,26 +72,42 @@
           break;
         case 'translate':
           console.log("received to translate: " + request.word);
-          translate(
-            request.word,
-            function (data) {
-              var output = [];
 
-              if (data instanceof Array) {
-                data.pop().forEach(function(translation) {
-                  var part_of_speech = translation.shift();
+          var translate_with_options_set = function() {
+            translate(
+              request.word,
+              function (data) {
+                var output = [];
 
-                  var trs = translation.slice(0,5);
-                  output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                if (data instanceof Array) {
+                  data.pop().forEach(function(translation) {
+                    var part_of_speech = translation.shift();
+
+                    var trs = translation.slice(0,5);
+                    output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                  });
+                }
+                else {
+                  output = [data];
+                }
+
+                sendResponse({translation: output.join('<br/>')});
+              }
+            );
+          }
+
+          if (!source_lang) {
+            chrome.windows.getCurrent(function(current_window) {
+              chrome.tabs.getSelected(current_window.id, function(selected_tab) {
+                setup_source_lang(sender.tab.id, function() {
+                  if (source_lang) { translate_with_options_set(); }
                 });
-              }
-              else {
-                output = [data];
-              }
-
-              sendResponse({translation: output.join('<br/>')});
-            }
-          );
+              });
+            });
+          }
+          else {
+            translate_with_options_set();
+          }
           break;
         default:
           console.log("Error! Unknown handler");
