@@ -121,6 +121,18 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 });
 
 var source_lang;
-chrome.extension.sendRequest({handler: 'detect_lang'}, function(response) {
-  source_lang = response.source_lang;
+chrome.extension.sendRequest({handler: 'detect_lang', detection_method: 'google_ext'}, function(response) {
+  if (response.source_lang) {
+    source_lang = response.source_lang;
+  }
+  else {
+    chrome.extension.sendRequest({handler: 'detect_lang', detection_method: 'manual', content: $('body').realText().replace(/\s{2,}/g, ' ').slice(0,200)}, function(response) {
+      if (response.source_lang) {
+        source_lang = response.source_lang;
+      }
+      else {
+        console.log("failed to detect source language");
+      }
+    });
+  }
 });

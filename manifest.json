@@ -11,6 +11,7 @@
       "lib/xregexp-min.js",
       "lib/xregexp-unicode-base.js",
       "lib/tooltip.js",
+      "lib/real_text.jquery.js",
       "contentscript.js"
     ],
     "all_frames": true
