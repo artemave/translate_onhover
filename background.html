@@ -3,18 +3,56 @@
   <script type="text/javascript" src="lib/jquery-1.4.4.min.js"></script>
 
   <script type="text/javascript">
-    var pos_translations = {},
-        cached_langs = {},
-        source_lang = '';
-
     google.load('language', 1);
+
+    var SourceLang = (function() {
+      var source_lang = '',
+          pos_translations = {};
+
+      return {
+        setup: function(lang) {
+          console.log('setup lang: ' + lang);
+
+          if (!lang) { return }
+
+          source_lang = lang;
+
+          pos_translations[lang] = pos_translations[lang] || {};
+
+          ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
+            if (!pos_translations[lang][pos]) {
+              translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
+            }
+          });
+        },
+        is_valid: function() {
+          //1. don't bother translating into the same language
+          //2. respect 'don't translate into these languages' option
+          return !(new RegExp(this.get()).test(localStorage['except_langs'] + localStorage['target_lang']));
+        },
+        get: function() {
+          return source_lang;
+        },
+        pos_translations: function(lang) {
+          var sl = lang || this.get();
+          return pos_translations[sl] || {};
+        }
+      };
+    })();
+
+    function detect_and_translate(word, onresponse) {
+      google.language.detect(word, function(result) {
+        SourceLang.setup(result.language);
+        translate(word, onresponse);
+      });
+    }
 
     function translate(word, onresponse) {
       $.getJSON("http://www.google.com/translate_a/t",
         {
           client: 'ig',
           text: word,
-          sl: source_lang,
+          sl: SourceLang.get(),
           tl: localStorage['target_lang'],
           ie: 'UTF8',
           oe: 'UTF8'
@@ -23,63 +61,8 @@
       );
     }
 
-    function setup_source_lang(tab_id, lang, make_current) {
-      console.log('detected: ' + lang);
-      if (make_current) {
-        source_lang = lang;
-      }
-      cached_langs[tab_id] = lang;
-
-      if (lang) {
-        pos_translations[lang] = pos_translations[lang] || {};
-
-        ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
-          if (!pos_translations[lang][pos]) {
-            translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
-          }
-        });
-      }
-    }
-
-    chrome.tabs.onSelectionChanged.addListener(function(tab_id) {
-      source_lang = cached_langs[tab_id];
-      console.log("language changed to " + source_lang);
-    });
-
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       switch (request.handler) {
-        case 'detect_lang':
-          chrome.windows.getCurrent(function(current_window) {
-            chrome.tabs.getSelected(current_window.id, function(selected_tab) {
-              console.log('detecting language for tab ' + sender.tab.id + ', method: ' + request.detection_method);
-              switch (request.detection_method) {
-                case 'google_ext':
-                  var callback_invoked = false;
-                  chrome.tabs.detectLanguage(sender.tab.id, function(lang) {
-                    callback_invoked = true;
-                    setup_source_lang(sender.tab.id, lang, selected_tab.id == sender.tab.id);
-                    sendResponse({source_lang: lang});
-                  });
-                  setTimeout(function() { if (!callback_invoked) { sendResponse({}) } }, 1000); //clean up if google fucked up. details here: http://code.google.com/p/chromium/issues/detail?id=53781&q=detectLanguage&colspec=ID%20Stars%20Pri%20Area%20Feature%20Type%20Status%20Summary%20Modified%20Owner%20Mstone%20OS
-                  break;
-                case 'manual':
-                  if (request.content) {
-                    google.language.detect(request.content, function(result) {
-                      setup_source_lang(sender.tab.id, result.language, selected_tab.id == sender.tab.id);
-                      sendResponse({source_lang: result.language});
-                    });
-                  }
-                  else {
-                    sendResponse({});
-                  }
-                  break;
-                default:
-                  console.log("Error! unknown detection_method: " + request.detection_method);
-                  sendResponse({});
-              }
-            });
-          });
-          break;
         case 'set_encoding':
           console.log('setting encoding: '+ request.encoding);
           localStorage['encoding'] = request.encoding;
@@ -95,7 +78,7 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
-          translate(
+          detect_and_translate(
             request.word,
             function (data) {
               var output = [];
@@ -105,14 +88,14 @@
                   var part_of_speech = translation.shift();
 
                   var trs = translation.slice(0,5);
-                  output.push('<b>'+(pos_translations[source_lang][part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                  output.push('<b>'+(SourceLang.pos_translations()[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
                 });
               }
               else {
                 output = [data];
               }
 
-              sendResponse({translation: output.join('<br/>')});
+              sendResponse(SourceLang.is_valid() ? {translation: output.join('<br/>')} : {});
             }
           );
           break;

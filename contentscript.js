@@ -4,6 +4,9 @@ var tooltip = new Tooltip();
 $(document).bind('mousestop', function(e) {
 
   //TODO option to show translation in a growl type popup (in the corner)
+  //TODO popup should never show up under cursor (so it doesn't pervent to click links)
+  //TODO option to ignore certain sites
+  //TODO french is all in capitals
 
   function getHitWord(e) {
     var hit_word = '';
@@ -14,7 +17,7 @@ $(document).bind('mousestop', function(e) {
       return '';
     }
 
-    //text contents of hit element
+    //get text contents of hit element
     var text_nodes = hit_elem.contents().filter(function(){
       return this.nodeType == Node.TEXT_NODE && XRegExp("\\p{L}{2,}").test( this.nodeValue )
     });
@@ -57,14 +60,9 @@ $(document).bind('mousestop', function(e) {
   }
 
   //skip entirely if user is selecting text (so that selection is not dropped)
+  //TODO make it restore selection
   //TODO make it translate the selection
   if (window.getSelection() != '') { return }
-
-  //don't bother translating into the same language
-  if (source_lang == options.target_lang) { return }
-
-  //respect 'don't translate into these languages' option
-  if ((new RegExp(source_lang).test(options.except_langs))) { return }
 
   //respect 'translate only when shift pressed' option
   if (options.shift_only == 1 && !shift_pressed) { return }
@@ -120,19 +118,3 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   options = response.options;
 });
 
-var source_lang;
-chrome.extension.sendRequest({handler: 'detect_lang', detection_method: 'google_ext'}, function(response) {
-  if (response.source_lang) {
-    source_lang = response.source_lang;
-  }
-  else {
-    chrome.extension.sendRequest({handler: 'detect_lang', detection_method: 'manual', content: $('body').realText().replace(/\s{2,}/g, ' ').slice(0,200)}, function(response) {
-      if (response.source_lang) {
-        source_lang = response.source_lang;
-      }
-      else {
-        console.log("failed to detect source language");
-      }
-    });
-  }
-});
