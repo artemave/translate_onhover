@@ -67,6 +67,9 @@ $(document).bind('mousestop', function(e) {
   //respect 'translate only when shift pressed' option
   if (options.shift_only == 1 && !shift_pressed) { return }
 
+  //respect "don't translate these sites"
+  if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
+
   var word = getHitWord(e);
 
   if (word != '') { translate_and_show(word, e); }

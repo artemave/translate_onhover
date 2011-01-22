@@ -94,36 +94,57 @@
     ];
 
     function save_options() {
-      var except_langs = [];
-      $('input:checked', $('#except_langs')).each(function(i, input) {
-        except_langs.push($(input).val());
-      });
+      function get_except_langs() {
+        var except_langs = [];
+        $('input:checked', $('#except_langs')).each(function(i, input) {
+          except_langs.push($(input).val());
+        });
+        return except_langs;
+      }
 
-      localStorage['except_langs'] = except_langs.join(',');
+      function get_except_urls() {
+        var except_urls = [];
+        except_urls = $('input:text', $('#exc_urls_table')).map(function() {
+          return this.value;
+        }).get();
+
+        //get rid of blank input (always last)
+        except_urls.pop();
+
+        return except_urls;
+      }
+
+      localStorage['except_langs'] = get_except_langs().join(',');
+      localStorage['except_urls'] = get_except_urls().join(',');
       localStorage['target_lang'] = $('#target_lang').val();
       localStorage['shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
+
+      console.log(localStorage['except_urls']);
 
       $('#status').fadeIn().delay(2000).fadeOut();
     }
 
     function populate_excepts_urls() {
       function add_exc_url(url) {
-        var input = $('<input type="text">'),
-            button;
+        var input = $('<input type="text">').attr('size', 100).val(url),
+            button,
+            rm_callback = function() { $(this).closest('tr').fadeOut('fast', function() {$(this).remove()}) };
 
         if (url) {
-          button = $('<button>', {text: 'X'}).click(function() { $(this).closest('tr').remove() });
+          button = $('<button>', {text: 'X'}).click(rm_callback);
         }
         else {
           button = $('<button>', {text: "+"}).click(function() {
-            $(this).text('X').click(function() { $(this).closest('tr').remove() });
-            add_exc_url();
+            if ($('input:text', $(this).closest('tr') ).val() > '') {
+              $(this).text('X').unbind('click').click(rm_callback);
+              add_exc_url();
+            }
           });
         }
         $('<td>')
           .append(input)
           .after($('<td>').append(button))
-          .appendTo($('<tr>'))
+          .appendTo($('<tr>', {css: {display: 'none'}}).fadeIn())
           .parent()
           .appendTo($('#exc_urls_table'));
       }

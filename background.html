@@ -72,7 +72,8 @@
           sendResponse({options: {
             target_lang: localStorage['target_lang'],
             shift_only: localStorage['shift_only'],
-            except_langs: localStorage['except_langs']
+            except_langs: localStorage['except_langs'].split(','),
+            except_urls: localStorage['except_urls'].split(',')
           }});
           break;
         case 'translate':
