@@ -4,8 +4,6 @@ var tooltip = new Tooltip();
 $(document).bind('mousestop', function(e) {
 
   //TODO option to show translation in a growl type popup (in the corner)
-  //TODO popup should never show up under cursor (so it doesn't pervent to click links)
-  //TODO option to ignore certain sites
   //TODO french is all in capitals
 
   function getHitWord(e) {
@@ -24,12 +22,12 @@ $(document).bind('mousestop', function(e) {
 
     //bunch of text under cursor? break it into words
     if (text_nodes.length > 0) {
-      var original_content = hit_elem.clone();
-
-      //wrap every word in every node in a dom element (real magic happens here)
-      text_nodes.replaceWith(function(i) {
-        return $(this).text().replace(XRegExp("(\\p{L}*)", 'g'), "<transover>$1</transover>")
-      });
+      if (hit_elem.get(0).nodeName != 'TRANSOVER') {
+        //wrap every word in every node in a dom element (real magic happens here)
+        text_nodes.replaceWith(function(i) {
+          return $(this).text().replace(XRegExp("(\\p{L}*)", 'g'), "<transover>$1</transover>")
+        });
+      }
 
       //get the exact word under cursor (and here)
       var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
@@ -42,8 +40,6 @@ $(document).bind('mousestop', function(e) {
         hit_word = $(hit_word_elem).text();
         console.log("got it: "+hit_word);
       }
-
-      hit_elem.replaceWith(original_content);
     }
     else { console.log("no text")}
 
@@ -94,6 +90,7 @@ $(document).mousemove(function(e){
   clearTimeout(timer25);
 
   timer25 = setTimeout(function() {
+
     if (last_x != e.clientX && last_y != e.clientY) { return }
 
     var mousestop = new $.Event("mousestop");

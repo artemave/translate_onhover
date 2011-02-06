@@ -1,6 +1,6 @@
 <html>
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-  <script type="text/javascript" src="lib/jquery-1.4.4.min.js"></script>
+  <script type="text/javascript" src="lib/jquery-1.5.min.js"></script>
 
   <script type="text/javascript">
     google.load('language', 1);
@@ -72,8 +72,8 @@
           sendResponse({options: {
             target_lang: localStorage['target_lang'],
             shift_only: localStorage['shift_only'],
-            except_langs: localStorage['except_langs'].split(','),
-            except_urls: localStorage['except_urls'].split(',')
+            except_langs: localStorage['except_langs'] != "" ? localStorage['except_langs'].split(',') : [],
+            except_urls: localStorage['except_urls'] != "" ? localStorage['except_urls'].split(',') : []
           }});
           break;
         case 'translate':

@@ -7,7 +7,7 @@
   "content_scripts": [{
     "matches": [ "<all_urls>" ],
     "js": [
-      "lib/jquery-1.4.4.min.js",
+      "lib/jquery-1.5.min.js",
       "lib/xregexp-min.js",
       "lib/xregexp-unicode-base.js",
       "lib/tooltip.js",
