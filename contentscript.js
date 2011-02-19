@@ -5,6 +5,7 @@ $(document).bind('mousestop', function(e) {
 
   //TODO option to show translation in a growl type popup (in the corner)
   //TODO french is all in capitals
+  //TODO 'no style' class for transover element
 
   function getHitWord(e) {
     var hit_word = '';
