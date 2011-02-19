@@ -96,7 +96,7 @@
                 output = [data];
               }
 
-              sendResponse(SourceLang.is_valid() ? {translation: output.join('<br/>')} : {});
+              sendResponse(SourceLang.is_valid() ? {translation: output.join('<br/>').toLowerCase()} : {});
             }
           );
           break;

@@ -4,7 +4,6 @@ var tooltip = new Tooltip();
 $(document).bind('mousestop', function(e) {
 
   //TODO option to show translation in a growl type popup (in the corner)
-  //TODO french is all in capitals
   //TODO 'no style' class for transover element
 
   function getHitWord(e) {
@@ -26,7 +25,7 @@ $(document).bind('mousestop', function(e) {
       if (hit_elem.get(0).nodeName != 'TRANSOVER') {
         //wrap every word in every node in a dom element (real magic happens here)
         text_nodes.replaceWith(function(i) {
-          return $(this).text().replace(XRegExp("(\\p{L}*)", 'g'), "<transover>$1</transover>")
+          return $(this).text().replace(XRegExp("(\\p{L}+)", 'g'), "<transover>$1</transover>")
         });
       }
 
