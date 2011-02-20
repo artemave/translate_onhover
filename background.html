@@ -1,6 +1,7 @@
 <html>
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   <script type="text/javascript" src="lib/jquery-1.5.min.js"></script>
+  <script type="text/javascript" src="lib/options.js"></script>
 
   <script type="text/javascript">
     google.load('language', 1);
@@ -28,7 +29,7 @@
         is_valid: function() {
           //1. don't bother translating into the same language
           //2. respect 'don't translate into these languages' option
-          return !(new RegExp(this.get()).test(localStorage['except_langs'] + localStorage['target_lang']));
+          return !(new RegExp(this.get()).test(Options.except_langs() + Options.target_lang()));
         },
         get: function() {
           return source_lang;
@@ -53,7 +54,7 @@
           client: 'ig',
           text: word,
           sl: SourceLang.get(),
-          tl: localStorage['target_lang'],
+          tl: Options.target_lang(),
           ie: 'UTF8',
           oe: 'UTF8'
         },
@@ -65,15 +66,15 @@
       switch (request.handler) {
         case 'set_encoding':
           console.log('setting encoding: '+ request.encoding);
-          localStorage['encoding'] = request.encoding;
+          //Options.encoding(request.encoding);
           sendResponse({});
           break;
         case 'get_options':
           sendResponse({options: {
-            target_lang: localStorage['target_lang'],
-            shift_only: localStorage['shift_only'],
-            except_langs: localStorage['except_langs'] != "" ? localStorage['except_langs'].split(',') : [],
-            except_urls: localStorage['except_urls'] != "" ? localStorage['except_urls'].split(',') : []
+            except_langs: Options.except_langs(),
+            except_urls: Options.except_urls(),
+            target_lang: Options.target_lang(),
+            shift_only: Options.shift_only()
           }});
           break;
         case 'translate':

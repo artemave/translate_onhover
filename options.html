@@ -1,7 +1,8 @@
 <html>
   <head>
     <title>TransOver Extension Options</title>
-    <script type="text/javascript" src="lib/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="lib/jquery-1.5.min.js"></script>
+    <script type="text/javascript" src="lib/options.js"></script>
     <style type="text/css">
       body {
         margin: 10px auto;
@@ -114,10 +115,10 @@
         return except_urls;
       }
 
-      localStorage['except_langs'] = get_except_langs().join(',');
-      localStorage['except_urls'] = get_except_urls().join(',');
-      localStorage['target_lang'] = $('#target_lang').val();
-      localStorage['shift_only'] = $('#shift_only:checked').val() ? 1 : 0;
+      Options.except_langs(get_except_langs());
+      Options.except_urls(get_except_urls());
+      Options.target_lang($('#target_lang').val());
+      Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
 
       $('#status').fadeIn().delay(2000).fadeOut();
     }
@@ -147,7 +148,7 @@
           .appendTo($('#exc_urls_table'));
       }
 
-      var saved_except_urls = localStorage['except_urls'] ? localStorage['except_urls'].split(',') : [];
+      var saved_except_urls = Options.except_urls();
 
       saved_except_urls.forEach(function(url) {
         add_exc_url(url);
@@ -156,8 +157,8 @@
     }
 
     $(function() {
-      var saved_target_lang = localStorage['target_lang'];
-      var saved_except_langs = (localStorage['except_langs'] || '').split(',');
+      var saved_target_lang = Options.target_lang();
+      var saved_except_langs = Options.except_langs();
 
       lang_map.forEach(function(lang, i) {
         $('#target_lang').append('<option value="'+lang[0]+'"'+(saved_target_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
@@ -179,7 +180,7 @@
 
       $('#except_langs').append($('#exc_lang_table'));
 
-      if (localStorage['shift_only'] == 1) {
+      if (Options.shift_only()) {
         $('#shift_only').attr('checked', true);
       }
 
