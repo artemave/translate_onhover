@@ -1,3 +1,4 @@
+$.noConflict();
 (function($) {
 
   var tooltip = new Tooltip();
