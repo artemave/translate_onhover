@@ -1,5 +1,13 @@
 $.noConflict();
 (function($) {
+  var $debug = false;
+
+  var original_console_log = console.log;
+  console.log = function(arg) {
+    if ($debug) {
+      original_console_log.call(this, arg);
+    }
+  }
 
   var tooltip = new Tooltip();
 
@@ -7,6 +15,7 @@ $.noConflict();
 
     //TODO option to show translation in a growl type popup (in the corner)
     //TODO 'no style' class for transover element
+    //TODO fix popup getting out of frames
 
     function getHitWord(e) {
       var hit_word = '';
