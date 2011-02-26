@@ -66,8 +66,10 @@ $.noConflict();
       });
     }
 
+    //we don't know what language to translate into
+    if (!options.target_lang) { return }
+
     //skip entirely if user is selecting text (so that selection is not dropped)
-    //TODO make it restore selection
     //TODO make it translate the selection
     if (window.getSelection() != '') { return }
 

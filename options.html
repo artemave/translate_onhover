@@ -160,6 +160,10 @@
       var saved_target_lang = Options.target_lang();
       var saved_except_langs = Options.except_langs();
 
+      if (!saved_target_lang) {
+        $('#target_lang').append('<option selected value="">Choose...</option>').append('<optgroup label="----------"></optgroup>');
+      }
+
       Langs.forEach(function(lang, i) {
         $('#target_lang').append('<option value="'+lang[0]+'"'+(saved_target_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
 
