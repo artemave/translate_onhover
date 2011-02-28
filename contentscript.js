@@ -110,7 +110,7 @@ $.noConflict();
       mousestop.clientX = e.clientX;
       mousestop.clientY = e.clientY;
       $(document).trigger(mousestop);
-    }, 1000);
+    }, 700);
   });
 
   var last_x, last_y;
