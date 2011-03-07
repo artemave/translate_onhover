@@ -53,7 +53,7 @@
         {
           client: 'ig',
           text: word,
-          sl: SourceLang.get(),
+          sl: Options.source_lang(),
           tl: Options.target_lang(),
           ie: 'UTF8',
           oe: 'UTF8'
@@ -80,7 +80,7 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
-          detect_and_translate(
+          translate(
             request.word,
             function (data) {
               var output = [];
