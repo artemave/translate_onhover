@@ -110,7 +110,7 @@ $.noConflict();
       mousestop.clientX = e.clientX;
       mousestop.clientY = e.clientY;
       $(document).trigger(mousestop);
-    }, 700);
+    }, options.shift_only ? 200 : options.delay);
   });
 
   var last_x, last_y;

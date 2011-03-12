@@ -21,6 +21,11 @@
         text-align: left;
       }
 
+      div.heading {
+        text-align: center;
+        font-size: 1.3em;
+      }
+
       .option {
         margin-top: 15px;
       }
@@ -46,6 +51,10 @@
         float: left;
         margin-top: 4px;
         margin-left: 8px;
+      }
+
+      .disabled {
+        color: #ccc;
       }
     </style>
   </head>
@@ -95,14 +104,6 @@
     ];
 
     function save_options() {
-      function get_except_langs() {
-        var except_langs = [];
-        $('input:checked', $('#except_langs')).each(function(i, input) {
-          except_langs.push($(input).val());
-        });
-        return except_langs;
-      }
-
       function get_except_urls() {
         var except_urls = [];
         except_urls = $('input:text', $('#exc_urls_table')).map(function() {
@@ -115,11 +116,11 @@
         return except_urls;
       }
 
-      Options.except_langs(get_except_langs());
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
       Options.source_lang($('#source_lang').val());
       Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
+      Options.delay($('#delay').val());
 
       $('#status').fadeIn().delay(2000).fadeOut();
     }
@@ -202,12 +203,23 @@
     $(function() {
       fill_source_lang();
       fill_target_lang();
-      //populate_except_langs();
       populate_except_urls();
 
       if (Options.shift_only()) {
         $('#shift_only').attr('checked', true);
+        $('#delay').attr('disabled', true).parent().addClass('disabled');
       }
+
+      $('#shift_only').click(function() {
+        if ($('#delay').parent().hasClass('disabled')) {
+          $('#delay').attr('disabled', false).parent().removeClass('disabled');
+        }
+        else {
+          $('#delay').attr('disabled', true).parent().addClass('disabled');
+        }
+      });
+
+      $('#delay').val(Options.delay());
 
       $('#save_button').click(function() { save_options() });
     });
@@ -216,6 +228,7 @@
 
   <body>
     <div class="content">
+      <div class="heading">TransOver options</div>
       <div class="option">
         Translate from: <select id="source_lang"></select>
       </div>
@@ -224,20 +237,21 @@
         Translate into: <select id="target_lang"></select>
       </div>
 
-      <!--fieldset class="option" id='except_langs'>
-        <legend>Don't translate words in these languages:</legend>
-        <table id='exc_lang_table'></table>
-      </fieldset -->
+      <div class="option">
+        <label for="delay">Wait for</label>
+        <input type="number" id="delay" name="delay"/>
+        <span>ms before translating</span>
+      </div>
+  
+      <div class="option">
+        <label for="shift_only">Only show translation when I hold the 'shift' key</label>
+        <input type="checkbox" id="shift_only" name="shift_only"/>
+      </div>
 
       <fieldset class="option" id="except_urls">
         <legend>Don't translate words on these sites:</legend>
         <table id='exc_urls_table'></table>
       </fieldset>
-  
-      <div class="option">
-        <label for="shift_only">Only show translation when I hold the shift key</label>
-        <input type="checkbox" id="shift_only" name="shift_only"/>
-      </div>
 
       <div class="button_group">
         <div class="button">
