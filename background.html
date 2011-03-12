@@ -28,8 +28,7 @@
         },
         is_valid: function() {
           //1. don't bother translating into the same language
-          //2. respect 'don't translate into these languages' option
-          return !(new RegExp(this.get()).test(Options.except_langs() + Options.target_lang()));
+          return !(new RegExp(this.get()).test(Options.target_lang()));
         },
         get: function() {
           return source_lang;
@@ -40,13 +39,6 @@
         }
       };
     })();
-
-    function detect_and_translate(word, onresponse) {
-      google.language.detect(word, function(result) {
-        SourceLang.setup(result.language);
-        translate(word, onresponse);
-      });
-    }
 
     function translate(word, onresponse) {
       $.getJSON("http://www.google.com/translate_a/t",
@@ -71,9 +63,9 @@
           break;
         case 'get_options':
           sendResponse({options: {
-            except_langs: Options.except_langs(),
             except_urls: Options.except_urls(),
             target_lang: Options.target_lang(),
+            source_lang: Options.source_lang(),
             shift_only: Options.shift_only()
           }});
           break;
@@ -86,15 +78,27 @@
               var output = [];
 
               if (data instanceof Array) {
-                data.pop().forEach(function(translation) {
-                  var part_of_speech = translation.shift();
+                var translation = data.pop();
 
-                  var trs = translation.slice(0,5);
-                  output.push('<b>'+(SourceLang.pos_translations()[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
-                });
+                // api didn't manage to translate; report error
+                if (! translation instanceof Array) {
+                  output.push('Oops.. No translation found');
+                }
+                else  {
+                  translation.forEach(function(translation) {
+                    var part_of_speech = translation.shift();
+
+                    var trs = translation.slice(0,5);
+                    output.push('<b>'+(SourceLang.pos_translations()[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                  });
+
+                  // second element in data, if present, is autodetected language
+                  SourceLang.setup(data.length == 2 ? data.pop() : Options.source_lang());
+                }
               }
               else {
-                output = [data];
+                // sometimes, api returns original word if failed to translate
+                output.push(data == request.word ? 'Oops.. No translation found' : data);
               }
 
               sendResponse(SourceLang.is_valid() ? {translation: output.join('<br/>').toLowerCase()} : {});
