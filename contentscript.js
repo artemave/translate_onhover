@@ -124,6 +124,8 @@ $.noConflict();
     last_y = e.clientY;
   });
 
+  $(window).scroll(function() { tooltip.hide() });
+
   //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
 
   var options = {};
