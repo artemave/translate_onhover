@@ -80,13 +80,12 @@
               var output = [];
 
               if (data instanceof Array) {
-                var translation = data.pop();
-
-                // api didn't manage to translate; report error
-                if (! translation instanceof Array) {
-                  output.push('Oops.. No translation found');
+                if (!( data[data.length - 1] instanceof Array )) {
+                  var translation = data.shift();
+                  output.push(translation.toLowerCase() == request.word.toLowerCase() ? 'Oops.. No translation found' : translation);
                 }
                 else  {
+                  var translation = data.pop();
                   translation.forEach(function(translation) {
                     var part_of_speech = translation.shift();
 
