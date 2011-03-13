@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var $debug = true;
+  var $debug = false;
 
   var original_console_log = console.log;
   console.log = function(arg) {
@@ -10,6 +10,7 @@ $.noConflict();
   }
 
   var tooltip = new Tooltip();
+  var start_tip = new Tooltip();
 
   $(document).bind('mousestop', function(e) {
 
@@ -52,26 +53,10 @@ $.noConflict();
           console.log("got it: "+hit_word);
         }
       }
-      else { console.log("no text")}
+      else { console.log("no text") }
 
       return hit_word;
     }
-
-    function translate_and_show(word, e) {
-      chrome.extension.sendRequest({handler: 'translate', word: word}, function(response){
-        console.log('response: '+response.translation);
-        if (response.translation && response.translation != '') {
-          tooltip.show(e.clientX, e.clientY, response.translation);
-        }
-      });
-    }
-
-    //we don't know what language to translate into
-    if (!options.target_lang) { return }
-
-    //skip entirely if user is selecting text (so that selection is not dropped)
-    //TODO make it translate the selection
-    if (window.getSelection() != '') { return }
 
     //respect 'translate only when shift pressed' option
     if (options.shift_only && !shift_pressed) { return }
@@ -81,7 +66,22 @@ $.noConflict();
 
     var word = getHitWord(e);
 
-    if (word != '') { translate_and_show(word, e); }
+    if (word != '') {
+      if (!options.target_lang) {
+        start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
+      }
+      else {
+        chrome.extension.sendRequest({handler: 'translate', word: word}, function(response){
+          console.log('response: "'+response.source_lang+'" '+response.translation);
+          if (options.target_lang == response.source_lang) {
+            console.log('skipping translation into the same language');
+          }
+          else {
+            tooltip.show(e.clientX, e.clientY, response.translation);
+          }
+        });
+      }
+    }
   });
 
   var shift_pressed = false;
@@ -123,8 +123,20 @@ $.noConflict();
     last_x = e.clientX;
     last_y = e.clientY;
   });
-
   $(window).scroll(function() { tooltip.hide() });
+
+  // hide start_tip on click outside and escape
+  $(document)
+    .click(function(e) {
+      var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
+      if (!$(hit_elem).hasClass('to-tooltip')) {
+        start_tip.hide();
+      }
+    }).keydown(function(e) {
+      if (e.keyCode == 27) {
+        start_tip.hide();
+      }
+    });
 
   //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
 

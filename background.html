@@ -26,10 +26,6 @@
             }
           });
         },
-        is_valid: function() {
-          //1. don't bother translating into the same language
-          return !(new RegExp(this.get()).test(Options.target_lang()));
-        },
         get: function() {
           return source_lang;
         },
@@ -104,10 +100,10 @@
               }
               else {
                 // sometimes, api returns original word if failed to translate
-                output.push(data == request.word ? 'Oops.. No translation found' : data);
+                output.push(data.toLowerCase() == request.word.toLowerCase() ? 'Oops.. No translation found' : data);
               }
 
-              sendResponse(SourceLang.is_valid() ? {translation: output.join('<br/>').toLowerCase()} : {});
+              sendResponse({translation: output.join('<br/>').toLowerCase(), source_lang: SourceLang.get()});
             }
           );
           break;
