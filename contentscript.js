@@ -77,7 +77,7 @@ $.noConflict();
             console.log('skipping translation into the same language');
           }
           else {
-            tooltip.show(e.clientX, e.clientY, response.translation);
+            tooltip.show(e.clientX, e.clientY, response.translation == word.toLowerCase() ? 'Oops.. No translation found.' : response.translation);
           }
         });
       }

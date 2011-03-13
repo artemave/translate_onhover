@@ -82,7 +82,10 @@
               if (data instanceof Array) {
                 if (!( data[data.length - 1] instanceof Array )) {
                   var translation = data.shift();
-                  output.push(translation.toLowerCase() == request.word.toLowerCase() ? 'Oops.. No translation found' : translation);
+                  output.push(translation);
+
+                  // anything left in data is autodetected language
+                  SourceLang.setup(data.shift() || Options.source_lang());
                 }
                 else  {
                   var translation = data.pop();
@@ -98,8 +101,9 @@
                 }
               }
               else {
-                // sometimes, api returns original word if failed to translate
-                output.push(data.toLowerCase() == request.word.toLowerCase() ? 'Oops.. No translation found' : data);
+                // this is to ensure previous SourceLang setup has no effect
+                SourceLang.setup(Options.source_lang());
+                output.push(data);
               }
 
               sendResponse({translation: output.join('<br/>').toLowerCase(), source_lang: SourceLang.get()});
