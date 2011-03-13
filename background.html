@@ -41,17 +41,22 @@
     })();
 
     function translate(word, onresponse) {
-      $.getJSON("http://www.google.com/translate_a/t",
-        {
-          client: 'ig',
-          text: word,
-          sl: Options.source_lang(),
-          tl: Options.target_lang(),
-          ie: 'UTF8',
-          oe: 'UTF8'
-        },
-        onresponse
-      );
+      $.ajax({
+          url: "http://www.google.com/translate_a/t",
+          dataType: 'json',
+          data: {
+            client: 'ig',
+            text: word,
+            sl: Options.source_lang(),
+            tl: Options.target_lang(),
+            ie: 'UTF8',
+            oe: 'UTF8'
+          },
+          success: onresponse,
+          error: function() {
+            sendResponse({translation: "Oops.. Dictionary error."});
+          }
+      });
     }
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
