@@ -181,7 +181,7 @@
     }
 
     function fill_source_lang() {
-      $('#source_lang').append('<option selected value="">Autodetect</option>').append('<optgroup label="----------"></optgroup>');
+      $('#source_lang').append('<option selected value="autodetect">Autodetect</option>').append('<optgroup label="----------"></optgroup>');
 
       Langs.forEach(function(lang, i) {
         $('#source_lang').append('<option value="'+lang[0]+'"'+(Options.source_lang() == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
