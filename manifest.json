@@ -2,7 +2,7 @@
   "name": "TransOver",
   "version": "0.4",
   "icons": { "48": "to_icon.png", "128": "to_icon.png" },
-  "description": "Translates word on mouse hover",
+  "description": "Translate word by mouse pointing",
   "background_page": "background.html",
   "options_page": "options.html",
   "content_scripts": [{
