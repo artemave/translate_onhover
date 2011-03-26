@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var $debug = false;
+  var $debug = true;
 
   var original_console_log = console.log;
   console.log = function(arg) {
@@ -64,22 +64,32 @@ $.noConflict();
     //respect "don't translate these sites"
     if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
 
-    var word = getHitWord(e);
+    if (!options.target_lang) {
+      start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
+    }
+    else {
+      var show_result = function(response) {
+        console.log('response: "'+response.source_lang+'" '+response.translation);
+        if (options.target_lang == response.source_lang) {
+          console.log('skipping translation into the same language');
+        }
+        else {
+          tooltip.show(e.clientX, e.clientY, response.translation);
+        }
+      };
 
-    if (word != '') {
-      if (!options.target_lang) {
-        start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
+      // translate API for text selection
+      var selection = window.getSelection().toString();
+      if (selection != '') {
+        chrome.extension.sendRequest({handler: 'bulk_translate', text: selection}, show_result);
       }
+      // dictionary API for word under mouse
       else {
-        chrome.extension.sendRequest({handler: 'translate', word: word}, function(response){
-          console.log('response: "'+response.source_lang+'" '+response.translation);
-          if (options.target_lang == response.source_lang) {
-            console.log('skipping translation into the same language');
-          }
-          else {
-            tooltip.show(e.clientX, e.clientY, response.translation == word.toLowerCase() ? 'Oops.. No translation found.' : response.translation);
-          }
-        });
+        var word = getHitWord(e);
+
+        if (word != '') {
+          chrome.extension.sendRequest({handler: 'translate', word: word}, show_result);
+        }
       }
     }
   });

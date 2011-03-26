@@ -106,9 +106,23 @@
                 output.push(data);
               }
 
-              sendResponse({translation: output.join('<br/>').toLowerCase(), source_lang: SourceLang.get()});
+              var result = output.join('<br/>').toLowerCase();
+              sendResponse({translation: result == request.word.toLowerCase() ? 'Oops.. No translation found.' : result, source_lang: SourceLang.get()});
             }
           );
+          break;
+        case 'bulk_translate':
+          console.log("received to bulk translate: " + request.text);
+
+          google.language.translate(request.text, Options.source_lang() == 'autodetect' ? '' : Options.source_lang(), Options.target_lang(), function(result) {
+            if (!result.error) {
+              var res = result.translation.toLowerCase();
+              sendResponse({translation: res == request.text.toLowerCase() ? 'Oops.. No translation found.' : res, source_lang: result.detectedSourceLanguage || Options.source_lang()});
+            }
+            else {
+              sendResponse({translation: "Oops.. Translation error."});
+            }
+          });
           break;
         default:
           console.log("Error! Unknown handler");
