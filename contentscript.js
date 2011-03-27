@@ -79,9 +79,10 @@ $.noConflict();
       };
 
       // translate API for text selection
-      var selection = window.getSelection().toString();
-      if (selection != '') {
-        chrome.extension.sendRequest({handler: 'bulk_translate', text: selection}, show_result);
+      var selection = window.getSelection();
+      var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
+      if (selection.toString() != '' && selection.containsNode(hit_elem, true)) {
+        chrome.extension.sendRequest({handler: 'bulk_translate', text: selection.toString()}, show_result);
       }
       // dictionary API for word under mouse
       else {
