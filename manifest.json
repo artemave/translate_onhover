@@ -16,5 +16,5 @@
     ],
     "all_frames": true
   }],
-  "permissions": [ "http://*.google.com/" ]
+  "permissions": [ "http://www.google.com/jsapi", "http://www.google.com/translate_a/t" ]
 }
