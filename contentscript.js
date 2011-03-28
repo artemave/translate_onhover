@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var $debug = true;
+  var $debug = false;
 
   var original_console_log = console.log;
   console.log = function(arg) {
