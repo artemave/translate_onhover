@@ -36,8 +36,17 @@ $.noConflict();
       if (text_nodes.length > 0) {
         if (hit_elem.get(0).nodeName != 'TRANSOVER') {
           //wrap every word in every node in a dom element (real magic happens here)
-          text_nodes.replaceWith(function(i) {
-            return $(this).text().replace(XRegExp("(\\p{L}+)", 'g'), "<transover>$1</transover>")
+          text_nodes.replaceWith(function() {
+            return $(this).text().replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
+                var t;
+                switch ($1) {
+                  case '<': t = "&lt;"; break;
+                  case '>': t = "&gt;"; break;
+                  case '&': t = "&amp;"; break;
+                  default: t = '<transover>'+$1+'</transover>';
+                }
+                return t;
+            });
           });
         }
 
