@@ -93,7 +93,7 @@
                     var part_of_speech = translation.shift();
 
                     var trs = translation.slice(0,5);
-                    output.push('<b>'+(SourceLang.pos_translations()[part_of_speech] || part_of_speech)+'</b>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                    output.push('<bolds>'+(SourceLang.pos_translations()[part_of_speech] || part_of_speech)+'</bolds>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
                   });
 
                   // second element in data, if present, is autodetected language
