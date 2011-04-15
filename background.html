@@ -6,8 +6,8 @@
   <script type="text/javascript">
     google.load('language', 1);
 
-    var SourceLang = (function() {
-      var source_lang = '',
+    var PosTranslations = (function() {
+      var target_lang = '',
           pos_translations = {};
 
       return {
@@ -16,7 +16,7 @@
 
           if (!lang) { return }
 
-          source_lang = lang;
+          target_lang = lang;
 
           pos_translations[lang] = pos_translations[lang] || {};
 
@@ -26,11 +26,8 @@
             }
           });
         },
-        get: function() {
-          return source_lang;
-        },
-        pos_translations: function(lang) {
-          var sl = lang || this.get();
+        get: function(lang) {
+          var sl = lang || Options.target_lang();
           return pos_translations[sl] || {};
         }
       };
@@ -43,7 +40,7 @@
           data: {
             client: 'ig',
             text: word,
-            sl: Options.source_lang(),
+            sl: 'autodetect',
             tl: Options.target_lang(),
             ie: 'UTF8',
             oe: 'UTF8'
@@ -56,6 +53,7 @@
     }
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+
       switch (request.handler) {
         case 'set_encoding':
           console.log('setting encoding: '+ request.encoding);
@@ -66,7 +64,6 @@
           sendResponse({options: {
             except_urls: Options.except_urls(),
             target_lang: Options.target_lang(),
-            source_lang: Options.source_lang(),
             delay: Options.delay(),
             shift_only: Options.shift_only()
           }});
@@ -74,50 +71,41 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
+          PosTranslations.setup(Options.target_lang());
+
           translate(
             request.word,
             function (data) {
-              var output = [];
+              var output = [], source_lang;
 
-              if (data instanceof Array) {
-                if (!( data[data.length - 1] instanceof Array )) {
-                  var translation = data.shift();
-                  output.push(translation);
-
-                  // anything left in data is autodetected language
-                  SourceLang.setup(data.shift() || Options.source_lang());
-                }
-                else  {
-                  var translation = data.pop();
-                  translation.forEach(function(translation) {
-                    var part_of_speech = translation.shift();
-
-                    var trs = translation.slice(0,5);
-                    output.push('<bolds>'+(SourceLang.pos_translations()[part_of_speech] || part_of_speech)+'</bolds>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
-                  });
-
-                  // second element in data, if present, is autodetected language
-                  SourceLang.setup(data.length == 2 ? data.pop() : Options.source_lang());
-                }
+              if (!( data[data.length - 1] instanceof Array )) {
+                var translation = data.shift();
+                output.push(translation);
+                source_lang = data.shift();
               }
-              else {
-                // this is to ensure previous SourceLang setup has no effect
-                SourceLang.setup(Options.source_lang());
-                output.push(data);
+              else  {
+                var translation = data.pop();
+                translation.forEach(function(translation) {
+                  var part_of_speech = translation.shift();
+
+                  var trs = translation.slice(0,5);
+                  output.push('<bolds>'+(PosTranslations.get()[part_of_speech] || part_of_speech)+'</bolds>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                });
+                source_lang = data.pop();
               }
 
               var result = output.join('<br/>').toLowerCase();
-              sendResponse({translation: result == request.word.toLowerCase() ? 'Oops.. No translation found.' : result, source_lang: SourceLang.get()});
+              sendResponse({translation: result == request.word.toLowerCase() ? 'Oops.. No translation found.' : result, source_lang: source_lang});
             }
           );
           break;
         case 'bulk_translate':
           console.log("received to bulk translate: " + request.text);
 
-          google.language.translate(request.text, Options.source_lang() == 'autodetect' ? '' : Options.source_lang(), Options.target_lang(), function(result) {
+          google.language.translate(request.text, '', Options.target_lang(), function(result) {
             if (!result.error) {
               var res = result.translation.toLowerCase();
-              sendResponse({translation: res == request.text.toLowerCase() ? 'Oops.. No translation found.' : res, source_lang: result.detectedSourceLanguage || Options.source_lang()});
+              sendResponse({translation: res == request.text.toLowerCase() ? 'Oops.. No translation found.' : res, source_lang: result.detectedSourceLanguage});
             }
             else {
               sendResponse({translation: "Oops.. Translation error."});
@@ -129,5 +117,9 @@
           sendResponse({});
       }
     });
+
+    if (Options.target_lang()) {
+      PosTranslations.setup(Options.target_lang());
+    }
   </script>
 </html>

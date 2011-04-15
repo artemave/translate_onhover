@@ -118,7 +118,6 @@
 
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
-      Options.source_lang($('#source_lang').val());
       Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
       Options.delay($('#delay').val());
 
@@ -180,14 +179,6 @@
       $('#except_langs').append($('#exc_lang_table'));
     }
 
-    function fill_source_lang() {
-      $('#source_lang').append('<option selected value="autodetect">Autodetect</option>').append('<optgroup label="----------"></optgroup>');
-
-      Langs.forEach(function(lang, i) {
-        $('#source_lang').append('<option value="'+lang[0]+'"'+(Options.source_lang() == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
-      });
-    }
-
     function fill_target_lang() {
       var saved_target_lang = Options.target_lang();
 
@@ -201,7 +192,6 @@
     }
 
     $(function() {
-      fill_source_lang();
       fill_target_lang();
       populate_except_urls();
 
@@ -229,10 +219,6 @@
   <body>
     <div class="content">
       <div class="heading">TransOver options</div>
-      <div class="option">
-        Translate from: <select id="source_lang"></select>
-      </div>
-
       <div class="option">
         Translate into: <select id="target_lang"></select>
       </div>
