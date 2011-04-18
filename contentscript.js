@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var $debug = false;
+  var $debug = true;
 
   var original_console_log = console.log;
   console.log = function(arg) {
@@ -32,35 +32,48 @@ $.noConflict();
         return this.nodeType == Node.TEXT_NODE && XRegExp("\\p{L}{2,}").test( this.nodeValue )
       });
 
-      //bunch of text under cursor? break it into words
-      if (text_nodes.length > 0) {
-        if (hit_elem.get(0).nodeName != 'TRANSOVER') {
-          //wrap every word in every node in a dom element (real magic happens here)
-          text_nodes.replaceWith(function() {
-            return $(this).text().replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
-                switch ($1) {
-                  case '<': return "&lt;";
-                  case '>': return "&gt;";
-                  case '&': return "&amp;";
-                  default: return '<transover>'+$1+'</transover>';
-                }
-            });
-          });
-        }
-
-        //get the exact word under cursor (and here)
-        var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
-
-        //no word under cursor? we are done
-        if (hit_word_elem.nodeName != 'TRANSOVER') {
-          console.log("missed!");
-        }
-        else  {
-          hit_word = $(hit_word_elem).text();
-          console.log("got it: "+hit_word);
-        }
+      if (text_nodes.length == 0) {
+        console.log('no text');
+        return '';
       }
-      else { console.log("no text") }
+
+      //wrap every word in every node in a dom element (real magic happens here)
+      text_nodes.each(function(i) {
+          $(this).replaceWith(function() {
+              return '<transblock id="transblock_'+i+'">' + $(this).text().replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
+                  switch ($1) {
+                    case '<': return "&lt;";
+                    case '>': return "&gt;";
+                    case '&': return "&amp;";
+                    default: return '<transover>'+$1+'</transover>';
+                  }
+              }) + '</transblock>';
+          });
+      });
+
+      //get the exact word under cursor (and here)
+      var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
+
+      //no word under cursor? we are done
+      if (hit_word_elem.nodeName != 'TRANSOVER') {
+        console.log("missed!");
+      }
+      else  {
+        hit_word = $(hit_word_elem).text();
+        console.log("got it: "+hit_word);
+      }
+
+      //cleanup
+      text_nodes.each(function(i) {
+          $('#transblock_' + i).replaceWith( this.nodeValue.replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
+              switch ($1) {
+                case '<': return "&lt;";
+                case '>': return "&gt;";
+                case '&': return "&amp;";
+                default: return $1;
+              }
+          }));
+      });
 
       return hit_word;
     }
