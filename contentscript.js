@@ -22,11 +22,6 @@ $.noConflict();
       var hit_word = '';
       var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
 
-      //don't mess with html inputs
-      if (/INPUT|TEXTAREA/.test( hit_elem.get(0).nodeName )) {
-        return '';
-      }
-
       //get text contents of hit element
       var text_nodes = hit_elem.contents().filter(function(){
         return this.nodeType == Node.TEXT_NODE && XRegExp("\\p{L}{2,}").test( this.nodeValue )
@@ -98,9 +93,15 @@ $.noConflict();
         }
       };
 
-      // translate API for text selection
       var selection = window.getSelection();
       var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
+
+      //don't mess with html inputs
+      if (/INPUT|TEXTAREA/.test( hit_elem.nodeName )) {
+        return;
+      }
+
+      // translate API for text selection
       if (selection.toString() != '' && selection.containsNode(hit_elem, true)) {
         chrome.extension.sendRequest({handler: 'bulk_translate', text: selection.toString()}, show_result);
       }
