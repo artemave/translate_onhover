@@ -1,6 +1,6 @@
 {
   "name": "TransOver",
-  "version": "0.7",
+  "version": "0.8",
   "icons": { "48": "to_icon.png", "128": "to_icon.png" },
   "description": "Translate word by mouse pointing",
   "background_page": "background.html",
