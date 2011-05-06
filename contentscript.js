@@ -161,7 +161,7 @@ $.noConflict();
   $(document)
     .click(function(e) {
       var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
-      if (!$(hit_elem).hasClass('to-tooltip')) {
+      if (!$(hit_elem).hasClass('transover-tooltip')) {
         start_tip.hide();
       }
     }).keydown(function(e) {
