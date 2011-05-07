@@ -11,6 +11,8 @@
       "lib/jquery-1.5.1.min.js",
       "lib/xregexp-min.js",
       "lib/xregexp-unicode-base.js",
+      "lib/xregexp-unicode-categories.js",
+      "lib/underscore.js",
       "lib/tooltip.js",
       "contentscript.js"
     ],

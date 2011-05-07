@@ -83,14 +83,48 @@ $.noConflict();
       start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
     }
     else {
-      var show_result = function(response) {
+      function show_result(response) {
+        function deserialize(text) {
+          var res;
+
+          try {
+            res = JSON.parse(text);
+          }
+          catch (e) {
+            // that means text is string as opposed to serialized object
+            if (e.toString() == 'SyntaxError: Unexpected token ILLEGAL') {
+              res = text;
+            }
+            else {
+              throw e;
+            }
+          }
+          return res;
+        };
+
         console.log('response: "'+response.source_lang+'" '+response.translation);
+
         if (options.target_lang == response.source_lang) {
           console.log('skipping translation into the same language');
+          return;
+        }
+
+        var translation = deserialize(response.translation);
+        var formatted_translation = '';
+
+        if (translation instanceof Array) {
+          _.each(translation, function(pos_block) {
+              var formatted_pos = pos_block.pos ? '<bolds>'+pos_block.pos+'</bolds>: ' : '';
+              var formatted_meanings = pos_block.meanings.slice(0,5).join(', ') + ( pos_block.meanings.length > 5 ? '...' : '' );
+
+              formatted_translation = formatted_pos + formatted_meanings + '<br/>';
+          });
         }
         else {
-          tooltip.show(e.clientX, e.clientY, response.translation);
+          formatted_translation = translation;
         }
+
+        tooltip.show(e.clientX, e.clientY, formatted_translation);
       };
 
       var selection = window.getSelection();

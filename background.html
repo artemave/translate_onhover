@@ -1,6 +1,10 @@
 <html>
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   <script type="text/javascript" src="lib/jquery-1.5.1.min.js"></script>
+  <script type="text/javascript" src="lib/xregexp-min.js"></script>
+  <script type="text/javascript" src="lib/xregexp-unicode-base.js"></script>
+  <script type="text/javascript" src="lib/xregexp-unicode-categories.js"></script>
+  <script type="text/javascript" src="lib/underscore.js"></script>
   <script type="text/javascript" src="lib/options.js"></script>
 
   <script type="text/javascript">
@@ -54,6 +58,32 @@
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 
+      // Sometimes (e.g. french->russian) Google API returns translation in capitals
+      function normalizeCase(text) {
+        function is_all_upper_case(t) {
+          return XRegExp('^[\\p{Lu}|\s]+$').test(t);
+        };
+
+        if (text instanceof Array) {
+          if (_.all(text, is_all_upper_case)) {
+            return _.map(text, String.prototype.toLowerCase);
+          }
+        }
+        else {
+          if (is_all_upper_case(text)) {
+            return text.toLowerCase();
+          }
+        }
+        return text;
+      };
+
+      function notTranslated(text, result) {
+        //Google API may return original word if failed to translate
+        return result.match(new RegExp('^('+text+')?$', 'i'));
+      };
+
+      var no_translation_found = 'Oops.. No translation found.';
+
       switch (request.handler) {
         case 'set_encoding':
           console.log('setting encoding: '+ request.encoding);
@@ -76,26 +106,29 @@
           translate(
             request.word,
             function (data) {
-              var output = [], source_lang;
+              var output, source_lang;
 
-              if (!( data[data.length - 1] instanceof Array )) {
-                var translation = data.shift();
-                output.push(translation);
-                source_lang = data.shift();
-              }
-              else  {
+              //If all goes well, Google API returns something like this:
+              // ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
+              if (data[data.length - 1] instanceof Array) {
+                output = [];
                 var translation = data.pop();
-                translation.forEach(function(translation) {
-                  var part_of_speech = translation.shift();
-
-                  var trs = translation.slice(0,5);
-                  output.push('<bolds>'+(PosTranslations.get()[part_of_speech] || part_of_speech)+'</bolds>'+(part_of_speech == "" ? '' : ': ')+trs.join(', '));
+                translation.forEach(function(t) {
+                  var part_of_speech = t.shift();
+                  output.push({pos: PosTranslations.get()[part_of_speech] || part_of_speech, meanings: normalizeCase(t)});
                 });
                 source_lang = data.pop();
               }
+              // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
+              // ['book', 'ru']
+              else  {
+                var translation = normalizeCase(data.shift());
 
-              var result = output.join('<br/>').toLowerCase();
-              sendResponse({translation: result == request.word.toLowerCase() ? 'Oops.. No translation found.' : result, source_lang: source_lang});
+                output = notTranslated(request.word, translation) ? no_translation_found : translation;
+                source_lang = data.shift();
+              }
+
+              sendResponse({translation: JSON.stringify(output), source_lang: source_lang});
             }
           );
           break;
@@ -104,8 +137,11 @@
 
           google.language.translate(request.text, '', Options.target_lang(), function(result) {
             if (!result.error) {
-              var res = result.translation.toLowerCase();
-              sendResponse({translation: res == request.text.toLowerCase() ? 'Oops.. No translation found.' : res, source_lang: result.detectedSourceLanguage});
+              var res = normalizeCase( result.translation );
+              sendResponse({
+                translation: notTranslated(request.text, res) ? no_translation_found : res,
+                source_lang: result.detectedSourceLanguage
+              });
             }
             else {
               sendResponse({translation: "Oops.. Translation error."});
