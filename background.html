@@ -61,12 +61,12 @@
       // Sometimes (e.g. french->russian) Google API returns translation in capitals
       function normalizeCase(text) {
         function is_all_upper_case(t) {
-          return XRegExp('^[\\p{Lu}|\s]+$').test(t);
+          return XRegExp('^[\\p{Lu} ]+$').test(t);
         };
 
         if (text instanceof Array) {
           if (_.all(text, is_all_upper_case)) {
-            return _.map(text, String.prototype.toLowerCase);
+            return _.map(text, function(t) { return t.toLowerCase() });
           }
         }
         else {
