@@ -119,7 +119,7 @@ $.noConflict();
               var formatted_pos = pos_block.pos ? '<bolds>'+pos_block.pos+'</bolds>: ' : '';
               var formatted_meanings = pos_block.meanings.slice(0,5).join(', ') + ( pos_block.meanings.length > 5 ? '...' : '' );
 
-              formatted_translation = formatted_pos + formatted_meanings + '<br/>';
+              formatted_translation = formatted_translation + formatted_pos + formatted_meanings + '<br/>';
           });
         }
         else {
