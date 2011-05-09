@@ -80,7 +80,9 @@ $.noConflict();
     if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
 
     if (!options.target_lang) {
-      start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
+      if (start_tip.is(':hidden')) {
+        start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
+      }
     }
     else {
       function show_result(response) {
