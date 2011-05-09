@@ -24,7 +24,7 @@
 
           pos_translations[lang] = pos_translations[lang] || {};
 
-          ['noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
+          ['phrase', 'noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
             if (!pos_translations[lang][pos]) {
               translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
             }
