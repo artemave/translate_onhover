@@ -8,34 +8,10 @@
   <script type="text/javascript" src="lib/options.js"></script>
 
   <script type="text/javascript">
-    google.load('language', 1);
-
-    var PosTranslations = (function() {
-      var target_lang = '',
-          pos_translations = {};
-
-      return {
-        setup: function(lang) {
-          console.log('setup lang: ' + lang);
-
-          if (!lang) { return }
-
-          target_lang = lang;
-
-          pos_translations[lang] = pos_translations[lang] || {};
-
-          ['phrase', 'noun', 'adverb', 'verb', 'adjective', 'pronoun', 'preposition', 'conjunction', 'interjection', 'abbreviation'].forEach(function(pos) {
-            if (!pos_translations[lang][pos]) {
-              translate(pos, function(data) { pos_translations[lang][pos] = data instanceof Array ? data.shift() : data; });
-            }
-          });
-        },
-        get: function(lang) {
-          var sl = lang || Options.target_lang();
-          return pos_translations[sl] || {};
-        }
-      };
-    })();
+    // If it is deprecated finally, don't break
+    if (google) {
+      google.load('language', 1);
+    }
 
     function translate(word, onresponse) {
       $.ajax({
@@ -101,8 +77,6 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
-          PosTranslations.setup(Options.target_lang());
-
           translate(
             request.word,
             function (data) {
@@ -115,7 +89,7 @@
                 var translation = data.pop();
                 translation.forEach(function(t) {
                   var part_of_speech = t.shift();
-                  output.push({pos: PosTranslations.get()[part_of_speech] || part_of_speech, meanings: normalizeCase(t)});
+                  output.push({meanings: normalizeCase(t)});
                 });
                 source_lang = data.pop();
               }
@@ -135,6 +109,7 @@
         case 'bulk_translate':
           console.log("received to bulk translate: " + request.text);
 
+          // This will break when Translate API deprecated
           google.language.translate(request.text, '', Options.target_lang(), function(result) {
             if (!result.error) {
               var res = normalizeCase( result.translation );
@@ -154,8 +129,5 @@
       }
     });
 
-    if (Options.target_lang()) {
-      PosTranslations.setup(Options.target_lang());
-    }
   </script>
 </html>

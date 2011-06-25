@@ -16,7 +16,6 @@ $.noConflict();
 
     //TODO option to show translation in a growl type popup (in the corner)
     //TODO 'no style' class for transover element
-    //TODO fix popup getting out of frames
 
     function getHitWord(e) {
       var hit_word = '';
@@ -116,10 +115,8 @@ $.noConflict();
 
         if (translation instanceof Array) {
           _.each(translation, function(pos_block) {
-              var formatted_pos = pos_block.pos ? '<bolds>'+pos_block.pos+'</bolds>: ' : '';
               var formatted_meanings = pos_block.meanings.slice(0,5).join(', ') + ( pos_block.meanings.length > 5 ? '...' : '' );
-
-              formatted_translation = formatted_translation + formatted_pos + formatted_meanings + '<br/>';
+              formatted_translation = formatted_translation + formatted_meanings + '<br/>';
           });
         }
         else {
