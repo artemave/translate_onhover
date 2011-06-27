@@ -1,5 +1,4 @@
 <html>
-  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   <script type="text/javascript" src="lib/jquery-1.5.1.min.js"></script>
   <script type="text/javascript" src="lib/xregexp-min.js"></script>
   <script type="text/javascript" src="lib/xregexp-unicode-base.js"></script>
@@ -8,11 +7,6 @@
   <script type="text/javascript" src="lib/options.js"></script>
 
   <script type="text/javascript">
-    // If it is deprecated finally, don't break
-    if (google) {
-      google.load('language', 1);
-    }
-
     function translate(word, onresponse) {
       $.ajax({
           url: "http://www.google.com/translate_a/t",
@@ -105,23 +99,6 @@
               sendResponse({translation: JSON.stringify(output), source_lang: source_lang});
             }
           );
-          break;
-        case 'bulk_translate':
-          console.log("received to bulk translate: " + request.text);
-
-          // This will break when Translate API deprecated
-          google.language.translate(request.text, '', Options.target_lang(), function(result) {
-            if (!result.error) {
-              var res = normalizeCase( result.translation );
-              sendResponse({
-                translation: notTranslated(request.text, res) ? no_translation_found : res,
-                source_lang: result.detectedSourceLanguage
-              });
-            }
-            else {
-              sendResponse({translation: "Oops.. Translation error."});
-            }
-          });
           break;
         default:
           console.log("Error! Unknown handler");

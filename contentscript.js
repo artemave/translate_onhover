@@ -134,17 +134,15 @@ $.noConflict();
         return;
       }
 
-      // translate API for text selection
+      var word = '';
       if (selection.toString() != '' && selection.containsNode(hit_elem, true)) {
-        chrome.extension.sendRequest({handler: 'bulk_translate', text: selection.toString()}, show_result);
+        word = selection.toString();
       }
-      // dictionary API for word under mouse
       else {
-        var word = getHitWord(e);
-
-        if (word != '') {
-          chrome.extension.sendRequest({handler: 'translate', word: word}, show_result);
-        }
+        word = getHitWord(e);
+      }
+      if (word != '') {
+        chrome.extension.sendRequest({handler: 'translate', word: word}, show_result);
       }
     }
   });
