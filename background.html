@@ -20,8 +20,8 @@
             oe: 'UTF8'
           },
           success: onresponse,
-          error: function() {
-            sendResponse({translation: "Oops.. Dictionary error."});
+          error: function(xrh, status, e) {
+            console.log(e);
           }
       });
     }
@@ -83,7 +83,7 @@
                 var translation = data.pop();
                 translation.forEach(function(t) {
                   var part_of_speech = t.shift();
-                  output.push({meanings: normalizeCase(t)});
+                  output.push({pos: part_of_speech, meanings: normalizeCase(t)});
                 });
                 source_lang = data.pop();
               }
