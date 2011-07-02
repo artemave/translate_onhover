@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var $debug = false;
+  var $debug = true;
 
   var original_console_log = console.log;
   console.log = function(arg) {
@@ -15,7 +15,6 @@ $.noConflict();
   $(document).bind('mousestop', function(e) {
 
     //TODO option to show translation in a growl type popup (in the corner)
-    //TODO 'no style' class for transover element
 
     function getHitWord(e) {
       var hit_word = '';
@@ -136,8 +135,27 @@ $.noConflict();
       }
 
       var word = '';
-      if (selection.toString() != '' && selection.containsNode(hit_elem, true)) {
-        word = selection.toString();
+      if (selection.toString() != '') {
+        var sel_container = selection.getRangeAt(0).commonAncestorContainer;
+
+        while (sel_container.nodeType != Node.ELEMENT_NODE) {
+          sel_container = sel_container.parentNode;
+        }
+
+        if (
+          // only choose selection if mouse stopped within immediate parent of selection
+          ( $(hit_elem).is(sel_container) || $.contains(sel_container, hit_elem) )
+          // and since it can still be quite a large area
+          // narrow it down by only choosing selection if mouse points at the element that is (partially) inside selection
+          && selection.containsNode(hit_elem, true)
+            // But what is the point for the first part of condition? Well, without it, pointing at body for instance would also satisfy it
+            // resulting in selection translation showing up in random places
+        ) {
+          word = selection.toString();
+        }
+        else {
+          word = getHitWord(e);
+        }
       }
       else {
         word = getHitWord(e);
