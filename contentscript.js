@@ -19,10 +19,21 @@ $.noConflict();
     function getHitWord(e) {
       var hit_word = '';
       var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
+      var word_re = "\\p{L}{2,}";
+
+      function escape_html(text) {
+        return text.replace(XRegExp("(<|>|&)", 'g'), function ($0, $1) {
+            switch ($1) {
+              case '<': return "&lt;";
+              case '>': return "&gt;";
+              case '&': return "&amp;";
+            }
+        });
+      }
 
       //get text contents of hit element
       var text_nodes = hit_elem.contents().filter(function(){
-        return this.nodeType == Node.TEXT_NODE && XRegExp("\\p{L}{2,}").test( this.nodeValue )
+        return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
       });
 
       if (text_nodes.length == 0) {
@@ -30,43 +41,65 @@ $.noConflict();
         return '';
       }
 
-      //wrap every word in every node in a dom element (real magic happens here)
-      text_nodes.each(function(i) {
-          $(this).replaceWith(function() {
-              return '<transblock id="transblock_'+i+'">' + $(this).text().replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
-                  switch ($1) {
-                    case '<': return "&lt;";
-                    case '>': return "&gt;";
-                    case '&': return "&amp;";
-                    default: return '<transover>'+$1+'</transover>';
-                  }
-              }) + '</transblock>';
+      //find the exact text_node hit
+      $(text_nodes).wrap('<transblock />');
+      var hit_text_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
+      $(text_nodes).unwrap();
+
+      function getHitText(node) {
+        console.log("getHitText: " + node.textContent);
+
+        if (XRegExp(word_re).test( node.textContent )) {
+          $(node).replaceWith(function() {
+              return this.textContent.replace(XRegExp("^(.{"+Math.round( node.textContent.length/2 )+"}\\p{L}*)(.*)"), function($0, $1, $2) {
+                  return '<transblock>'+escape_html($1)+'</transblock><transblock>'+escape_html($2)+'</transblock>';
+              });
           });
-      });
 
-      //get the exact word under cursor (and here)
-      var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
+          var next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
 
-      //no word under cursor? we are done
-      if (hit_word_elem.nodeName != 'TRANSOVER') {
-        console.log("missed!");
+          if (next_node.textContent == node.textContent) {
+            return next_node;
+          }
+          else {
+            return getHitText(next_node);
+          }
+        }
+        else {
+          return null;
+        }
       }
-      else  {
-        hit_word = $(hit_word_elem).text();
-        console.log("got it: "+hit_word);
+
+      var minimal_text_node = getHitText(hit_text_node);
+
+      if (minimal_text_node) {
+
+        $(minimal_text_node).replaceWith(function() {
+            return this.textContent.replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
+                switch ($1) {
+                  case '<': return "&lt;";
+                  case '>': return "&gt;";
+                  case '&': return "&amp;";
+                  default: return '<transover>'+$1+'</transover>';
+                }
+            });
+        });
+
+        //get the exact word under cursor
+        var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
+
+        //no word under cursor? we are done
+        if (hit_word_elem.nodeName != 'TRANSOVER') {
+          console.log("missed!");
+        }
+        else  {
+          hit_word = $(hit_word_elem).text();
+          console.log("got it: "+hit_word);
+        }
       }
 
-      //cleanup
-      text_nodes.each(function(i) {
-          $('#transblock_' + i).replaceWith( this.nodeValue.replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
-              switch ($1) {
-                case '<': return "&lt;";
-                case '>': return "&gt;";
-                case '&': return "&amp;";
-                default: return $1;
-              }
-          }));
-      });
+      // trick to discard all our temporary dom elements
+      hit_text_node.textContent = hit_text_node.textContent;
 
       return hit_word;
     }
