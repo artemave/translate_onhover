@@ -17,7 +17,6 @@ $.noConflict();
     //TODO option to show translation in a growl type popup (in the corner)
 
     function getHitWord(e) {
-      var hit_word = '';
       var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
       var word_re = "\\p{L}{2,}";
 
@@ -29,6 +28,13 @@ $.noConflict();
               case '&': return "&amp;";
             }
         });
+      }
+
+      function restorable(node, stuff_todo) {
+        $(node).wrap('<transwrapper />');
+        var res = stuff_todo(node);
+        $('transwrapper').replaceWith($('transwrapper').text());
+        return res;
       }
 
       //get text contents of hit element
@@ -46,60 +52,63 @@ $.noConflict();
       var hit_text_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
       $(text_nodes).unwrap();
 
-      function getHitText(node) {
-        console.log("getHitText: " + node.textContent);
+      var hit_word = restorable(hit_text_node, function(node) {
+        var hw = '';
 
-        if (XRegExp(word_re).test( node.textContent )) {
-          $(node).replaceWith(function() {
-              return this.textContent.replace(XRegExp("^(.{"+Math.round( node.textContent.length/2 )+"}\\p{L}*)(.*)"), function($0, $1, $2) {
-                  return '<transblock>'+escape_html($1)+'</transblock><transblock>'+escape_html($2)+'</transblock>';
+        function getHitText(node) {
+          console.log("getHitText: '" + node.textContent + "'");
+
+          if (XRegExp(word_re).test( node.textContent )) {
+            $(node).replaceWith(function() {
+                return this.textContent.replace(XRegExp("^(.{"+Math.round( node.textContent.length/2 )+"}\\p{L}*)(.*)", 's'), function($0, $1, $2) {
+                    return '<transblock>'+escape_html($1)+'</transblock><transblock>'+escape_html($2)+'</transblock>';
+                });
+            });
+
+            var next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
+
+            if (next_node.textContent == node.textContent) {
+              return next_node;
+            }
+            else {
+              return getHitText(next_node);
+            }
+          }
+          else {
+            return null;
+          }
+        }
+
+        var minimal_text_node = getHitText(hit_text_node);
+
+        if (minimal_text_node) {
+          //wrap words inside text node into <transover> element
+          $(minimal_text_node).replaceWith(function() {
+              return this.textContent.replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
+                  switch ($1) {
+                    case '<': return "&lt;";
+                    case '>': return "&gt;";
+                    case '&': return "&amp;";
+                    default: return '<transover>'+$1+'</transover>';
+                  }
               });
           });
 
-          var next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
+          //get the exact word under cursor
+          var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
 
-          if (next_node.textContent == node.textContent) {
-            return next_node;
+          //no word under cursor? we are done
+          if (hit_word_elem.nodeName != 'TRANSOVER') {
+            console.log("missed!");
           }
-          else {
-            return getHitText(next_node);
+          else  {
+            hw = $(hit_word_elem).text();
+            console.log("got it: "+hw);
           }
         }
-        else {
-          return null;
-        }
-      }
 
-      var minimal_text_node = getHitText(hit_text_node);
-
-      if (minimal_text_node) {
-
-        $(minimal_text_node).replaceWith(function() {
-            return this.textContent.replace(XRegExp("(<|>|&|\\p{L}+)", 'g'), function ($0, $1) {
-                switch ($1) {
-                  case '<': return "&lt;";
-                  case '>': return "&gt;";
-                  case '&': return "&amp;";
-                  default: return '<transover>'+$1+'</transover>';
-                }
-            });
-        });
-
-        //get the exact word under cursor
-        var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
-
-        //no word under cursor? we are done
-        if (hit_word_elem.nodeName != 'TRANSOVER') {
-          console.log("missed!");
-        }
-        else  {
-          hit_word = $(hit_word_elem).text();
-          console.log("got it: "+hit_word);
-        }
-      }
-
-      // trick to discard all our temporary dom elements
-      hit_text_node.textContent = hit_text_node.textContent;
+        return hw;
+      });
 
       return hit_word;
     }
