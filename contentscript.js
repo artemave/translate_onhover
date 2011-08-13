@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var $debug = true;
+  var $debug = false;
 
   var original_console_log = console.log;
   console.log = function(arg) {
@@ -235,7 +235,7 @@ $.noConflict();
 
     timer25 = setTimeout(function() {
 
-      if (last_x != e.clientX && last_y != e.clientY) { return }
+      if (last_x != e.clientX || last_y != e.clientY) { return }
 
       var mousestop = new $.Event("mousestop");
       mousestop.clientX = e.clientX;
@@ -273,7 +273,7 @@ $.noConflict();
 
   var options = {};
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
-    options = response.options;
+    options = JSON.parse( response.options );
   });
 
 })(jQuery);

@@ -61,13 +61,15 @@
           sendResponse({});
           break;
         case 'get_options':
-          sendResponse({options: {
-            except_urls: Options.except_urls(),
-            target_lang: Options.target_lang(),
-            delay: Options.delay(),
-            shift_only: Options.shift_only(),
-            by_click: Options.by_click()
-          }});
+          sendResponse({
+            options: JSON.stringify({
+              except_urls: Options.except_urls(),
+              target_lang: Options.target_lang(),
+              delay: Options.delay(),
+              shift_only: Options.shift_only(),
+              by_click: Options.by_click()
+            })
+          });
           break;
         case 'translate':
           console.log("received to translate: " + request.word);
