@@ -12,7 +12,7 @@ $.noConflict();
   var tooltip = new Tooltip();
   var start_tip = new Tooltip();
 
-  $(document).bind('mousestop', function(e) {
+  function process(e) {
 
     //TODO option to show translation in a growl type popup (in the corner)
 
@@ -116,6 +116,10 @@ $.noConflict();
     //respect 'translate only when shift pressed' option
     if (options.shift_only && !shift_pressed) { return }
 
+    //respect 'translate by click' option
+    //but fallback to mousestop to translate selections
+    if (window.getSelection().toString() == '' && options.by_click && e.type != 'click') { return }
+
     //respect "don't translate these sites"
     if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
 
@@ -206,7 +210,10 @@ $.noConflict();
         chrome.extension.sendRequest({handler: 'translate', word: word}, show_result);
       }
     }
-  });
+  }
+
+  $(document).bind('mousestop', process);
+  $(document).click(process);
 
   var shift_pressed = false;
   $(document)

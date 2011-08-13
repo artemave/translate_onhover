@@ -143,6 +143,7 @@
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
       Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
+      Options.by_click($('#by_click:checked').val() ? 1 : 0);
       Options.delay($('#delay').val());
 
       $('#status').fadeIn().delay(3000).fadeOut();
@@ -224,6 +225,10 @@
         $('#delay').attr('disabled', true).parent().addClass('disabled');
       }
 
+      if (Options.by_click()) {
+        $('#by_click').attr('checked', true);
+      }
+
       $('#shift_only').click(function() {
         if ($('#delay').parent().hasClass('disabled')) {
           $('#delay').attr('disabled', false).parent().removeClass('disabled');
@@ -253,6 +258,11 @@
         <span>ms before translating</span>
       </div>
   
+      <div class="option">
+        <label for="by_click">Only show translation when I click on word</label>
+        <input type="checkbox" id="by_click" name="by_click"/>
+      </div>
+
       <div class="option">
         <label for="shift_only">Only show translation when I hold the 'shift' key</label>
         <input type="checkbox" id="shift_only" name="shift_only"/>
