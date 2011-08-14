@@ -27,7 +27,7 @@
       }
 
       .option {
-        margin-top: 15px;
+        margin-top: 25px;
       }
 
       fieldset.option {
@@ -143,7 +143,7 @@
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
       Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
-      Options.by_click($('#by_click:checked').val() ? 1 : 0);
+      Options.translate_by($('#translate_by').val());
       Options.delay($('#delay').val());
 
       $('#status').fadeIn().delay(3000).fadeOut();
@@ -225,9 +225,7 @@
         $('#delay').attr('disabled', true).parent().addClass('disabled');
       }
 
-      if (Options.by_click()) {
-        $('#by_click').attr('checked', true);
-      }
+      $('#translate_by').val(Options.translate_by());
 
       $('#shift_only').click(function() {
         if ($('#delay').parent().hasClass('disabled')) {
@@ -249,18 +247,16 @@
     <div class="content">
       <div class="heading">TransOver options</div>
       <div class="option">
-        Translate into: <select id="target_lang"></select>
+        <label for="target_lang">Translate into</label>
+        <select id="target_lang"></select>
       </div>
 
       <div class="option">
-        <label for="delay">Wait for</label>
-        <input type="number" id="delay" name="delay"/>
-        <span>ms before translating</span>
-      </div>
-  
-      <div class="option">
-        <label for="by_click">Only show translation when I click on word</label>
-        <input type="checkbox" id="by_click" name="by_click"/>
+        <label for="translate_by">Translate when I</label>
+        <select id="translate_by" name="translate_by">
+          <option value="click">click on word</option>
+          <option value="point">point at word</option>
+        </select>
       </div>
 
       <div class="option">
@@ -268,6 +264,12 @@
         <input type="checkbox" id="shift_only" name="shift_only"/>
       </div>
 
+      <div class="option">
+        <label for="delay">Wait for</label>
+        <input type="number" id="delay" name="delay"/>
+        <span>ms before showing translation</span>
+      </div>
+  
       <fieldset class="option" id="except_urls">
         <legend>Don't translate words on these sites:</legend>
         <table id='exc_urls_table'></table>

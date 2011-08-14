@@ -113,22 +113,22 @@ $.noConflict();
       return hit_word;
     }
 
-    //respect 'translate only when shift pressed' option
-    if (options.shift_only && !shift_pressed) { return }
-
-    //respect 'translate by click' option
-    //but fallback to mousestop to translate selections
-    if (window.getSelection().toString() == '' && options.by_click && e.type != 'click') { return }
-
-    //respect "don't translate these sites"
-    if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
-
     if (!options.target_lang) {
       if (start_tip.is(':hidden')) {
-        start_tip.show(e.clientX, e.clientY, 'Please, choose language to translate into in TransOver <a href="'+chrome.extension.getURL('options.html')+'">options</a>');
+        start_tip.show(e.clientX, e.clientY, 'Please, <a href="'+chrome.extension.getURL('options.html')+'">choose</a> language to translate into.');
       }
     }
     else {
+      //respect 'translate only when shift pressed' option
+      if (options.shift_only && !shift_pressed) { return }
+
+      //respect 'translate by click' option
+      //but fallback to mousestop to translate selections
+      if (window.getSelection().toString() == '' && options.translate_by == 'click' && e.type != 'click') { return }
+
+      //respect "don't translate these sites"
+      if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
+
       function show_result(response) {
         function deserialize(text) {
           var res;
@@ -182,6 +182,8 @@ $.noConflict();
 
       var word = '';
       if (selection.toString() != '') {
+        console.log('Got selection: ' + selection.toString());
+
         var sel_container = selection.getRangeAt(0).commonAncestorContainer;
 
         while (sel_container.nodeType != Node.ELEMENT_NODE) {
@@ -194,12 +196,12 @@ $.noConflict();
           // and since it can still be quite a large area
           // narrow it down by only choosing selection if mouse points at the element that is (partially) inside selection
           && selection.containsNode(hit_elem, true)
-            // But what is the point for the first part of condition? Well, without it, pointing at body for instance would also satisfy it
+            // But what is the point for the first part of condition? Well, without it, pointing at body for instance would also satisfy the second part
             // resulting in selection translation showing up in random places
         ) {
           word = selection.toString();
         }
-        else {
+        else if (options.translate_by == 'point') {
           word = getHitWord(e);
         }
       }
