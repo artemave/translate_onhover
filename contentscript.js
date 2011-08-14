@@ -113,7 +113,7 @@ $.noConflict();
       return hit_word;
     }
 
-    if (!options.target_lang) {
+    if (options && !options.target_lang) {
       if (start_tip.is(':hidden')) {
         start_tip.show(e.clientX, e.clientY, 'Please, <a href="'+chrome.extension.getURL('options.html')+'">choose</a> language to translate into.');
       }
@@ -273,7 +273,7 @@ $.noConflict();
 
   //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
 
-  var options = {};
+  var options;
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     options = JSON.parse( response.options );
   });
