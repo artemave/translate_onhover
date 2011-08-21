@@ -19,10 +19,10 @@ $.noConflict();
           });
         }
 
-        function restorable(node, stuff_todo) {
+        function restorable(node, do_stuff) {
           $(node).wrap('<transwrapper />');
-          var res = stuff_todo(node);
-          $('transwrapper').replaceWith($('transwrapper').text());
+          var res = do_stuff(node);
+          $('transwrapper').replaceWith(escape_html( $('transwrapper').text() ));
           return res;
         }
 
@@ -280,18 +280,12 @@ $.noConflict();
     });
     $(window).scroll(function() { tooltip.hide() });
 
-    // hide start_tip on click outside and escape
-    $(document)
-      .click(function(e) {
-        var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
-        if (!$(hit_elem).hasClass('transover-tooltip')) {
-          start_tip.hide();
-        }
-      }).keydown(function(e) {
+    // hide start_tip on escape
+    $(document).keydown(function(e) {
         if (e.keyCode == 27) {
           start_tip.hide();
         }
-      });
+    });
 
     //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
   });
