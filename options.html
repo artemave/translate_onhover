@@ -220,15 +220,25 @@
       fill_target_lang();
       populate_except_urls();
 
+      if (Options.translate_by() == 'point') { 
+        $('#delay').attr('disabled', false).parent().removeClass('disabled');
+      }
+
       if (Options.shift_only()) {
-        $('#shift_only').attr('checked', true);
         $('#delay').attr('disabled', true).parent().addClass('disabled');
       }
 
-      $('#translate_by').val(Options.translate_by());
+      $('#translate_by').val(Options.translate_by()).change(function() {
+        if ($(this).val() == 'point' && !$('#shift_only').attr('checked')) {
+          $('#delay').attr('disabled', false).parent().removeClass('disabled');
+        }
+        else {
+          $('#delay').attr('disabled', true).parent().addClass('disabled');
+        }
+      });
 
-      $('#shift_only').click(function() {
-        if ($('#delay').parent().hasClass('disabled')) {
+      $('#shift_only').attr('checked', Options.shift_only() ? true : false).click(function() {
+        if ($('#translate_by').val() == 'point' && !$(this).attr('checked')) {
           $('#delay').attr('disabled', false).parent().removeClass('disabled');
         }
         else {
@@ -264,9 +274,9 @@
         <input type="checkbox" id="shift_only" name="shift_only"/>
       </div>
 
-      <div class="option">
+      <div class="option disabled">
         <label for="delay">Wait for</label>
-        <input type="number" id="delay" name="delay"/>
+        <input type="number" id="delay" name="delay" disabled/>
         <span>ms before showing translation</span>
       </div>
   
