@@ -6,8 +6,6 @@ $.noConflict();
       //TODO option to show translation in a growl type popup (in the corner)
 
       function getHitWord(e) {
-        var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
-        var word_re = "\\p{L}{2,}";
 
         function escape_html(text) {
           return text.replace(XRegExp("(<|>|&)", 'g'), function ($0, $1) {
@@ -25,6 +23,13 @@ $.noConflict();
           $('transwrapper').replaceWith(escape_html( $('transwrapper').text() ));
           return res;
         }
+
+        var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
+        var word_re = "\\p{L}{2,}";
+        var parent_font_style = {
+          'font-size': hit_elem.css('font-size'),
+          'font-family': hit_elem.css('font-family')
+        };
 
         //get text contents of hit element
         var text_nodes = hit_elem.contents().filter(function(){
@@ -44,7 +49,7 @@ $.noConflict();
         var hit_word = restorable(hit_text_node, function(node) {
           var hw = '';
 
-          function getHitText(node) {
+          function getHitText(node, parent_font_style) {
             console.log("getHitText: '" + node.textContent + "'");
 
             if (XRegExp(word_re).test( node.textContent )) {
@@ -54,13 +59,15 @@ $.noConflict();
                   });
               });
 
+              $('transblock').css(parent_font_style);
+
               var next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
 
               if (next_node.textContent == node.textContent) {
                 return next_node;
               }
               else {
-                return getHitText(next_node);
+                return getHitText(next_node, parent_font_style);
               }
             }
             else {
@@ -68,7 +75,7 @@ $.noConflict();
             }
           }
 
-          var minimal_text_node = getHitText(hit_text_node);
+          var minimal_text_node = getHitText(hit_text_node, parent_font_style);
 
           if (minimal_text_node) {
             //wrap words inside text node into <transover> element
@@ -82,6 +89,8 @@ $.noConflict();
                     }
                 });
             });
+
+            $('transover').css(parent_font_style);
 
             //get the exact word under cursor
             var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY);
@@ -214,7 +223,7 @@ $.noConflict();
 
     var options = JSON.parse( response.options );
 
-    var $debug = false;
+    var $debug = true;
 
     var original_console_log = console.log;
     console.log = function(arg) {
