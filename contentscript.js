@@ -24,6 +24,23 @@ $.noConflict();
           return res;
         }
 
+        function getExactTextNode(nodes, e) {
+          $(text_nodes).wrap('<transblock />');
+          var hit_text_node = document.elementFromPoint(e.clientX, e.clientY);
+
+          //means we hit between the lines
+          if (hit_text_node.nodeName != 'TRANSBLOCK') {
+            $(text_nodes).unwrap();
+            return null;
+          }
+
+          hit_text_node = hit_text_node.childNodes[0];
+
+          $(text_nodes).unwrap();
+
+          return hit_text_node;
+        }
+
         var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
         var word_re = "\\p{L}{2,}";
         var parent_font_style = {
@@ -41,10 +58,11 @@ $.noConflict();
           return '';
         }
 
-        //find the exact text_node hit
-        $(text_nodes).wrap('<transblock />');
-        var hit_text_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0];
-        $(text_nodes).unwrap();
+        var hit_text_node = getExactTextNode(text_nodes, e);
+        if (!hit_text_node) {
+          console.log('hit between lines');
+          return '';
+        }
 
         var hit_word = restorable(hit_text_node, function(node) {
           var hw = '';
@@ -223,7 +241,7 @@ $.noConflict();
 
     var options = JSON.parse( response.options );
 
-    var $debug = true;
+    var $debug = false;
 
     var original_console_log = console.log;
     console.log = function(arg) {
