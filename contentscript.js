@@ -44,6 +44,7 @@ $.noConflict();
         var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
         var word_re = "\\p{L}{2,}";
         var parent_font_style = {
+          'line-height': hit_elem.css('line-height'),
           'font-size': hit_elem.css('font-size'),
           'font-family': hit_elem.css('font-family')
         };
