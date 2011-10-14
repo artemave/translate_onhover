@@ -1,5 +1,13 @@
 $.noConflict();
 (function($) {
+  var debug = true;
+
+  function log(arg) {
+    if (debug) {
+      console.log(arg);
+    }
+  }
+
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     function process(e) {
 
@@ -49,19 +57,24 @@ $.noConflict();
           'font-family': hit_elem.css('font-family')
         };
 
+        //attempt to get around the issue when click link not always work
+        $('transover').live('click', function() {
+            hit_elem.click();
+        });
+
         //get text contents of hit element
         var text_nodes = hit_elem.contents().filter(function(){
           return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
         });
 
         if (text_nodes.length == 0) {
-          console.log('no text');
+          log('no text');
           return '';
         }
 
         var hit_text_node = getExactTextNode(text_nodes, e);
         if (!hit_text_node) {
-          console.log('hit between lines');
+          log('hit between lines');
           return '';
         }
 
@@ -69,7 +82,7 @@ $.noConflict();
           var hw = '';
 
           function getHitText(node, parent_font_style) {
-            console.log("getHitText: '" + node.textContent + "'");
+            log("getHitText: '" + node.textContent + "'");
 
             if (XRegExp(word_re).test( node.textContent )) {
               $(node).replaceWith(function() {
@@ -116,11 +129,11 @@ $.noConflict();
 
             //no word under cursor? we are done
             if (hit_word_elem.nodeName != 'TRANSOVER') {
-              console.log("missed!");
+              log("missed!");
             }
             else  {
               hw = $(hit_word_elem).text();
-              console.log("got it: "+hw);
+              log("got it: "+hw);
             }
           }
 
@@ -149,10 +162,10 @@ $.noConflict();
           return res;
         };
 
-        console.log('response: "'+response.source_lang+'" '+response.translation);
+        log('response: "'+response.source_lang+'" '+response.translation);
 
         if (options.target_lang == response.source_lang) {
-          console.log('skipping translation into the same language');
+          log('skipping translation into the same language');
           return;
         }
 
@@ -183,7 +196,7 @@ $.noConflict();
 
       var word = '';
       if (selection.toString() != '') {
-        console.log('Got selection: ' + selection.toString());
+        log('Got selection: ' + selection.toString());
 
         var sel_container = selection.getRangeAt(0).commonAncestorContainer;
 
@@ -241,15 +254,6 @@ $.noConflict();
     }
 
     var options = JSON.parse( response.options );
-
-    var $debug = false;
-
-    var original_console_log = console.log;
-    console.log = function(arg) {
-      if ($debug) {
-        original_console_log.call(this, arg);
-      }
-    }
 
     var tooltip = new Tooltip();
     var start_tip = new Tooltip();
