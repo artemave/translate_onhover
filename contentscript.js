@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var debug = true;
+  var debug = false;
 
   function log(arg) {
     if (debug) {
@@ -57,12 +57,6 @@ $.noConflict();
           'font-family': hit_elem.css('font-family')
         };
 
-        //attempt to get around the issue when click link not always work
-        $('transover').live('click', function() {
-            hit_elem.click();
-        });
-
-        //get text contents of hit element
         var text_nodes = hit_elem.contents().filter(function(){
           return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
         });
