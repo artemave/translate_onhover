@@ -103,6 +103,10 @@
             }
           );
           break;
+        case 'tts':
+          console.log("tts: " + request.word);
+          chrome.tts.speak(request.word);
+          break;
         default:
           console.log("Error! Unknown handler");
           sendResponse({});

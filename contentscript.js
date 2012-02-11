@@ -9,6 +9,8 @@ $.noConflict();
   }
 
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
+    var word = '';
+
     function process(e) {
 
       //TODO option to show translation in a growl type popup (in the corner)
@@ -188,7 +190,7 @@ $.noConflict();
         return;
       }
 
-      var word = '';
+      word = '';
       if (selection.toString() != '') {
         log('Got selection: ' + selection.toString());
 
@@ -273,6 +275,10 @@ $.noConflict();
       .keydown(function(event) {
         if (event.keyCode == 16) {
           shift_pressed = true;
+        }
+        // text-to-speech on ctrl press
+        if (event.keyCode == 17 && tooltip.is(':visible')) {
+          chrome.extension.sendRequest({handler: 'tts', word: word});
         }
       }).keyup(function(event) {
         if (event.keyCode == 16) {
