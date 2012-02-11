@@ -9,7 +9,6 @@ $.noConflict();
   }
 
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
-    var word = '';
 
     function process(e) {
 
@@ -190,7 +189,7 @@ $.noConflict();
         return;
       }
 
-      word = '';
+      var word = '';
       if (selection.toString() != '') {
         log('Got selection: ' + selection.toString());
 
@@ -278,7 +277,7 @@ $.noConflict();
         }
         // text-to-speech on ctrl press
         if (event.keyCode == 17 && tooltip.is(':visible')) {
-          chrome.extension.sendRequest({handler: 'tts', word: word});
+          chrome.extension.sendRequest({handler: 'tts'});
         }
       }).keyup(function(event) {
         if (event.keyCode == 16) {

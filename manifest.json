@@ -19,5 +19,5 @@
     "css": ["styles.css"],
     "all_frames": true
   }],
-  "permissions": [ "http://www.google.com/translate_a/t", "tts" ]
+  "permissions": [ "http://www.google.com/translate_a/t" ]
 }

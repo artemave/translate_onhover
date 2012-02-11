@@ -26,6 +26,8 @@
       });
     }
 
+    var last_word, last_sl, last_translation_succeeded;
+
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 
       // Sometimes (e.g. french->russian) Google API returns translation in capitals
@@ -82,21 +84,33 @@
               //If all goes well, Google API returns something like this:
               // ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
               if (data[data.length - 1] instanceof Array) {
-                output = [];
-                var translation = data.pop();
+                output                     = [];
+                last_translation_succeeded = true;
+                var translation            = data.pop();
+                source_lang                = data.pop();
+                last_word                  = request.word;
+                last_sl                    = source_lang;
+
                 translation.forEach(function(t) {
                   var part_of_speech = t.shift();
                   output.push({pos: part_of_speech, meanings: normalizeCase(t)});
                 });
-                source_lang = data.pop();
               }
               // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
               // ['book', 'ru']
               else  {
                 var translation = normalizeCase(data.shift());
 
-                output = notTranslated(request.word, translation) ? no_translation_found : translation;
-                source_lang = data.shift();
+                if (notTranslated(request.word, translation)) {
+                  last_translation_succeeded = false;
+                  output                     = no_translation_found;
+                }
+                else {
+                  last_translation_succeeded = true;
+                  output                     = translation;
+                  last_word                  = request.word;
+                }
+                source_lang = last_sl = data.shift();
               }
 
               sendResponse({translation: JSON.stringify(output), source_lang: source_lang});
@@ -104,8 +118,15 @@
           );
           break;
         case 'tts':
-          console.log("tts: " + request.word);
-          chrome.tts.speak(request.word);
+          if (last_translation_succeeded) {
+            console.log("tts: " + last_word + ", sl: " + last_sl);
+            var audio = $("<audio src='http://translate.google.com/translate_tts?q="+last_word+"&tl="+last_sl+"'></audio>");
+            // I would you autoplay instead, if only it didn't echoing
+            audio.on('canplaythrough', function () {
+                audio.get(0).play();
+            })
+          }
+          sendResponse({});
           break;
         default:
           console.log("Error! Unknown handler");
