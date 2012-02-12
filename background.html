@@ -14,7 +14,7 @@
           data: {
             client: 'ig',
             text: word,
-            sl: 'autodetect',
+            sl: Options.source_lang(),
             tl: Options.target_lang(),
             ie: 'UTF8',
             oe: 'UTF8'
@@ -82,12 +82,15 @@
               var output, source_lang;
 
               //If all goes well, Google API returns something like this:
-              // ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
+              // with source language 'autodetect'
+              //   ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
+              // with source language set
+              //   ['book', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
               if (data[data.length - 1] instanceof Array) {
                 output                     = [];
                 last_translation_succeeded = true;
                 var translation            = data.pop();
-                source_lang                = data.pop();
+                source_lang                = Options.source_lang() == 'autodetect' ? data.pop() : Options.source_lang();
                 last_word                  = request.word;
                 last_sl                    = source_lang;
 
@@ -97,9 +100,20 @@
                 });
               }
               // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
-              // ['book', 'ru']
+              // with source language 'autodetect'
+              //   ['book', 'ru']
+              // with source language set
+              //   'book'
               else  {
-                var translation = normalizeCase(data.shift());
+                var translation;
+                if (Options.source_lang() == 'autodetect') {
+                  translation = normalizeCase(data.shift());
+                  source_lang = last_sl = data.shift();
+                }
+                else {
+                  translation = normalizeCase(data);
+                  source_lang = last_sl = Options.source_lang();
+                }
 
                 if (notTranslated(request.word, translation)) {
                   last_translation_succeeded = false;
@@ -110,7 +124,6 @@
                   output                     = translation;
                   last_word                  = request.word;
                 }
-                source_lang = last_sl = data.shift();
               }
 
               sendResponse({translation: JSON.stringify(output), source_lang: source_lang});

@@ -11,6 +11,7 @@
       body, table {
         color: #4f4f4f;
         font: normal normal normal 12px Verdana, Tahoma, sans-serif;
+        border-spacing: 0px;
       }
 
       td {
@@ -22,7 +23,7 @@
       }
 
       div.heading {
-        text-align: center;
+        text-align: left;
         font-size: 1.3em;
       }
 
@@ -42,7 +43,7 @@
       }
 
       div.button_group {
-        margin-top: 10px;
+        margin-top: 30px;
       }
 
       #status {
@@ -142,6 +143,7 @@
 
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
+      Options.source_lang($('#source_lang').val());
       Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
       Options.translate_by($('#translate_by').val());
       Options.delay($('#delay').val());
@@ -216,8 +218,21 @@
       });
     }
 
+    function fill_source_lang() {
+      var saved_source_lang = Options.source_lang();
+      var target_lang = Options.target_lang();
+
+      $('#source_lang').append('<option value="autodetect">autodetect</option>').append('<optgroup label="----------"></optgroup>');
+      Langs.forEach(function(lang, i) {
+        if (target_lang == lang) { return }
+        $('#source_lang').append('<option value="'+lang[0]+'">'+lang[1]+'</option>');
+      });
+      $('#source_lang option[value='+saved_source_lang+']').attr('selected', true);
+    }
+
     $(function() {
       fill_target_lang();
+      fill_source_lang();
       populate_except_urls();
 
       if (Options.translate_by() == 'point') { 
@@ -249,6 +264,10 @@
       $('#delay').val(Options.delay());
 
       $('#save_button').click(function() { save_options() });
+      $('#more_options_link').on('click', function() {
+          $('#more_options_link').hide();
+          $('#more_options').fadeIn();
+      })
     });
 
   </script>
@@ -259,31 +278,37 @@
       <div class="option">
         <label for="target_lang">Translate into</label>
         <select id="target_lang"></select>
-      </div>
-
-      <div class="option">
-        <label for="translate_by">Translate when I</label>
+        <label for="translate_by">when I</label>
         <select id="translate_by" name="translate_by">
           <option value="click">click on word</option>
           <option value="point">point at word</option>
         </select>
       </div>
 
-      <div class="option">
-        <label for="shift_only">Only show translation when I hold the 'shift' key</label>
-        <input type="checkbox" id="shift_only" name="shift_only"/>
+      <div class="option" id="more_options_link">
+        <a href="#">more options</a>&nbsp;&gt;
       </div>
 
-      <div class="option disabled">
-        <label for="delay">Wait for</label>
-        <input type="number" id="delay" name="delay" disabled/>
-        <span>ms before showing translation</span>
-      </div>
+      <div id="more_options" style="display:none">
+        <div class="option">
+          <label for="source_lang">Translate from</label>
+          <select id="source_lang"></select>
+        </div>
+
+        <div class="option">
+          <label for="shift_only">Only show translation when I hold the 'shift' key</label>
+          <input type="checkbox" id="shift_only" name="shift_only"/>
+        </div>
   
-      <fieldset class="option" id="except_urls">
-        <legend>Don't translate words on these sites:</legend>
+        <div class="option disabled">
+          <label for="delay">Wait for</label>
+          <input type="number" id="delay" name="delay" disabled/>
+          <span>ms before showing translation</span>
+        </div>
+    
+        <div class="option">Don't translate words on these sites:</div>
         <table id='exc_urls_table'></table>
-      </fieldset>
+      </div>
 
       <div class="button_group">
         <div class="button">
