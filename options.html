@@ -149,6 +149,7 @@
       Options.target_lang($('#target_lang').val());
       Options.source_lang($('#source_lang').val());
       Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
+      Options.tts($('#tts:checked').val() ? 1 : 0);
       Options.translate_by($('#translate_by').val());
       Options.delay($('#delay').val());
 
@@ -267,6 +268,8 @@
 
       $('#delay').val(Options.delay());
 
+      $('#tts').attr('checked', Options.tts() ? true : false);
+
       $('#save_button').click(function() { save_options() });
       $('#more_options_link').on('click', function() {
           $('#more_options_link').hide();
@@ -303,6 +306,12 @@
         <div class="option">
           <label for="shift_only">Only show translation when I hold the 'shift' key</label>
           <input type="checkbox" id="shift_only" name="shift_only"/>
+        </div>
+
+        <div class="option">
+          <label for="tts">Enable Text-To-Speech</label>
+          <input type="checkbox" id="tts" name="tts"/>
+          <span class="hint"> (press Ctrl while popup is showing)</span>
         </div>
   
         <div class="option disabled">
