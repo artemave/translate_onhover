@@ -233,8 +233,8 @@ $.noConflict();
 
     function withOptionsSatisfied(e, do_stuff) {
       if (options.target_lang) {
-        //respect 'translate only when shift pressed' option
-        if (options.shift_only && !shift_pressed) { return }
+        //respect 'translate only when alt pressed' option
+        if (options.alt_only && !alt_pressed) { return }
 
         //respect "don't translate these sites"
         if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
@@ -269,19 +269,19 @@ $.noConflict();
         });
     });
 
-    var shift_pressed = false;
+    var alt_pressed = false;
     $(document)
       .keydown(function(event) {
-        if (event.keyCode == 16) {
-          shift_pressed = true;
+        if (event.keyCode == 18) {
+          alt_pressed = true;
         }
         // text-to-speech on ctrl press
         if (event.keyCode == 17 && tooltip.is(':visible') && options.tts) {
           chrome.extension.sendRequest({handler: 'tts'});
         }
       }).keyup(function(event) {
-        if (event.keyCode == 16) {
-          shift_pressed = false;
+        if (event.keyCode == 18) {
+          alt_pressed = false;
         }
       });
 
@@ -300,7 +300,7 @@ $.noConflict();
         last_mouse_stop.y = mousestop.clientY = e.clientY;
 
         $(document).trigger(mousestop);
-      }, options.shift_only ? 200 : options.delay);
+      }, options.alt_only ? 200 : options.delay);
     });
 
     // hide translation on any move

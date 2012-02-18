@@ -148,7 +148,7 @@
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
       Options.source_lang($('#source_lang').val());
-      Options.shift_only($('#shift_only:checked').val() ? 1 : 0);
+      Options.alt_only($('#alt_only:checked').val() ? 1 : 0);
       Options.tts($('#tts:checked').val() ? 1 : 0);
       Options.translate_by($('#translate_by').val());
       Options.delay($('#delay').val());
@@ -244,12 +244,12 @@
         $('#delay').attr('disabled', false).parent().removeClass('disabled');
       }
 
-      if (Options.shift_only()) {
+      if (Options.alt_only()) {
         $('#delay').attr('disabled', true).parent().addClass('disabled');
       }
 
       $('#translate_by').val(Options.translate_by()).change(function() {
-        if ($(this).val() == 'point' && !$('#shift_only').attr('checked')) {
+        if ($(this).val() == 'point' && !$('#alt_only').attr('checked')) {
           $('#delay').attr('disabled', false).parent().removeClass('disabled');
         }
         else {
@@ -257,7 +257,7 @@
         }
       });
 
-      $('#shift_only').attr('checked', Options.shift_only() ? true : false).click(function() {
+      $('#alt_only').attr('checked', Options.alt_only() ? true : false).click(function() {
         if ($('#translate_by').val() == 'point' && !$(this).attr('checked')) {
           $('#delay').attr('disabled', false).parent().removeClass('disabled');
         }
@@ -304,8 +304,8 @@
         </div>
 
         <div class="option">
-          <label for="shift_only">Only show translation when I hold the 'shift' key</label>
-          <input type="checkbox" id="shift_only" name="shift_only"/>
+          <label for="alt_only">Only show translation when I hold the 'alt' key</label>
+          <input type="checkbox" id="alt_only" name="alt_only"/>
         </div>
 
         <div class="option">
