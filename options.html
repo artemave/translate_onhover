@@ -135,12 +135,11 @@
     function save_options() {
       function get_except_urls() {
         var except_urls = [];
-        except_urls = $('input:text', $('#exc_urls_table')).map(function() {
+        except_urls = $('input:text', $('#exc_urls_table')).filter(function() {
+          return this.value;
+        }).map(function() {
           return this.value;
         }).get();
-
-        //get rid of blank input (always last)
-        except_urls.pop();
 
         return except_urls;
       }
