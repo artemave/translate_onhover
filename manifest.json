@@ -1,6 +1,6 @@
 {
   "name": "TransOver",
-  "version": "0.24",
+  "version": "0.25",
   "icons": { "48": "to_icon.png", "128": "to_icon.png" },
   "description": "Hover, click or select to translate",
   "background_page": "background.html",
@@ -19,5 +19,5 @@
     "css": ["styles.css"],
     "all_frames": true
   }],
-  "permissions": [ "http://www.google.com/translate_a/t" ]
+  "permissions": [ "http://www.google.com/translate_a/t", "tabs" ]
 }

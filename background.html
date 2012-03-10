@@ -7,15 +7,15 @@
   <script type="text/javascript" src="lib/options.js"></script>
 
   <script type="text/javascript">
-    function translate(word, onresponse) {
+    function translate(word, sl, tl, onresponse) {
       $.ajax({
           url: "http://www.google.com/translate_a/t",
           dataType: 'json',
           data: {
             client: 'ig',
             text: word,
-            sl: Options.source_lang(),
-            tl: Options.target_lang(),
+            sl: sl,
+            tl: tl,
             ie: 'UTF8',
             oe: 'UTF8'
           },
@@ -67,6 +67,7 @@
             options: JSON.stringify({
               except_urls: Options.except_urls(),
               target_lang: Options.target_lang(),
+              reverse_lang: Options.reverse_lang(),
               delay: Options.delay(),
               alt_only: Options.alt_only(),
               tts: Options.tts(),
@@ -77,59 +78,68 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
-          translate(
-            request.word,
-            function (data) {
-              var output, source_lang;
+          chrome.tabs.detectLanguage(null, function(sl) {
+            console.log('tab language', sl);
+            last_sl = sl;
 
-              //If all goes well, Google API returns something like this:
-              // with source language 'autodetect'
-              //   ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
-              // with source language set
-              //   ['book', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
-              if (data[data.length - 1] instanceof Array) {
-                output                     = [];
-                last_translation_succeeded = true;
-                var translation            = data.pop();
-                source_lang                = Options.source_lang() == 'autodetect' ? data.pop() : Options.source_lang();
-                last_word                  = request.word;
-                last_sl                    = source_lang;
-
-                translation.forEach(function(t) {
-                  var part_of_speech = t.shift();
-                  output.push({pos: part_of_speech, meanings: normalizeCase(t)});
-                });
-              }
-              // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
-              // with source language 'autodetect'
-              //   ['book', 'ru']
-              // with source language set
-              //   'book'
-              else  {
-                var translation;
-                if (Options.source_lang() == 'autodetect') {
-                  translation = normalizeCase(data.shift());
-                  source_lang = last_sl = data.shift();
-                }
-                else {
-                  translation = normalizeCase(data);
-                  source_lang = last_sl = Options.source_lang();
-                }
-
-                if (notTranslated(request.word, translation)) {
-                  last_translation_succeeded = false;
-                  output                     = no_translation_found;
-                }
-                else {
-                  last_translation_succeeded = true;
-                  output                     = translation;
-                  last_word                  = request.word;
-                }
-              }
-
-              sendResponse({translation: JSON.stringify(output), source_lang: source_lang});
+            var tl;
+            if (Options.target_lang() == sl && Options.reverse_lang()) {
+              tl = Options.reverse_lang();
+              console.log('reverse translate:', sl, '->', tl);
             }
-          );
+            else {
+              tl = Options.target_lang();
+              console.log('normal translate:', sl, '->', tl);
+            }
+
+            translate(
+              request.word, sl, tl,
+              function (data) {
+                var output;
+
+                //If all goes well, Google API returns something like this:
+                // with source language 'autodetect'
+                //   ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
+                // with source language set
+                //   ['book', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
+                if (data[data.length - 1] instanceof Array) {
+                  output                     = [];
+                  last_translation_succeeded = true;
+                  var translation            = data.pop();
+                  last_word                  = request.word;
+
+                  translation.forEach(function(t) {
+                    var part_of_speech = t.shift();
+                    output.push({pos: part_of_speech, meanings: normalizeCase(t)});
+                  });
+                }
+                // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
+                // with source language 'autodetect'
+                //   ['book', 'ru']
+                // with source language set
+                //   'book'
+                else  {
+                  var translation = normalizeCase(data);
+
+                  if (sl == tl) { // don't translate into the same language
+                    last_translation_succeeded = false;
+                    output                     = ''; // assuming that empty response will be treated as failure on the other end
+                  }
+                  else if (notTranslated(request.word, translation)) {
+                    last_translation_succeeded = false;
+                    output                     = no_translation_found;
+                  }
+                  else {
+                    last_translation_succeeded = true;
+                    output                     = translation;
+                    last_word                  = request.word;
+                  }
+                }
+
+                sendResponse({translation: JSON.stringify(output)});
+              }
+            );
+          });
           break;
         case 'tts':
           if (last_translation_succeeded) {

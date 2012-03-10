@@ -157,14 +157,15 @@ $.noConflict();
           return res;
         };
 
-        log('response: "'+response.source_lang+'" '+response.translation);
+        log('response: ', response.translation);
 
-        if (options.target_lang == response.source_lang) {
-          log('skipping translation into the same language');
+        var translation = deserialize(response.translation);
+
+        if (!translation) {
+          log('skipping empty translation');
           return;
         }
 
-        var translation = deserialize(response.translation);
         var formatted_translation = '';
 
         if (translation instanceof Array) {
