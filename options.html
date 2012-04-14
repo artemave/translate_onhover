@@ -154,6 +154,7 @@
 
       Options.except_urls(get_except_urls());
       Options.target_lang($('#target_lang').val());
+      Options.source_lang($('#source_lang').val());
       Options.reverse_lang($('#reverse_lang').val());
       Options.alt_only($('#alt_only:checked').val() ? 1 : 0);
       Options.tts($('#tts:checked').val() ? 1 : 0);
@@ -230,6 +231,19 @@
       });
     }
 
+    function fill_source_lang() {
+      var saved_source_lang = Options.source_lang();
+
+      $('#source_lang')
+        .append('<option ' + (saved_source_lang == "autodetected_from_locale" ? "selected" : "") + ' value="autodetected_from_locale">Autodetect (page locale)</option>')
+        .append('<option ' + (saved_source_lang == "autodetected_from_word" ? "selected" : "") + ' value="autodetected_from_word">Autodetect (word)</option>')
+        .append('<optgroup label="----------"></optgroup>');
+
+      Langs.forEach(function(lang, i) {
+        $('#source_lang').append('<option value="'+lang[0]+'"'+(saved_source_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
+      });
+    }
+
     function fill_reverse_lang() {
       var saved_reverse_lang = Options.reverse_lang();
       var target_lang = Options.target_lang();
@@ -244,6 +258,7 @@
 
     $(function() {
       fill_target_lang();
+      fill_source_lang();
       fill_reverse_lang();
       populate_except_urls();
 
@@ -304,6 +319,11 @@
       </div>
 
       <div id="more_options" style="display:none">
+        <div class="option">
+          <label for="source_lang">Translate from</label>
+          <select id="source_lang"></select>
+        </div>
+
         <div class="option">
           <label for="reverse_lang">Reverse translate to</label>
           <select id="reverse_lang"></select>

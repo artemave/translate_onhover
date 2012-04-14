@@ -1,6 +1,6 @@
 {
   "name": "TransOver",
-  "version": "0.25",
+  "version": "0.26",
   "icons": { "48": "to_icon.png", "128": "to_icon.png" },
   "description": "Hover, click or select to translate",
   "background_page": "background.html",
