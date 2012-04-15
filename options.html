@@ -3,6 +3,7 @@
     <title>TransOver Extension Options</title>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/options.js"></script>
+    <script type="text/javascript" src="lib/tooltip.js"></script>
     <style type="text/css">
       body {
         margin: 10px auto;
@@ -64,6 +65,11 @@
 
       .hint {
         color: blue;
+      }
+
+      .help {
+        cursor: help;
+        border-bottom: 1px dotted;
       }
 
       .disabled {
@@ -233,15 +239,56 @@
 
     function fill_source_lang() {
       var saved_source_lang = Options.source_lang();
+      var help_baloon = new Tooltip();
+      var help = '\
+                 <b>Autodetect from page locale</b> is a very accurate one. Except it totally fails \
+                 <br/>\
+                 when locale does not match page language (e.g, russian version of french website).\
+                 <br/>\
+                 <br/>\
+                 <b>Autodetect from word</b> being translated is not as accurate.\
+                 <br/>\
+                 It may decide for instance that "bonjour" is english word and would therefor\
+                 <br/>\
+                 show single word translation as opposed to full french version.\
+                 <br/>\
+                 Also, for that reason, Text-To-Speech is a lot less useful.\
+                 <br/>\
+                 Also, "reverse translate" option is not available in this mode.\
+                 <br/>\
+                 Still, it mostly works and does so everywhere.\
+                 <br/>\
+                 <br/>\
+                 <b>Locking to specific language</b> will make it so that every word you translate\
+                 <br/>\
+                 will be treated as being in that language. 100% accuracy, but only for that language.\
+                 <br/>\
+                 <br/>\
+                 All in all, no best option. Experiment till you find the one that suits you best.\
+                 ';
+
+      $('#source_lang').parent().find('.help').hover(function(e) {
+          help_baloon.show(e.clientX, e.clientY, help);
+      }, function() {
+          help_baloon.hide();
+      });
+
+      // Reverse lang is only possible (or makes sense) if source language is defined from page locale
+      $('#source_lang').change(function() {
+        var mode = $(this).val() != 'autodetected_from_locale';
+        $('#reverse_lang').attr('disabled', mode);
+      });
 
       $('#source_lang')
-        .append('<option ' + (saved_source_lang == "autodetected_from_locale" ? "selected" : "") + ' value="autodetected_from_locale">Autodetect (page locale)</option>')
-        .append('<option ' + (saved_source_lang == "autodetected_from_word" ? "selected" : "") + ' value="autodetected_from_word">Autodetect (word)</option>')
+        .append('<option value="autodetected_from_locale">Autodetect (page locale)</option>')
+        .append('<option value="autodetected_from_word">Autodetect (word)</option>')
         .append('<optgroup label="----------"></optgroup>');
 
       Langs.forEach(function(lang, i) {
-        $('#source_lang').append('<option value="'+lang[0]+'"'+(saved_source_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
+        $('#source_lang').append('<option value="'+lang[0]+'">'+lang[1]+'</option>');
       });
+
+      $('#source_lang').val(saved_source_lang).trigger('change');
     }
 
     function fill_reverse_lang() {
@@ -322,6 +369,7 @@
         <div class="option">
           <label for="source_lang">Translate from</label>
           <select id="source_lang"></select>
+          <span class="hint help"> what?</span>
         </div>
 
         <div class="option">
