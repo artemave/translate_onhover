@@ -46,39 +46,37 @@
       return { sl: sl, tl: tl };
     }
 
-    var last_word, last_sl, last_translation_succeeded;
+    // Sometimes (e.g. french->russian) Google API returns translation in capitals
+    function normalizeCase(text) {
+      function is_all_upper_case(t) {
+        return XRegExp('^[\\p{Lu} ]+$').test(t);
+      };
+
+      if (text instanceof Array) {
+        if (_.all(text, is_all_upper_case)) {
+          return _.map(text, function(t) { return t.toLowerCase() });
+        }
+      }
+      else {
+        if (is_all_upper_case(text)) {
+          return text.toLowerCase();
+        }
+      }
+      return text;
+    };
+
+    function translateHappened(text, result) {
+      if (typeof result == "string") {
+        //Google API may return original word if failed to translate
+        return !result.match(new RegExp('^('+text+')?$', 'i'));
+      }
+      return true;
+    };
+
+    var last_word, last_sl, last_translation_succeeded,
+        no_translation_found = 'Oops.. No translation found.';
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-
-      // Sometimes (e.g. french->russian) Google API returns translation in capitals
-      function normalizeCase(text) {
-        function is_all_upper_case(t) {
-          return XRegExp('^[\\p{Lu} ]+$').test(t);
-        };
-
-        if (text instanceof Array) {
-          if (_.all(text, is_all_upper_case)) {
-            return _.map(text, function(t) { return t.toLowerCase() });
-          }
-        }
-        else {
-          if (is_all_upper_case(text)) {
-            return text.toLowerCase();
-          }
-        }
-        return text;
-      };
-
-      function translateHappened(text, result) {
-        if (typeof result == "string") {
-          //Google API may return original word if failed to translate
-          return !result.match(new RegExp('^('+text+')?$', 'i'));
-        }
-        return true;
-      };
-
-      var no_translation_found = 'Oops.. No translation found.';
-
       switch (request.handler) {
         case 'set_encoding':
           console.log('setting encoding: '+ request.encoding);
