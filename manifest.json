@@ -1,10 +1,11 @@
 {
   "name": "TransOver",
-  "version": "0.26",
+  "version": "0.27",
   "icons": { "48": "to_icon.png", "128": "to_icon.png" },
   "description": "Hover, click or select to translate",
   "background_page": "background.html",
   "options_page": "options.html",
+  "homepage_url": "https://github.com/artemave/translate_onhover",
   "content_scripts": [{
     "matches": [ "<all_urls>" ],
     "js": [

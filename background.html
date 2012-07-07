@@ -7,6 +7,10 @@
   <script type="text/javascript" src="lib/options.js"></script>
 
   <script type="text/javascript">
+    RegExp.quote = function(str) {
+      return (str+'').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+    };
+
     function translate(word, sl, tl, onresponse) {
       $.ajax({
           url: "http://www.google.com/translate_a/t",
@@ -68,7 +72,7 @@
     function translateHappened(text, result) {
       if (typeof result == "string") {
         //Google API may return original word if failed to translate
-        return !result.match(new RegExp('^('+text+')?$', 'i'));
+        return !result.match(new RegExp('^('+RegExp.quote(text)+')?$', 'i'));
       }
       return true;
     };
