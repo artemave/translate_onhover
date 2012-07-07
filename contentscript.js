@@ -244,7 +244,7 @@ $.noConflict();
       }
       else {
         if (start_tip.is(':hidden')) {
-          start_tip.show(e.clientX, e.clientY, 'Please, <a href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.');
+          start_tip.show(e.clientX, e.clientY, 'Please, <a target="_blank" href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.');
         }
       }
     }
