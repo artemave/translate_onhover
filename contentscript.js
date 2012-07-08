@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var debug = false;
+  var debug = true;
 
   function log(arg) {
     if (debug) {
@@ -223,15 +223,6 @@ $.noConflict();
       }
     }
 
-    function hasMouseReallyMoved(e) { //or is it a tremor?
-      var left_boundry = parseInt(last_mouse_stop.x) - 5,
-        right_boundry  = parseInt(last_mouse_stop.x) + 5,
-        top_boundry    = parseInt(last_mouse_stop.y) - 5,
-        bottom_boundry = parseInt(last_mouse_stop.y) + 5;
-
-      return e.clientX > right_boundry || e.clientX < left_boundry || e.clientY > bottom_boundry || e.clientY < top_boundry;
-    }
-
     function withOptionsSatisfied(e, do_stuff) {
       if (options.target_lang) {
         //respect 'translate only when alt pressed' option
@@ -243,7 +234,7 @@ $.noConflict();
         do_stuff();
       }
       else {
-        if (start_tip.is(':hidden')) {
+        if (start_tip.is_hidden()) {
           start_tip.show(e.clientX, e.clientY, 'Please, <a target="_blank" href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.');
         }
       }
@@ -251,8 +242,8 @@ $.noConflict();
 
     var options = JSON.parse( response.options );
 
-    var tooltip = new Tooltip();
-    var start_tip = new Tooltip();
+    var tooltip = new Tooltip({dismiss_on: 'mousemove'});
+    var start_tip = new Tooltip({dismiss_on: 'escape'});
 
     $(document).bind('mousestop', function(e) {
         withOptionsSatisfied(e, function() {
@@ -277,7 +268,7 @@ $.noConflict();
           alt_pressed = true;
         }
         // text-to-speech on ctrl press
-        if (event.keyCode == 17 && tooltip.is(':visible') && options.tts) {
+        if (event.keyCode == 17 && tooltip.is_visible() && options.tts) {
           chrome.extension.sendRequest({handler: 'tts'});
         }
       }).keyup(function(event) {
@@ -286,16 +277,33 @@ $.noConflict();
         }
       });
 
+    function hasMouseReallyMoved(e) { //or is it a tremor?
+      var left_boundry = parseInt(last_mouse_stop.x) - 5,
+        right_boundry  = parseInt(last_mouse_stop.x) + 5,
+        top_boundry    = parseInt(last_mouse_stop.y) - 5,
+        bottom_boundry = parseInt(last_mouse_stop.y) + 5;
+
+      return e.clientX > right_boundry || e.clientX < left_boundry || e.clientY > bottom_boundry || e.clientY < top_boundry;
+    }
+
+    $(document).mousemove(function(e) {
+        if (hasMouseReallyMoved(e)) {
+          var mousemove_without_noise = new $.Event('mousemove_without_noise');
+          mousemove_without_noise.clientX = e.clientX;
+          mousemove_without_noise.clientY = e.clientY;
+
+          $(document).trigger(mousemove_without_noise);
+        }
+    })
+
     var timer25;
     var last_mouse_stop = {x: 0, y: 0};
 
     // setup mousestop event
-    $(document).mousemove(function(e){
+    $(document).on('mousemove_without_noise', function(e){
       clearTimeout(timer25);
 
       timer25 = setTimeout(function() {
-        if (!hasMouseReallyMoved(e)) { return }
-
         var mousestop = new $.Event("mousestop");
         last_mouse_stop.x = mousestop.clientX = e.clientX;
         last_mouse_stop.y = mousestop.clientY = e.clientY;
@@ -304,22 +312,13 @@ $.noConflict();
       }, options.alt_only ? 200 : options.delay);
     });
 
-    // hide translation on any move
-    $(document).mousemove(function(e) {
-      if (hasMouseReallyMoved(e)) {
-        tooltip.hide();
-      }
-    });
-    $(window).scroll(function() { tooltip.hide() });
-
-    // hide start_tip on escape
-    $(document).keydown(function(e) {
-        if (e.keyCode == 27) {
-          start_tip.hide();
-        }
-    });
-
-    //chrome.extension.sendRequest({handler: 'set_encoding', encoding: document.charset});
+    if (options.translate_popup_hotkey) {
+      var translate_popup = new Tooltip({dismiss_on: 'escape'});
+      var manual_translate = new ManualTranslate(chrome, translate_popup);
+      // $(document).keydown(options.translate_popup_hotkey, function(e) {
+      //     manual_translate.show();
+      // });
+    }
   });
 })(jQuery);
 
