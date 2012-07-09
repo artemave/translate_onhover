@@ -14,6 +14,8 @@
       "lib/xregexp-unicode-categories.js",
       "lib/underscore.js",
       "lib/tooltip.js",
+      "lib/jquery.hotkeys.js",
+      "lib/type_and_translate.js",
       "contentscript.js"
     ],
     "css": ["styles.css"],

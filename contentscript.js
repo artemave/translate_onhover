@@ -312,12 +312,8 @@ $.noConflict();
       }, options.alt_only ? 200 : options.delay);
     });
 
-    if (options.translate_popup_hotkey) {
-      var translate_popup = new Tooltip({dismiss_on: 'escape'});
-      var manual_translate = new ManualTranslate(chrome, translate_popup);
-      // $(document).keydown(options.translate_popup_hotkey, function(e) {
-      //     manual_translate.show();
-      // });
+    if (options.type_and_translate_hotkey) {
+      new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options.type_and_translate_hotkey);
     }
   });
 })(jQuery);
