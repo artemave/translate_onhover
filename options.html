@@ -4,6 +4,7 @@
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/options.js"></script>
     <script type="text/javascript" src="lib/tooltip.js"></script>
+    <script type="text/javascript" src="lib/hotkey_input.jquery.js"></script>
     <style type="text/css">
       body {
         margin: 10px auto;
@@ -166,6 +167,7 @@
       Options.tts($('#tts:checked').val() ? 1 : 0);
       Options.translate_by($('#translate_by').val());
       Options.delay($('#delay').val());
+      Options.type_and_translate_hotkey($('#type_and_translate_hotkey').val());
 
       $('#status').fadeIn().delay(3000).fadeOut();
     }
@@ -303,11 +305,18 @@
       });
     }
 
+    function setup_hotkey_input() {
+      $('#type_and_translate_hotkey')
+        .hotkeyInput()
+        .val(Options.type_and_translate_hotkey());
+    }
+
     $(function() {
       fill_target_lang();
       fill_source_lang();
       fill_reverse_lang();
       populate_except_urls();
+      setup_hotkey_input();
 
       if (Options.translate_by() == 'point') { 
         $('#delay').attr('disabled', false).parent().removeClass('disabled');
@@ -383,18 +392,24 @@
           <input type="checkbox" id="alt_only" name="alt_only"/>
         </div>
 
-        <div class="option">
-          <label for="tts">Enable Text-To-Speech</label>
-          <input type="checkbox" id="tts" name="tts"/>
-          <span class="hint"> (press Ctrl while popup is showing)</span>
-        </div>
-  
         <div class="option disabled">
           <label for="delay">Wait for</label>
           <input type="number" id="delay" name="delay" disabled/>
           <span>ms before showing translation</span>
         </div>
     
+        <div class="option">
+          <label for="tts">Enable Text-To-Speech</label>
+          <input type="checkbox" id="tts" name="tts"/>
+          <span class="hint"> (press Ctrl while popup is showing)</span>
+        </div>
+
+        <div class="option">
+          <label for="type_and_translate_hotkey">Translate popup hotkey</label>
+          <input type="text" id="type_and_translate_hotkey" name="type_and_translate_hotkey"/>
+          <span class="hint">(don't type it, just press it)</span>
+        </div>
+  
         <div class="option">Don't translate words on these sites:</div>
         <table id='exc_urls_table'></table>
       </div>
