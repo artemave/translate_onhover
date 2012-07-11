@@ -23,7 +23,9 @@
             ie: 'UTF8',
             oe: 'UTF8'
           },
-          success: onresponse,
+          success: function(data) {
+            onresponse(data, sl, tl, last_translation);
+          },
           error: function(xrh, status, e) {
             console.log(e);
           }
@@ -77,8 +79,8 @@
       return true;
     };
 
-    var last_word, last_sl, last_translation_succeeded,
-        no_translation_found = 'Oops.. No translation found.';
+    var last_translation = {};
+    var no_translation_found = 'Oops.. No translation found.';
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       switch (request.handler) {
@@ -107,13 +109,12 @@
           chrome.tabs.detectLanguage(null, function(tab_lang) {
             console.log('tab language', tab_lang);
             var langs = figureOutLangs(tab_lang);
-            last_sl = langs.sl;
+            last_translation.sl = langs.sl;
 
             translate(
               request.word, langs.sl, langs.tl,
-              function (data) {
-                var output;
-                var sl = langs.sl;
+              function (data, sl, tl, last_translation) {
+                var output, translation = {};
 
                 //If all goes well, Google API returns something like this:
                 // with source language 'autodetect'
@@ -121,19 +122,18 @@
                 // with source language set
                 //   ['book', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
                 if (data[data.length - 1] instanceof Array) {
-                  output                     = [];
-                  last_translation_succeeded = true;
-                  var translation            = data.pop();
-                  last_word                  = request.word;
+                  output                = [];
+                  translation.succeeded = true;
+                  var raw_translation   = data.pop();
+                  translation.word      = request.word;
 
-                  translation.forEach(function(t) {
+                  raw_translation.forEach(function(t) {
                     var part_of_speech = t.shift();
                     output.push({pos: part_of_speech, meanings: normalizeCase(t)});
                   });
 
                   if (sl == 'autodetected_from_word') {
-                    sl = data.pop();
-                    last_sl = sl;
+                    translation.sl = data.pop();
                   }
                 }
                 // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
@@ -143,36 +143,40 @@
                 //   'book'
                 else  {
                   if (sl == 'autodetected_from_word' && data instanceof Array) {
-                    sl = data.pop();
-                    last_sl = sl;
+                    sl             = data.pop();
+                    translation.sl = sl;
                   }
-                  var translation = normalizeCase(data.toString());
+                  var raw_translation = normalizeCase(data.toString());
 
-                  if (sl == langs.tl) { // don't translate into the same language
-                    last_translation_succeeded = false;
-                    output                     = ''; // assuming that empty response will be treated as failure on the other end
+                  if (sl == tl) { // don't translate into the same language
+                    translation.succeeded = false;
+                    output                = '';
                   }
-                  else if (!translateHappened(request.word, translation)) {
-                    last_translation_succeeded = false;
-                    output                     = no_translation_found;
+                  else if (!translateHappened(request.word, raw_translation)) {
+                    translation.succeeded = false;
+                    output                = no_translation_found;
                   }
                   else {
-                    last_translation_succeeded = true;
-                    output                     = translation;
-                    last_word                  = request.word;
+                    translation.succeeded = true;
+                    output                = raw_translation;
+                    translation.word      = request.word;
                   }
                 }
 
-                console.log("output", output);
-                sendResponse({translation: JSON.stringify(output)});
+                translation.translation = JSON.stringify(output);
+
+                $.extend(last_translation, translation);
+
+                console.log('response: ', translation);
+                sendResponse(translation);
               }
             );
           });
           break;
         case 'tts':
-          if (last_translation_succeeded) {
-            console.log("tts: " + last_word + ", sl: " + last_sl);
-            var audio = $("<audio src='http://translate.google.com/translate_tts?q="+last_word+"&tl="+last_sl+"'></audio>");
+          if (last_translation.succeeded) {
+            console.log("tts: " + last_translation.word + ", sl: " + last_translation.sl);
+            var audio = $("<audio src='http://translate.google.com/translate_tts?q="+last_translation.word+"&tl="+last_translation.sl+"'></audio>");
             // I would use autoplay instead, if only it wasn't echoing
             audio.on('canplaythrough', function () {
                 audio.get(0).play();
