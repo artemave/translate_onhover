@@ -16,6 +16,7 @@
       "lib/tooltip.js",
       "lib/jquery.hotkeys.js",
       "lib/type_and_translate.js",
+      "lib/jaml.js",
       "contentscript.js"
     ],
     "css": ["styles.css"],

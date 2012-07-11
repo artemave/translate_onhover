@@ -312,9 +312,7 @@ $.noConflict();
       }, options.alt_only ? 200 : options.delay);
     });
 
-    if (options.type_and_translate_hotkey) {
-      new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options.type_and_translate_hotkey);
-    }
+    new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options);
   });
 })(jQuery);
 
