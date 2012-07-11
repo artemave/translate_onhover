@@ -4,6 +4,7 @@
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/options.js"></script>
     <script type="text/javascript" src="lib/tooltip.js"></script>
+    <script type="text/javascript" src="lib/languages.js"></script>
     <script type="text/javascript" src="lib/hotkey_input.jquery.js"></script>
     <style type="text/css">
       body {
@@ -80,73 +81,6 @@
   </head>
   <script type="text/javascript">
 
-    var Langs = [
-      ['af', 'Afrikaans'],
-      ['sq', 'Albanian'],
-      ['ar', 'Arabic'],
-      ['hy', 'Armenian'],
-      ['az', 'Azerbaijani'],
-      ['eu', 'Basque'],
-      ['be', 'Belarusian'],
-      ['bn', 'Bengali'],
-      ['bg', 'Bulgarian'],
-      ['ca', 'Catalan'],
-      ['zh-CN', 'Chinese (Simplified)'],
-      ['zh-TW', 'Chinese (Traditional)'],
-      ['hr', 'Croatian'],
-      ['cs', 'Czech'],
-      ['da', 'Danish'],
-      ['nl', 'Dutch'],  
-      ['en', 'English'],
-      ['et', 'Estonian'],
-      ['tl', 'Filipino'],
-      ['fi', 'Finnish'],
-      ['fr', 'French'],
-      ['gl', 'Galician'],
-      ['ka', 'Georgian'],
-      ['de', 'German'],
-      ['el', 'Greek'],
-      ['gu', 'Gujarati'],
-      ['ht', 'Haitian (Creole)'],
-      ['iw', 'Hebrew'],
-      ['hi', 'Hindi'],
-      ['hu', 'Hungarian'],
-      ['is', 'Icelandic'],
-      ['id', 'Indonesian'],
-      ['ga', 'Irish'],
-      ['it', 'Italian'],
-      ['ja', 'Japanese'],
-      ['kn', 'Kannada'],
-      ['ko', 'Korean'],
-      ['la', 'Latin'],
-      ['lv', 'Latvian'],
-      ['lt', 'Lithuanian'],
-      ['mk', 'Macedonian'],
-      ['ms', 'Malay'],
-      ['mt', 'Maltese'],
-      ['no', 'Norwegian'],
-      ['fa', 'Persian'],
-      ['pl', 'Polish'],
-      ['pt', 'Portuguese'],
-      ['ro', 'Romanian'],
-      ['ru', 'Russian'],
-      ['sr', 'Serbian'],
-      ['sk', 'Slovak'],
-      ['sl', 'Slovenian'],
-      ['es', 'Spanish'],
-      ['sw', 'Swahili'],
-      ['sv', 'Swedish'],
-      ['ta', 'Tamil'],
-      ['te', 'Telugu'],
-      ['th', 'Thai'],
-      ['tr', 'Turkish'],
-      ['uk', 'Ukrainian'],
-      ['ur', 'Urdu'],
-      ['vi', 'Vietnamese'],
-      ['cy', 'Welsh'],
-      ['yi', 'Yiddish']
-    ];
-
     function save_options() {
       function get_except_urls() {
         var except_urls = [];
@@ -208,7 +142,7 @@
     function populate_except_langs() {
       var saved_except_langs = Options.except_langs();
 
-      Langs.forEach(function(lang, i) {
+      TransOverLanguages.forEach(function(lang, i) {
         var inp = $('<input id="ex'+lang[0]+'" type="checkbox" value="'+lang[0]+'"/>');
         if (saved_except_langs.some(function(lang_code) { return lang_code == lang[0] }))  {
           inp.attr('checked', true);
@@ -234,7 +168,7 @@
         $('#target_lang').append('<option selected value="">Choose...</option>').append('<optgroup label="----------"></optgroup>');
       }
 
-      Langs.forEach(function(lang, i) {
+      TransOverLanguages.forEach(function(lang, i) {
         $('#target_lang').append('<option value="'+lang[0]+'"'+(saved_target_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
       });
     }
@@ -286,7 +220,7 @@
         .append('<option value="autodetected_from_word">Autodetect (word)</option>')
         .append('<optgroup label="----------"></optgroup>');
 
-      Langs.forEach(function(lang, i) {
+      TransOverLanguages.forEach(function(lang, i) {
         $('#source_lang').append('<option value="'+lang[0]+'">'+lang[1]+'</option>');
       });
 
@@ -299,7 +233,7 @@
 
       $('#reverse_lang').append('<option selected value="">Choose...</option>').append('<optgroup label="----------"></optgroup>');
 
-      Langs.forEach(function(lang, i) {
+      TransOverLanguages.forEach(function(lang, i) {
         if (target_lang == lang[0]) { return }
         $('#reverse_lang').append('<option value="'+lang[0]+'"'+(saved_reverse_lang == lang[0] ? ' selected' : '')+'>'+lang[1]+'</option>');
       });

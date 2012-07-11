@@ -17,6 +17,7 @@
       "lib/jquery.hotkeys.js",
       "lib/type_and_translate.js",
       "lib/jaml.js",
+      "lib/languages.js",
       "contentscript.js"
     ],
     "css": ["styles.css"],
