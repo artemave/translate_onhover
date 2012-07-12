@@ -8,6 +8,24 @@ $.noConflict();
     }
   }
 
+  function deserialize(text) {
+    var res;
+
+    try {
+      res = JSON.parse(text);
+    }
+    catch (e) {
+      // that means text is string as opposed to serialized object
+      if (e.toString() == 'SyntaxError: Unexpected token ILLEGAL') {
+        res = text;
+      }
+      else {
+        throw e;
+      }
+    }
+    return res;
+  };
+
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
     function process(e) {
@@ -139,23 +157,6 @@ $.noConflict();
       }
 
       function show_result(response) {
-        function deserialize(text) {
-          var res;
-
-          try {
-            res = JSON.parse(text);
-          }
-          catch (e) {
-            // that means text is string as opposed to serialized object
-            if (e.toString() == 'SyntaxError: Unexpected token ILLEGAL') {
-              res = text;
-            }
-            else {
-              throw e;
-            }
-          }
-          return res;
-        };
 
         log('response: ', response.translation);
 
@@ -312,7 +313,7 @@ $.noConflict();
       }, options.alt_only ? 200 : options.delay);
     });
 
-    new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options);
+    new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options, log, deserialize);
   });
 })(jQuery);
 
