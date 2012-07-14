@@ -2,3 +2,19 @@ transover {}
 bolds {
   font-weight: bold;
 }
+
+#tat_input {
+  -webkit-box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 5px;
+  margin-right: 5px;
+}
+
+#tat_popup {
+  -webkit-box-sizing: border-box;
+  width: 29em;
+}
+
+#tat_result {
+  margin-top: 12px;
+}
