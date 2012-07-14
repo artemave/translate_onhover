@@ -173,7 +173,7 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
-          if (Options.source_lang == 'autodetected_from_locale') { // this if is a workaraound the detectLanguage sometimes just not returning anything
+          if (Options.source_lang() == 'autodetected_from_locale') { // this if is a workaraound the detectLanguage sometimes just not returning anything
             chrome.tabs.detectLanguage(null, function(tab_lang) {
               console.log('tab language', tab_lang);
               var langs = figureOutLangs(tab_lang);
