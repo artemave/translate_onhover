@@ -173,12 +173,19 @@
         case 'translate':
           console.log("received to translate: " + request.word);
 
-          chrome.tabs.detectLanguage(null, function(tab_lang) {
-            console.log('tab language', tab_lang);
-            var langs = figureOutLangs(tab_lang);
+          if (Options.source_lang == 'autodetected_from_locale') { // this if is a workaraound the detectLanguage sometimes just not returning anything
+            chrome.tabs.detectLanguage(null, function(tab_lang) {
+              console.log('tab language', tab_lang);
+              var langs = figureOutLangs(tab_lang);
+
+              translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
+            });
+          }
+          else {
+            var langs = figureOutLangs('stub');
 
             translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
-          });
+          }
           break;
         case 'tts':
           if (last_translation.succeeded) {
