@@ -1,6 +1,6 @@
 $.noConflict();
 (function($) {
-  var debug = true;
+  var debug = false;
 
   function log(arg) {
     if (debug) {
