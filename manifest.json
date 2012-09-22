@@ -4,7 +4,16 @@
   "version": "0.30",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate",
-  "background": { "background": "background.html" },
+  "background": { "scripts": [
+      "lib/jquery.min.js",
+      "lib/xregexp-min.js",
+      "lib/xregexp-unicode-base.js",
+      "lib/xregexp-unicode-categories.js",
+      "lib/underscore.js",
+      "lib/options.js",
+      "background.js"
+    ]
+  },
   "options_page": "options.html",
   "content_scripts": [{
     "matches": [ "<all_urls>" ],
