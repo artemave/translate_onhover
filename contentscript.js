@@ -224,6 +224,8 @@ $.noConflict();
       }
     }
 
+    var start_tip_has_already_popped_up = false;
+
     function withOptionsSatisfied(e, do_stuff) {
       if (options.target_lang) {
         //respect 'translate only when alt pressed' option
@@ -235,8 +237,9 @@ $.noConflict();
         do_stuff();
       }
       else {
-        if (start_tip.is_hidden()) {
+        if (start_tip.is_hidden() && !start_tip_has_already_popped_up) {
           start_tip.show(e.clientX, e.clientY, 'Please, <a target="_blank" href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.');
+          start_tip_has_already_popped_up = true;
         }
       }
     }
