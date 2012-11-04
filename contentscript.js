@@ -2,9 +2,9 @@ $.noConflict();
 (function($) {
   var debug = false;
 
-  function log(arg) {
+  function log() {
     if (debug) {
-      console.log(arg);
+      console.log(arguments);
     }
   }
 
@@ -158,7 +158,7 @@ $.noConflict();
 
       function show_result(response) {
 
-        log('response: ', response.translation);
+        log('response: ', response);
 
         var translation = deserialize(response.translation);
 
@@ -180,7 +180,7 @@ $.noConflict();
           formatted_translation = translation;
         }
 
-        tooltip.show(e.clientX, e.clientY, formatted_translation);
+        tooltip.show(e.clientX, e.clientY, formatted_translation, getLangDirection(response.tl));
       };
 
       var selection = window.getSelection();

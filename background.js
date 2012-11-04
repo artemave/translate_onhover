@@ -71,7 +71,7 @@ function translateHappened(text, result) {
 };
 
 function on_translation_response(data, word, sl, tl, last_translation, sendResponse) {
-  var output, translation = {};
+  var output, translation = {tl: tl};
 
   //If all goes well, Google API returns something like this:
   // with source language 'autodetect'
