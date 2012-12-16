@@ -8,24 +8,6 @@ $.noConflict();
     }
   }
 
-  function deserialize(text) {
-    var res;
-
-    try {
-      res = JSON.parse(text);
-    }
-    catch (e) {
-      // that means text is string as opposed to serialized object
-      if (e.toString() == 'SyntaxError: Unexpected token ILLEGAL') {
-        res = text;
-      }
-      else {
-        throw e;
-      }
-    }
-    return res;
-  };
-
   chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
     function process(e) {
@@ -160,27 +142,14 @@ $.noConflict();
 
         log('response: ', response);
 
-        var translation = deserialize(response.translation);
+        var translation = TransOver.deserialize(response.translation);
 
         if (!translation) {
           log('skipping empty translation');
           return;
         }
 
-        var formatted_translation = '';
-
-        if (translation instanceof Array) {
-          _.each(translation, function(pos_block) {
-              var formatted_pos = pos_block.pos ? '<bolds>'+pos_block.pos+'</bolds>: ' : '';
-              var formatted_meanings = pos_block.meanings.slice(0,5).join(', ') + ( pos_block.meanings.length > 5 ? '...' : '' );
-              formatted_translation = formatted_translation + formatted_pos + formatted_meanings + '<br/>';
-          });
-        }
-        else {
-          formatted_translation = translation;
-        }
-
-        tooltip.show(e.clientX, e.clientY, formatted_translation, getLangDirection(response.tl));
+        tooltip.show(e.clientX, e.clientY, TransOver.formatTranslation(translation), getLangDirection(response.tl));
       };
 
       var selection = window.getSelection();
@@ -316,7 +285,7 @@ $.noConflict();
       }, options.alt_only ? 200 : options.delay);
     });
 
-    new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options, log, deserialize);
+    new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options, log);
   });
 })(jQuery);
 

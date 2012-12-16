@@ -1,6 +1,7 @@
-transover {}
-bolds {
-  font-weight: bold;
+body {
+  font-family: Arial, Helmet, Freesans, sans-serif;
+  font-size: 13px;
+  color: #333;
 }
 
 #tat_input {
@@ -11,9 +12,13 @@ bolds {
 }
 
 #tat_popup {
-  width: 30em;
+  width: 388px;
 }
 
 #tat_result {
   margin-top: 12px;
+}
+
+.pos_translation {
+  white-space: nowrap;
 }

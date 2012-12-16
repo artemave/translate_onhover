@@ -1,7 +1,7 @@
 {
   "name": "TransOver",
   "manifest_version": 2,
-  "version": "0.32",
+  "version": "0.33",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate",
   "background": { "scripts": [
@@ -25,13 +25,17 @@
       "lib/underscore.js",
       "lib/tooltip.js",
       "lib/jquery.hotkeys.js",
-      "lib/type_and_translate.js",
       "lib/jaml.js",
       "lib/languages.js",
+      "lib/transover_utils.js",
+      "lib/type_and_translate.js",
       "contentscript.js"
     ],
-    "css": ["styles.css"],
+    "css": ["page.css"],
     "all_frames": true
   }],
-  "permissions": [ "http://www.google.com/translate_a/t", "tabs" ]
+  "permissions": [ "http://www.google.com/translate_a/t", "tabs" ],
+  "web_accessible_resources": [
+    "iframe.css"
+  ]
 }
