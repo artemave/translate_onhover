@@ -194,3 +194,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       sendResponse({});
     }
 });
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+    chrome.tabs.sendRequest(tab.id, 'open_type_and_translate');
+});
