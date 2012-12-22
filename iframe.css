@@ -1,6 +1,6 @@
 body {
   font-family: Arial, Helmet, Freesans, sans-serif;
-  font-size: 13px;
+  font-size: 0.9em;
   color: #333;
 }
 
@@ -12,7 +12,7 @@ body {
 }
 
 #tat_popup {
-  width: 388px;
+  min-width: 392px;
 }
 
 #tat_result {
@@ -22,3 +22,4 @@ body {
 .pos_translation {
   white-space: nowrap;
 }
+
