@@ -34,6 +34,9 @@
     "css": ["page.css"],
     "all_frames": true
   }],
+  "browser_action": {
+    "default_icon": {"38": "to_38.png"}
+  },
   "permissions": [ "http://www.google.com/translate_a/t", "tabs" ],
   "web_accessible_resources": [
     "iframe.css"
