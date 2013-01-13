@@ -23,3 +23,6 @@ body {
   white-space: nowrap;
 }
 
+#swap_languages {
+  vertical-align: middle;
+}

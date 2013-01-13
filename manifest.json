@@ -38,6 +38,8 @@
   },
   "permissions": [ "http://www.google.com/translate_a/t", "tabs" ],
   "web_accessible_resources": [
-    "iframe.css"
+    "iframe.css",
+    "refresh_blue.png",
+    "refresh_grey.png"
   ]
 }
