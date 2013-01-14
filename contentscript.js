@@ -207,7 +207,8 @@ $.noConflict();
       }
       else {
         if (start_tip.is_hidden() && !start_tip_has_already_popped_up) {
-          start_tip.show(e.clientX, e.clientY, 'Please, <a target="_blank" href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.');
+          var text = 'Please, <a target="_blank" href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.';
+          start_tip.show(e.clientX, e.clientY, '<div class="pos_translation">'+text+'</div>');
           start_tip_has_already_popped_up = true;
         }
       }
