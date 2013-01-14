@@ -137,10 +137,9 @@ var no_translation_found = '<div class="pos_translation">Oops.. No translation f
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     switch (request.handler) {
-      case 'set_encoding':
-      console.log('setting encoding: '+ request.encoding);
-      //Options.encoding(request.encoding);
-      sendResponse({});
+      case 'get_last_tat_to_and_from_languages':
+      console.log('get_last_tat_to_and_from_languages');
+      sendResponse({from_lang: localStorage['last_tat_from_language'], to_lang: localStorage['last_tat_to_language']});
       break;
       case 'get_options':
       sendResponse({
@@ -158,6 +157,9 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       break;
       case 'translate_with_explicit_languages':
       console.log("type_and_translate", request.word, request.sl, request.tl);
+
+      localStorage['last_tat_from_language'] = request.sl;
+      localStorage['last_tat_to_language'] = request.tl;
 
       translate(request.word, request.sl, request.tl, last_translation, on_translation_response, sendResponse);
       break;
