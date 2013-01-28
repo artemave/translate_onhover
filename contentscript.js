@@ -160,6 +160,10 @@ $.noConflict();
         return;
       }
 
+      if (TransOver.isEditableDiv($, hit_elem)) {
+        return;
+      }
+
       var word = '';
       if (selection.toString() != '') {
         log('Got selection: ' + selection.toString());
