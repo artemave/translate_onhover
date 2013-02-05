@@ -160,7 +160,7 @@ $.noConflict();
         return;
       }
 
-      if (TransOver.isEditableDiv($, hit_elem)) {
+      if (hit_elem.getAttribute('contenteditable') == 'true') {
         return;
       }
 
