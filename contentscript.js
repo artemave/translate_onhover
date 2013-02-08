@@ -155,12 +155,13 @@ $.noConflict();
       var selection = window.getSelection();
       var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
 
-      //don't mess with html inputs
+      //don't mess around with html inputs
       if (/INPUT|TEXTAREA/.test( hit_elem.nodeName )) {
         return;
       }
 
-      if (hit_elem.getAttribute('contenteditable') == 'true') {
+      //and editable divs
+      if (hit_elem.getAttribute('contenteditable') == 'true' || $(hit_elem).parents('[contenteditable=true]').size() > 0) {
         return;
       }
 
