@@ -246,7 +246,7 @@ $.noConflict();
           alt_pressed = true;
         }
         // text-to-speech on ctrl press
-        if (event.keyCode == 17 && tooltip.is_visible() && options.tts) {
+        if (event.keyCode == 17 && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
           chrome.extension.sendRequest({handler: 'tts'});
         }
       }).keyup(function(event) {
@@ -290,7 +290,8 @@ $.noConflict();
       }, options.alt_only ? 200 : options.delay);
     });
 
-    new TypeAndTranslate(chrome, new Tooltip({dismiss_on: 'escape'}), options, log);
+    var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
+    new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
   });
 })(jQuery);
 
