@@ -115,7 +115,12 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
     }
     else if (!translateHappened(word, raw_translation)) {
       translation.succeeded = false;
-      output                = no_translation_found;
+      if (Options.do_not_show_oops()) {
+        output = ''
+      }
+      else {
+        output = no_translation_found;
+      }
     }
     else {
       translation.succeeded = true;
