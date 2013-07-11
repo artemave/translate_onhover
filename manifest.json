@@ -1,7 +1,7 @@
 {
   "name": "TransOver",
   "manifest_version": 2,
-  "version": "0.37",
+  "version": "0.38",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate",
   "background": { "scripts": [
@@ -17,6 +17,7 @@
   "options_page": "options.html",
   "content_scripts": [{
     "matches": [ "<all_urls>" ],
+    "all_frames": true,
     "js": [
       "lib/jquery.min.js",
       "lib/xregexp-min.js",
