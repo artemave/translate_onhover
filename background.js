@@ -24,18 +24,16 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
 }
 
 function figureOutLangs(tab_lang) {
-  var sl = tab_lang;
+  var sl;
   var tl;
 
-  if (Options.source_lang() != 'autodetected_from_locale') {
-    sl = Options.source_lang();
-  }
-
-  if (Options.target_lang() == sl && Options.reverse_lang()) {
+  if (Options.target_lang() == tab_lang && Options.reverse_lang()) {
+    sl = tab_lang;
     tl = Options.reverse_lang();
     console.log('reverse translate:', sl, '->', tl);
   }
   else {
+    sl = Options.source_lang();
     tl = Options.target_lang();
     console.log('normal translate:', sl, '->', tl);
   }
@@ -171,19 +169,12 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       case 'translate':
       console.log("received to translate: " + request.word);
 
-      if (Options.source_lang() == 'autodetected_from_locale') { // this if is a workaraound the detectLanguage sometimes just not returning anything
-        chrome.tabs.detectLanguage(null, function(tab_lang) {
-            console.log('tab language', tab_lang);
-            var langs = figureOutLangs(tab_lang);
+      chrome.tabs.detectLanguage(null, function(tab_lang) {
+          console.log('tab language', tab_lang);
+          var langs = figureOutLangs(tab_lang);
 
-            translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
-        });
-      }
-      else {
-        var langs = figureOutLangs('stub');
-
-        translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
-      }
+          translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
+      });
       break;
       case 'tts':
       if (last_translation.succeeded) {
