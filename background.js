@@ -151,7 +151,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
               target_lang: Options.target_lang(),
               reverse_lang: Options.reverse_lang(),
               delay: Options.delay(),
-              alt_only: Options.alt_only(),
+              word_alt_only: Options.word_alt_only(),
               tts: Options.tts(),
               type_and_translate_hotkey: Options.type_and_translate_hotkey(),
               translate_by: Options.translate_by()

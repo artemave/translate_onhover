@@ -203,7 +203,7 @@ $.noConflict();
     function withOptionsSatisfied(e, do_stuff) {
       if (options.target_lang) {
         //respect 'translate only when alt pressed' option
-        if (options.alt_only && !alt_pressed) { return }
+        if (options.word_alt_only && !alt_pressed) { return }
 
         //respect "don't translate these sites"
         if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
@@ -288,7 +288,7 @@ $.noConflict();
         last_mouse_stop.y = mousestop.clientY = e.clientY;
 
         $(document).trigger(mousestop);
-      }, options.alt_only ? 200 : options.delay);
+      }, options.word_alt_only ? 200 : options.delay);
     });
 
     var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
