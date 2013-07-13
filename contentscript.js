@@ -166,7 +166,7 @@ $.noConflict();
       }
 
       var word = '';
-      if (selection.toString() != '') {
+      if (selection.toString()) {
         log('Got selection: ' + selection.toString());
 
         var sel_container = selection.getRangeAt(0).commonAncestorContainer;
@@ -226,9 +226,15 @@ $.noConflict();
 
     $(document).bind('mousestop', function(e) {
         withOptionsSatisfied(e, function() {
-            //translate selection on hover regardless
-            if (options.translate_by == 'point' || window.getSelection().toString() != '') {
-              process(e);
+            // translate selection unless 'translate selection on alt only' is set
+            if (window.getSelection().toString()) {
+              if (!options.selection_alt_only) {
+                process(e);
+              }
+            } else {
+              if (options.translate_by == 'point') {
+                process(e);
+              }
             }
         });
     });
@@ -245,6 +251,10 @@ $.noConflict();
       .keydown(function(event) {
         if (event.keyCode == 18) {
           alt_pressed = true;
+
+          if (options.selection_alt_only && window.getSelection().toString()) {
+            process(event);
+          }
         }
         // text-to-speech on ctrl press
         if (event.keyCode == 17 && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
@@ -282,13 +292,25 @@ $.noConflict();
     $(document).on('mousemove_without_noise', function(e){
       clearTimeout(timer25);
 
+      var delay = options.delay;
+
+      if (window.getSelection().toString()) {
+        if (options.selection_alt_only) {
+          delay = 200;
+        }
+      } else {
+        if (options.word_alt_only) {
+          delay = 200;
+        }
+      }
+
       timer25 = setTimeout(function() {
         var mousestop = new $.Event("mousestop");
         last_mouse_stop.x = mousestop.clientX = e.clientX;
         last_mouse_stop.y = mousestop.clientY = e.clientY;
 
         $(document).trigger(mousestop);
-      }, options.word_alt_only ? 200 : options.delay);
+      }, delay);
     });
 
     var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
