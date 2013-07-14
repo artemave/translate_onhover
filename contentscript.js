@@ -138,20 +138,6 @@ $.noConflict();
         return hit_word;
       }
 
-      function show_result(response) {
-
-        log('response: ', response);
-
-        var translation = TransOver.deserialize(response.translation);
-
-        if (!translation) {
-          log('skipping empty translation');
-          return;
-        }
-
-        tooltip.show(e.clientX, e.clientY, TransOver.formatTranslation(translation), getLangDirection(response.tl));
-      };
-
       var selection = window.getSelection();
       var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
 
@@ -167,6 +153,12 @@ $.noConflict();
 
       var word = '';
       if (selection.toString()) {
+
+        if (options.selection_alt_only) {
+          log('Skip because "selection_alt_only"');
+          return;
+        }
+
         log('Got selection: ' + selection.toString());
 
         var sel_container = selection.getRangeAt(0).commonAncestorContainer;
@@ -194,7 +186,18 @@ $.noConflict();
         word = getHitWord(e);
       }
       if (word != '') {
-        chrome.extension.sendRequest({handler: 'translate', word: word}, show_result);
+        chrome.extension.sendRequest({handler: 'translate', word: word}, function(response) {
+            log('response: ', response);
+
+            var translation = TransOver.deserialize(response.translation);
+
+            if (!translation) {
+              log('skipping empty translation');
+              return;
+            }
+
+            tooltip.show(e.clientX, e.clientY, TransOver.formatTranslation(translation), getLangDirection(response.tl));
+        });
       }
     }
 
@@ -248,16 +251,31 @@ $.noConflict();
 
     var alt_pressed = false;
     $(document)
-      .keydown(function(event) {
-        if (event.keyCode == 18) {
+      .keydown(function(e) {
+        if (e.keyCode == 18) {
           alt_pressed = true;
 
-          if (options.selection_alt_only && window.getSelection().toString()) {
-            process(event);
+          var selection = window.getSelection().toString();
+
+          if (options.selection_alt_only && selection) {
+            log('Got selection_alt_only');
+
+            chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
+                log('response: ', response);
+
+                var translation = TransOver.deserialize(response.translation);
+
+                if (!translation) {
+                  log('skipping empty translation');
+                  return;
+                }
+
+                tooltip.show(last_mouse_stop.x, last_mouse_stop.y, TransOver.formatTranslation(translation), getLangDirection(response.tl));
+            });
           }
         }
         // text-to-speech on ctrl press
-        if (event.keyCode == 17 && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
+        if (e.keyCode == 17 && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
           chrome.extension.sendRequest({handler: 'tts'});
         }
       }).keyup(function(event) {
