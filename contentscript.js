@@ -276,6 +276,7 @@ $.noConflict();
         }
         // text-to-speech on ctrl press
         if (e.keyCode == 17 && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
+          log("tts");
           chrome.extension.sendRequest({handler: 'tts'});
         }
       }).keyup(function(event) {

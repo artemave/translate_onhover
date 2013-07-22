@@ -32,6 +32,11 @@ function figureOutLangs(tab_lang) {
     tl = Options.reverse_lang();
     console.log('reverse translate:', sl, '->', tl);
   }
+  else if (Options.source_lang() == 'autodetected_from_locale') {
+    sl = tab_lang;
+    tl = Options.target_lang();
+    console.log('normal (autodetected_from_locale) translate:', sl, '->', tl);
+  }
   else {
     sl = Options.source_lang();
     tl = Options.target_lang();
@@ -180,11 +185,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       case 'tts':
       if (last_translation.succeeded) {
         console.log("tts: " + last_translation.word + ", sl: " + last_translation.sl);
-        var audio = $("<audio src='http://translate.google.com/translate_tts?q="+last_translation.word+"&tl="+last_translation.sl+"'></audio>");
-        // I would use autoplay instead, if only it wasn't echoing
-        audio.on('canplaythrough', function () {
-            audio.get(0).play();
-        })
+        chrome.tts.speak(last_translation.word, {'lang': last_translation.sl});
       }
       sendResponse({});
       break;
