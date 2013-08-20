@@ -53,6 +53,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
   if (data.dict) {
     translation.succeeded = true;
+    translation.word = data.sentences[0].orig;
 
     output = [];
 
