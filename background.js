@@ -4,11 +4,11 @@ RegExp.quote = function(str) {
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
   $.ajax({
-      url: "http://www.google.com/translate_a/t",
+      url: "http://translate.google.com/translate_a/t",
       dataType: 'json',
       data: {
-        client: 'ig',
-        text: word,
+        client: 't',
+        q: word,
         sl: sl,
         tl: tl,
         ie: 'UTF8',
@@ -46,25 +46,6 @@ function figureOutLangs(tab_lang) {
   return { sl: sl, tl: tl };
 }
 
-// Sometimes (e.g. french->russian) Google API returns translation in capitals
-function normalizeCase(text) {
-  function is_all_upper_case(t) {
-    return XRegExp('^[\\p{Lu} ]+$').test(t);
-  };
-
-  if (text instanceof Array) {
-    if (_.all(text, is_all_upper_case)) {
-      return _.map(text, function(t) { return t.toLowerCase() });
-    }
-  }
-  else {
-    if (is_all_upper_case(text)) {
-      return text.toLowerCase();
-    }
-  }
-  return text;
-};
-
 function translateHappened(text, result) {
   if (typeof result == "string") {
     //Google API may return original word if failed to translate
@@ -89,7 +70,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
     raw_translation.forEach(function(t) {
         var part_of_speech = t.shift();
-        output.push({pos: part_of_speech, meanings: normalizeCase(t)});
+        output.push({pos: part_of_speech, meanings: t});
     });
 
     if (sl == 'autodetected_from_word') {
@@ -110,7 +91,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
     }
     translation.sl = sl;
 
-    var raw_translation = normalizeCase(data.toString());
+    var raw_translation = data.toString();
 
     if (sl == tl) { // don't translate into the same language
       translation.succeeded = false;
@@ -136,7 +117,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
   $.extend(last_translation, translation);
 
-  console.log('response: ', translation);
+  console.log('response: ', {translation: translation, raw_translation: raw_translation});
   sendResponse(translation);
 }
 
