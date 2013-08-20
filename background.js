@@ -5,20 +5,20 @@ RegExp.quote = function(str) {
 function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
   $.ajax({
       url: "http://translate.google.com/translate_a/t",
-      dataType: 'json',
       data: {
-        client: 't',
+        client: 'blah', // atm api returns json of everything if random client specified
         q: word,
         sl: sl,
         tl: tl,
         ie: 'UTF8',
         oe: 'UTF8'
       },
+      dataType: 'json',
       success: function(data) {
         onresponse(data, word, sl, tl, last_translation, sendResponse);
       },
-      error: function(xrh, status, e) {
-        console.log(e);
+      error: function(xhr, status, e) {
+        console.log({e: e, xhr: xhr});
       }
   });
 }
@@ -46,70 +46,35 @@ function figureOutLangs(tab_lang) {
   return { sl: sl, tl: tl };
 }
 
-function translateHappened(text, result) {
-  if (typeof result == "string") {
-    //Google API may return original word if failed to translate
-    return !result.match(new RegExp('^('+RegExp.quote(text)+')?$', 'i'));
-  }
-  return true;
-};
-
 function on_translation_response(data, word, sl, tl, last_translation, sendResponse) {
   var output, translation = {tl: tl};
 
-  //If all goes well, Google API returns something like this:
-  // with source language 'autodetect'
-  //   ['book', 'ru', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
-  // with source language set
-  //   ['book', [['noun', 'book', 'blah blah', 'lorem'], ['verb', 'to book', 'to blah blah', 'lorem']]]
-  if (data[data.length - 1] instanceof Array) {
-    output                = [];
-    translation.succeeded = true;
-    var raw_translation   = data.pop();
-    translation.word      = word;
+  console.log('raw_translation: ', data);
 
-    raw_translation.forEach(function(t) {
-        var part_of_speech = t.shift();
-        output.push({pos: part_of_speech, meanings: t});
+  if (data.dict) {
+    translation.succeeded = true;
+
+    output = [];
+
+    data.dict.forEach(function(t) {
+        output.push({pos: t.pos, meanings: t.terms});
     });
 
+    // FIXME possibly no longer relevant - simply always sl = data.src INVESTIGATE
     if (sl == 'autodetected_from_word') {
-      translation.sl = data.pop();
+      translation.sl = data.src;
     }
     else {
       translation.sl = sl;
     }
-  }
-  // Google dictionary API falls back to Google translate API if unsuccessful. Hence we receive something like this:
-  // with source language 'autodetect'
-  //   ['book', 'ru']
-  // with source language set
-  //   'book'
-  else  {
-    if (sl == 'autodetected_from_word' && data instanceof Array) {
-      sl = data.pop();
-    }
-    translation.sl = sl;
+  } else {
+    translation.succeeded = false;
 
-    var raw_translation = data.toString();
-
-    if (sl == tl) { // don't translate into the same language
-      translation.succeeded = false;
-      output                = '';
-    }
-    else if (!translateHappened(word, raw_translation)) {
-      translation.succeeded = false;
-      if (Options.do_not_show_oops()) {
-        output = ''
-      }
-      else {
-        output = no_translation_found;
-      }
+    if (sl == tl || Options.do_not_show_oops()) {
+      output = '';
     }
     else {
-      translation.succeeded = true;
-      output                = raw_translation;
-      translation.word      = word;
+      output = no_translation_found;
     }
   }
 
@@ -117,7 +82,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
   $.extend(last_translation, translation);
 
-  console.log('response: ', {translation: translation, raw_translation: raw_translation});
+  console.log('response: ', translation);
   sendResponse(translation);
 }
 
