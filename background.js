@@ -51,24 +51,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
   console.log('raw_translation: ', data);
 
-  if (data.dict) {
-    translation.succeeded = true;
-    translation.word = data.sentences[0].orig;
-
-    output = [];
-
-    data.dict.forEach(function(t) {
-        output.push({pos: t.pos, meanings: t.terms});
-    });
-
-    // FIXME possibly no longer relevant - simply always sl = data.src INVESTIGATE
-    if (sl == 'autodetected_from_word') {
-      translation.sl = data.src;
-    }
-    else {
-      translation.sl = sl;
-    }
-  } else {
+  if (data.sentences[0].orig == data.sentences[0].trans) {
     translation.succeeded = false;
 
     if (sl == tl || Options.do_not_show_oops()) {
@@ -76,6 +59,29 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
     }
     else {
       output = no_translation_found;
+    }
+  }
+  else {
+    if (data.dict) { // single word
+      translation.succeeded = true;
+      translation.word = data.sentences[0].orig;
+
+      output = [];
+
+      data.dict.forEach(function(t) {
+          output.push({pos: t.pos, meanings: t.terms});
+      });
+
+    } else { // multiword
+      output = data.sentences[0].trans;
+    }
+
+    // FIXME possibly no longer relevant - simply always sl = data.src INVESTIGATE
+    if (sl == 'autodetected_from_word') {
+      translation.sl = data.src;
+    }
+    else {
+      translation.sl = sl;
     }
   }
 
