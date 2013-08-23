@@ -37,10 +37,11 @@
   "browser_action": {
     "default_icon": {"38": "to_38.png", "19": "to_19.png"}
   },
-  "permissions": [ "http://translate.google.com/translate_a/t", "tabs", "tts" ],
+  "permissions": [ "*://translate.google.com/translate_a/t", "tabs", "tts" ],
   "web_accessible_resources": [
     "iframe.css",
     "refresh_blue.png",
     "refresh_grey.png"
-  ]
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://translate.google.com; object-src 'self'"
 }

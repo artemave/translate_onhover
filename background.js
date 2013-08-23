@@ -3,24 +3,40 @@ RegExp.quote = function(str) {
 };
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
-  $.ajax({
-      url: "http://translate.google.com/translate_a/t",
-      data: {
-        client: 'blah', // atm api returns json of everything if random client specified
-        q: word,
-        sl: sl,
-        tl: tl,
-        ie: 'UTF8',
-        oe: 'UTF8'
-      },
-      dataType: 'json',
-      success: function(data) {
-        onresponse(data, word, sl, tl, last_translation, sendResponse);
-      },
-      error: function(xhr, status, e) {
-        console.log({e: e, xhr: xhr});
-      }
-  });
+  var options = {
+    url: "https://translate.google.com/translate_a/t",
+    data: {
+      q: word,
+      sl: sl,
+      tl: tl,
+      ie: 'UTF8',
+      oe: 'UTF8'
+    },
+    error: function(xhr, status, e) {
+      console.log({e: e, xhr: xhr});
+    }
+  };
+
+  if (/\s/.test(word)) {
+    $.extend(options, {
+        accepts: '*/*',
+        dataType: 'text',
+        success: function on_success(data) {
+          onresponse(eval(data), word, sl, tl, last_translation, sendResponse);
+        }
+    });
+    options.data.client = 't'
+  }
+  else {
+    $.extend(options, {
+        dataType: 'json',
+        success: function on_success(data) {
+          onresponse(data, word, sl, tl, last_translation, sendResponse);
+        }
+    });
+    options.data.client = 'blah'; // atm api returns json of everything if random client specified
+  }
+  $.ajax(options);
 }
 
 function figureOutLangs(tab_lang) {
@@ -51,37 +67,39 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
   console.log('raw_translation: ', data);
 
-  if (data.sentences[0].orig == data.sentences[0].trans) {
-    translation.succeeded = false;
+  if (data instanceof Array) { // multiword
+    translation.succeeded = true;
+    translation.sl = data[2];
 
-    if (sl == tl || Options.do_not_show_oops()) {
-      output = '';
+    output = ''
+    data[0].forEach(function(t) {
+        output += t[0];
+    });
+  } else { // single word
+    if (data.sentences[0].orig == data.sentences[0].trans) {
+      translation.succeeded = false;
+
+      if (sl == tl || Options.do_not_show_oops()) {
+        output = '';
+      }
+      else {
+        output = no_translation_found;
+      }
     }
     else {
-      output = no_translation_found;
-    }
-  }
-  else {
-    if (data.dict) { // single word
       translation.succeeded = true;
       translation.word = data.sentences[0].orig;
 
-      output = [];
+      if (data.dict) { // full translation
+        output = [];
+        data.dict.forEach(function(t) {
+            output.push({pos: t.pos, meanings: t.terms});
+        });
+      } else { // single word translation
+        output = data.sentences[0].trans;
+      }
 
-      data.dict.forEach(function(t) {
-          output.push({pos: t.pos, meanings: t.terms});
-      });
-
-    } else { // multiword
-      output = data.sentences[0].trans;
-    }
-
-    // FIXME possibly no longer relevant - simply always sl = data.src INVESTIGATE
-    if (sl == 'autodetected_from_word') {
       translation.sl = data.src;
-    }
-    else {
-      translation.sl = sl;
     }
   }
 
