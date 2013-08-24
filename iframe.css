@@ -20,6 +20,7 @@ body {
 
 .pos_translation {
   white-space: nowrap;
+  display: inline-block;
 }
 
 #swap_languages {
