@@ -2,6 +2,7 @@ body {
   font-family: Arial, Helmet, Freesans, sans-serif;
   font-size: 0.9em;
   color: #333;
+  overflow: hidden;
 }
 
 #tat_input {
