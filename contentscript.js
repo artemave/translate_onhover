@@ -143,7 +143,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }
 
     //and editable divs
-    if (hit_elem.getAttribute('contenteditable') == 'true' || $(hit_elem).parents('[contenteditable=true]').size() > 0) {
+    if (hit_elem.getAttribute('contenteditable') == 'true' || $(hit_elem).parents('[contenteditable=true]').length > 0) {
       return;
     }
 
@@ -223,7 +223,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   var tooltip = new Tooltip({dismiss_on: 'mousemove'});
   var start_tip = new Tooltip({dismiss_on: 'escape'});
 
-  $(document).bind('mousestop', function(e) {
+  $(document).on('mousestop', function(e) {
       withOptionsSatisfied(e, function() {
           // translate selection unless 'translate selection on alt only' is set
           if (window.getSelection().toString()) {
