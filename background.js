@@ -2,6 +2,14 @@ RegExp.quote = function(str) {
   return (str+'').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 };
 
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-46863240-1']);
+_gaq.push(['_trackPageview']);
+
+var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ga.src = 'https://ssl.google-analytics.com/ga.js';
+var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+
 function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
   var options = {
     url: "https://translate.google.com/translate_a/t",
@@ -141,6 +149,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       localStorage['last_tat_from_language'] = request.sl;
       localStorage['last_tat_to_language'] = request.tl;
 
+      _gaq.push(['_trackEvent', 'popup' , request.sl, request.tl]);
       translate(request.word, request.sl, request.tl, last_translation, on_translation_response, sendResponse);
       break;
       case 'translate':
@@ -150,12 +159,14 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
           console.log('tab language', tab_lang);
           var langs = figureOutLangs(tab_lang);
 
+          _gaq.push(['_trackEvent', Options.translate_by() , langs.sl, langs.tl]);
           translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
       });
       break;
       case 'tts':
       if (last_translation.succeeded) {
         console.log("tts: " + last_translation.word + ", sl: " + last_translation.sl);
+        _gaq.push(['_trackEvent', 'tts', last_translation.sl, last_translation.tl]);
         $("<audio autoplay src='http://translate.google.com/translate_tts?q="+last_translation.word+"&tl="+last_translation.sl+"'></audio>");
       }
       sendResponse({});

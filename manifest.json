@@ -1,7 +1,7 @@
 {
   "name": "TransOver",
   "manifest_version": 2,
-  "version": "1.0",
+  "version": "1.1",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate",
   "background": { "scripts": [
@@ -42,5 +42,5 @@
     "refresh_blue.png",
     "refresh_grey.png"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval' https://translate.google.com; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
 }
