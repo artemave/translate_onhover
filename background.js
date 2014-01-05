@@ -10,7 +10,7 @@ var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async
 ga.src = 'https://ssl.google-analytics.com/ga.js';
 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 
-function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
+function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   var options = {
     url: "https://translate.google.com/translate_a/t",
     data: {
@@ -30,7 +30,7 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
         accepts: '*/*',
         dataType: 'text',
         success: function on_success(data) {
-          onresponse(eval(data), word, sl, tl, last_translation, sendResponse);
+          onresponse(eval(data), word, sl, tl, last_translation, sendResponse, ga_event_name);
         }
     });
     options.data.client = 't'
@@ -39,7 +39,7 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse) {
     $.extend(options, {
         dataType: 'json',
         success: function on_success(data) {
-          onresponse(data, word, sl, tl, last_translation, sendResponse);
+          onresponse(data, word, sl, tl, last_translation, sendResponse, ga_event_name);
         }
     });
     options.data.client = 'blah'; // atm api returns json of everything if random client specified
@@ -70,7 +70,7 @@ function figureOutLangs(tab_lang) {
   return { sl: sl, tl: tl };
 }
 
-function on_translation_response(data, word, sl, tl, last_translation, sendResponse) {
+function on_translation_response(data, word, sl, tl, last_translation, sendResponse, ga_event_name) {
   var output, translation = {tl: tl};
 
   console.log('raw_translation: ', data);
@@ -115,6 +115,8 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 
   $.extend(last_translation, translation);
 
+  _gaq.push(['_trackEvent', ga_event_name, translation.sl, translation.tl]);
+
   console.log('response: ', translation);
   sendResponse(translation);
 }
@@ -149,8 +151,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       localStorage['last_tat_from_language'] = request.sl;
       localStorage['last_tat_to_language'] = request.tl;
 
-      _gaq.push(['_trackEvent', 'popup' , request.sl, request.tl]);
-      translate(request.word, request.sl, request.tl, last_translation, on_translation_response, sendResponse);
+      translate(request.word, request.sl, request.tl, last_translation, on_translation_response, sendResponse, 'popup');
       break;
       case 'translate':
       console.log("received to translate: " + request.word);
@@ -159,8 +160,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
           console.log('tab language', tab_lang);
           var langs = figureOutLangs(tab_lang);
 
-          _gaq.push(['_trackEvent', Options.translate_by() , langs.sl, langs.tl]);
-          translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse);
+          translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse, Options.translate_by());
       });
       break;
       case 'tts':
