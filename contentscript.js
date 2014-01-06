@@ -239,10 +239,14 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   });
   $(document).click(function(e) {
       withOptionsSatisfied(e, function() {
-          if (options.translate_by == 'click') {
-            process(e);
-          }
+          if (e.target.nodeName == 'A')
+            return
+          if (options.translate_by != 'click')
+            return
+
+          process(e);
       });
+      return true;
   });
 
   var alt_pressed = false;
