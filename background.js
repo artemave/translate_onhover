@@ -78,6 +78,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
   if (data instanceof Array) { // multiword
     translation.succeeded = true;
     translation.sl = data[2];
+    translation.word = data[0][0][1]; // original text for tts
 
     output = ''
     data[0].forEach(function(t) {
