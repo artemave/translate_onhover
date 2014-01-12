@@ -239,9 +239,9 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   });
   $(document).click(function(e) {
       withOptionsSatisfied(e, function() {
-          if (e.target.nodeName == 'A')
-            return
           if (options.translate_by != 'click')
+            return
+          if ($(e.target).closest('a').length > 0)
             return
 
           process(e);
