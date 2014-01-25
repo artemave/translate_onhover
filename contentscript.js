@@ -332,7 +332,9 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }, delay);
   });
 
-  var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
-  new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
+  if (window == window.top) {
+    var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
+    new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
+  }
 });
 
