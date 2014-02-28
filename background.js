@@ -112,7 +112,11 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
     }
   }
 
-  translation.translation = JSON.stringify(output);
+  if (! output instanceof String) {
+    output = JSON.stringify(output);
+  }
+
+  translation.translation = output;
 
   $.extend(last_translation, translation);
 
