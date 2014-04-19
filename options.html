@@ -2,6 +2,7 @@
   <head>
     <title>TransOver Extension Options</title>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/lodash.min.js"></script>
     <script type="text/javascript" src="lib/options.js"></script>
     <script type="text/javascript" src="lib/tooltip.js"></script>
     <script type="text/javascript" src="lib/languages.js"></script>
@@ -122,18 +123,24 @@
         </div>
 
         <div class="option">
-          <label for="word_alt_only">Only show word translation when I hold the 'alt' key</label>
+          <label for="word_alt_only">Only show word translation when</label>
+          <label for="word_alt_only_key"> I hold the
+            <select name="word_alt_only_key" id="word_alt_only_key"></select>
+            key</label>
           <input type="checkbox" id="word_alt_only" name="word_alt_only"/>
         </div>
 
         <div class="option">
-          <label for="selection_alt_only">Only show selection translation when I hold the 'alt' key</label>
+          <label for="selection_alt_only">Only show selection translation when</label>
+          <label for="selection_alt_only_key"> I hold the 
+            <select name="selection_alt_only_key" id="selection_alt_only_key"></select>
+            key</label>
           <input type="checkbox" id="selection_alt_only" name="selection_alt_only"/>
         </div>
 
         <div class="option disabled">
           <label for="delay">Wait for</label>
-          <input type="number" id="delay" name="delay" disabled/>
+          <input type="number" id="delay" name="delay" disabled />
           <span>ms before showing translation</span>
         </div>
 
