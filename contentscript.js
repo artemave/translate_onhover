@@ -252,7 +252,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   var show_popup_key_pressed = false;
   $(document)
     .keydown(function(e) {
-      if (e.keyCode == 18) {
+      if (TransOver.modifierKeys[event.keyCode] == options.popup_show_trigger) {
         show_popup_key_pressed = true;
 
         var selection = window.getSelection().toString();
@@ -280,7 +280,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         chrome.extension.sendRequest({handler: 'tts'});
       }
     }).keyup(function(event) {
-      if (event.keyCode == 18) {
+      if (TransOver.modifierKeys[event.keyCode] == options.popup_show_trigger) {
         show_popup_key_pressed = false;
       }
     });

@@ -146,6 +146,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
               selection_key_only: Options.selection_key_only(),
               tts: Options.tts(),
               type_and_translate_hotkey: Options.type_and_translate_hotkey(),
+              popup_show_trigger: Options.popup_show_trigger(),
               translate_by: Options.translate_by()
           })
       });
