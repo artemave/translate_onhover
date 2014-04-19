@@ -150,8 +150,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var word = '';
     if (selection.toString()) {
 
-      if (options.selection_alt_only) {
-        log('Skip because "selection_alt_only"');
+      if (options.selection_key_only) {
+        log('Skip because "selection_key_only"');
         return;
       }
 
@@ -202,7 +202,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   function withOptionsSatisfied(e, do_stuff) {
     if (options.target_lang) {
       //respect 'translate only when alt pressed' option
-      if (options.word_alt_only && !alt_pressed) { return }
+      if (options.word_key_only && !show_popup_key_pressed) { return }
 
       //respect "don't translate these sites"
       if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
@@ -227,7 +227,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       withOptionsSatisfied(e, function() {
           // translate selection unless 'translate selection on alt only' is set
           if (window.getSelection().toString()) {
-            if (!options.selection_alt_only) {
+            if (!options.selection_key_only) {
               process(e);
             }
           } else {
@@ -249,16 +249,16 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       return true;
   });
 
-  var alt_pressed = false;
+  var show_popup_key_pressed = false;
   $(document)
     .keydown(function(e) {
       if (e.keyCode == 18) {
-        alt_pressed = true;
+        show_popup_key_pressed = true;
 
         var selection = window.getSelection().toString();
 
-        if (options.selection_alt_only && selection) {
-          log('Got selection_alt_only');
+        if (options.selection_key_only && selection) {
+          log('Got selection_key_only');
 
           chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
               log('response: ', response);
@@ -281,7 +281,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       }
     }).keyup(function(event) {
       if (event.keyCode == 18) {
-        alt_pressed = false;
+        show_popup_key_pressed = false;
       }
     });
 
@@ -314,11 +314,11 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var delay = options.delay;
 
     if (window.getSelection().toString()) {
-      if (options.selection_alt_only) {
+      if (options.selection_key_only) {
         delay = 200;
       }
     } else {
-      if (options.word_alt_only) {
+      if (options.word_key_only) {
         delay = 200;
       }
     }
