@@ -92,7 +92,7 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
         output = '';
       }
       else {
-        output = no_translation_found;
+        output = 'Oops.. No translation found.';
       }
     }
     else {
@@ -127,7 +127,6 @@ function on_translation_response(data, word, sl, tl, last_translation, sendRespo
 }
 
 var last_translation = {};
-var no_translation_found = '<div class="pos_translation">Oops.. No translation found.</div>';
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     switch (request.handler) {

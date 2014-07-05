@@ -12,20 +12,10 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
     function getHitWord(e) {
 
-      function escape_html(text) {
-        return text.replace(XRegExp("(<|>|&)", 'g'), function ($0, $1) {
-            switch ($1) {
-              case '<': return "&lt;";
-              case '>': return "&gt;";
-              case '&': return "&amp;";
-            }
-        });
-      }
-
       function restorable(node, do_stuff) {
         $(node).wrap('<transwrapper />');
         var res = do_stuff(node);
-        $('transwrapper').replaceWith(escape_html( $('transwrapper').text() ));
+        $('transwrapper').replaceWith(TransOver.escape_html( $('transwrapper').text() ));
         return res;
       }
 
@@ -78,7 +68,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
           if (XRegExp(word_re).test( node.textContent )) {
             $(node).replaceWith(function() {
                 return this.textContent.replace(XRegExp("^(.{"+Math.round( node.textContent.length/2 )+"}\\p{L}*)(.*)", 's'), function($0, $1, $2) {
-                    return '<transblock>'+escape_html($1)+'</transblock><transblock>'+escape_html($2)+'</transblock>';
+                    return '<transblock>'+TransOver.escape_html($1)+'</transblock><transblock>'+TransOver.escape_html($2)+'</transblock>';
                 });
             });
 
@@ -337,4 +327,3 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
   }
 });
-
