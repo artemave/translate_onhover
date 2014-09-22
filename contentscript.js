@@ -127,6 +127,11 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var selection = window.getSelection();
     var hit_elem = document.elementFromPoint(e.clientX, e.clientY);
 
+    // happens sometimes on page resize (I think)
+    if (!hit_elem) {
+      return;
+    }
+
     //don't mess around with html inputs
     if (/INPUT|TEXTAREA/.test( hit_elem.nodeName )) {
       return;
