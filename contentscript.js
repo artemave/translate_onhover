@@ -192,8 +192,6 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }
   }
 
-  var start_tip_has_already_popped_up = false;
-
   function withOptionsSatisfied(e, do_stuff) {
     if (options.target_lang) {
       //respect 'translate only when alt pressed' option
@@ -204,19 +202,11 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
       do_stuff();
     }
-    else {
-      if (start_tip.is_hidden() && !start_tip_has_already_popped_up) {
-        var text = 'Please, <a target="_blank" href="'+chrome.extension.getURL('options.html')+'">choose language</a> to translate into.';
-        start_tip.show(e.clientX, e.clientY, '<div class="pos_translation">'+text+'</div>');
-        start_tip_has_already_popped_up = true;
-      }
-    }
   }
 
   var options = JSON.parse( response.options );
 
   var tooltip = new Tooltip({dismiss_on: 'mousemove'});
-  var start_tip = new Tooltip({dismiss_on: 'escape'});
 
   $(document).on('mousestop', function(e) {
       withOptionsSatisfied(e, function() {

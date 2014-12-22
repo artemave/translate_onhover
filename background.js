@@ -185,3 +185,9 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 chrome.browserAction.onClicked.addListener(function(tab) {
     chrome.tabs.sendRequest(tab.id, 'open_type_and_translate');
 });
+
+chrome.runtime.onInstalled.addListener(function(details) {
+    if (details.reason == 'install') {
+      chrome.tabs.create({url: chrome.extension.getURL('options.html')});
+    }
+});
