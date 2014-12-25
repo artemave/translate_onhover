@@ -132,8 +132,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       return;
     }
 
-    //don't mess around with html inputs
-    if (/INPUT|TEXTAREA/.test( hit_elem.nodeName )) {
+    //skip inputs
+    if (/INPUT|TEXTAREA/.test( hit_elem.nodeName ) || hit_elem.isContentEditable) {
       return;
     }
 
