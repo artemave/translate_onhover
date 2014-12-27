@@ -37,7 +37,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       }
 
       var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY));
-      var word_re = "\\p{L}{2,}(?:'\\p{L}+)*"
+      var word_re = "\\p{L}+(?:['’]\\p{L}+)*"
       var parent_font_style = {
         'line-height': hit_elem.css('line-height'),
         'font-size': '1em',
@@ -67,7 +67,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
           if (XRegExp(word_re).test( node.textContent )) {
             $(node).replaceWith(function() {
-                return this.textContent.replace(XRegExp("^(.{"+Math.round( node.textContent.length/2 )+"}(?:\\p{L}|'(?=\\p{L}))*)(.*)", 's'), function($0, $1, $2) {
+                return this.textContent.replace(XRegExp("^(.{"+Math.round( node.textContent.length/2 )+"}(?:\\p{L}|['’](?=\\p{L}))*)(.*)", 's'), function($0, $1, $2) {
                     return '<transblock>'+TransOver.escape_html($1)+'</transblock><transblock>'+TransOver.escape_html($2)+'</transblock>';
                 });
             });
