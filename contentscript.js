@@ -132,13 +132,10 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       return;
     }
 
-    //skip inputs
-    if (/INPUT|TEXTAREA/.test( hit_elem.nodeName ) || hit_elem.isContentEditable) {
-      return;
-    }
+    //skip inputs and editable divs
+    if (/INPUT|TEXTAREA/.test( hit_elem.nodeName ) || hit_elem.isContentEditable
+      || $(hit_elem).parents().filter(function() { return this.isContentEditable }).length > 0) {
 
-    //and editable divs
-    if (hit_elem.getAttribute('contenteditable') == 'true' || $(hit_elem).parents('[contenteditable=true]').length > 0) {
       return;
     }
 
