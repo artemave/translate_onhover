@@ -257,7 +257,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         }
       }
       // text-to-speech on ctrl press
-      if (e.keyCode == 17 && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
+      if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
         log("tts");
         chrome.extension.sendRequest({handler: 'tts'});
       }

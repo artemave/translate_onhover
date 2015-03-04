@@ -144,6 +144,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
               word_key_only: Options.word_key_only(),
               selection_key_only: Options.selection_key_only(),
               tts: Options.tts(),
+              tts_key: Options.tts_key(),
               type_and_translate_hotkey: Options.type_and_translate_hotkey(),
               popup_show_trigger: Options.popup_show_trigger(),
               translate_by: Options.translate_by()

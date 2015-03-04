@@ -113,9 +113,12 @@
         </div>
 
         <div class="option">
-          <label for="tts">Enable Text-To-Speech</label>
           <input type="checkbox" id="tts" name="tts"/>
-          <span class="hint"> (press Ctrl while popup is showing)</span>
+          <label for="tts">Enable Text-To-Speech</label>
+          <label for="tts_key">when I press
+            <select name="tts_key" id="tts_key"></select>
+            while popup is showing
+          </label>
         </div>
 
         <div class="option">
@@ -124,19 +127,19 @@
         </div>
 
         <div class="option">
+          <input type="checkbox" id="word_key_only" name="word_key_only"/>
           <label for="word_key_only">Only show word translation when</label>
           <label for="word_key_only_key"> I hold the
             <select name="word_key_only_key" id="word_key_only_key"></select>
             key</label>
-          <input type="checkbox" id="word_key_only" name="word_key_only"/>
         </div>
 
         <div class="option">
+          <input type="checkbox" id="selection_key_only" name="selection_key_only"/>
           <label for="selection_key_only">Only show selection translation when</label>
           <label for="selection_key_only_key"> I hold the 
             <select name="selection_key_only_key" id="selection_key_only_key"></select>
             key</label>
-          <input type="checkbox" id="selection_key_only" name="selection_key_only"/>
         </div>
 
         <div class="option disabled">
@@ -146,8 +149,8 @@
         </div>
 
         <div class="option">
-          <label for="do_not_show_oops">Do not show 'Oops... No translation found'</label>
           <input type="checkbox" id="do_not_show_oops" name="do_not_show_oops"/>
+          <label for="do_not_show_oops">Do not show 'Oops... No translation found'</label>
         </div>
 
         <div class="option">Don't translate words on these sites:</div>
