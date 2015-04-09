@@ -10,106 +10,73 @@ var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async
 ga.src = 'https://ssl.google-analytics.com/ga.js';
 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 
-function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
+function translate(word, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   var options = {
-    url: "https://translate.google.com/translate_a/t",
+    url: "https://translate.googleapis.com/translate_a/single?dt=t&dt=bd",
     data: {
+      client: 'gtx',
       q: word,
-      sl: sl,
+      sl: 'auto',
       tl: tl,
-      ie: 'UTF8',
-      oe: 'UTF8'
+      dj: 1,
+      source: 'bubble'
+    },
+    dataType: 'json',
+    success: function on_success(data) {
+      onresponse(data, word, tl, last_translation, sendResponse, ga_event_name);
     },
     error: function(xhr, status, e) {
       console.log({e: e, xhr: xhr});
     }
   };
 
-  if (/\s/.test(word)) {
-    $.extend(options, {
-        accepts: '*/*',
-        dataType: 'text',
-        success: function on_success(data) {
-          onresponse(eval(data), word, sl, tl, last_translation, sendResponse, ga_event_name);
-        }
-    });
-    options.data.client = 't'
-  }
-  else {
-    $.extend(options, {
-        dataType: 'json',
-        success: function on_success(data) {
-          onresponse(data, word, sl, tl, last_translation, sendResponse, ga_event_name);
-        }
-    });
-    options.data.client = 'blah'; // atm api returns json of everything if random client specified
-  }
   $.ajax(options);
 }
 
-function figureOutLangs(tab_lang) {
-  var sl;
+function figureOutTl(tab_lang) {
   var tl;
 
   if (Options.target_lang() == tab_lang && Options.reverse_lang()) {
-    sl = tab_lang;
     tl = Options.reverse_lang();
-    console.log('reverse translate:', sl, '->', tl);
-  }
-  else if (Options.source_lang() == 'autodetected_from_locale') {
-    sl = tab_lang;
-    tl = Options.target_lang();
-    console.log('normal (autodetected_from_locale) translate:', sl, '->', tl);
+    console.log('reverse translate into: ', tl);
   }
   else {
-    sl = Options.source_lang();
     tl = Options.target_lang();
-    console.log('normal translate:', sl, '->', tl);
+    console.log('normal translate into:', tl);
   }
 
-  return { sl: sl, tl: tl };
+  return tl;
 }
 
-function on_translation_response(data, word, sl, tl, last_translation, sendResponse, ga_event_name) {
+function on_translation_response(data, word, tl, last_translation, sendResponse, ga_event_name) {
   var output, translation = {tl: tl};
 
   console.log('raw_translation: ', data);
 
-  if (data instanceof Array) { // multiword
-    translation.succeeded = true;
-    translation.sl = data[2];
-    translation.word = data[0][0][1]; // original text for tts
+  if (!data.dict && !data.sentences) {
+    translation.succeeded = false;
 
-    output = ''
-    data[0].forEach(function(t) {
-        output += t[0];
-    });
-  } else { // single word
-    if (data.sentences[0].orig == data.sentences[0].trans) {
-      translation.succeeded = false;
-
-      if (sl == tl || Options.do_not_show_oops()) {
-        output = '';
-      }
-      else {
-        output = 'Oops.. No translation found.';
-      }
+    if (data.src == tl || Options.do_not_show_oops()) {
+      output = '';
     }
     else {
-      translation.succeeded = true;
-      translation.word = data.sentences[0].orig;
-
-      if (data.dict) { // full translation
-        output = [];
-        data.dict.forEach(function(t) {
-            output.push({pos: t.pos, meanings: t.terms});
-        });
-      } else { // single word translation
-        output = data.sentences[0].trans;
-      }
-
-      translation.sl = data.src;
+      output = 'Oops.. No translation found.';
     }
+  }
+  else {
+    translation.succeeded = true;
+    translation.word = word;
+
+    if (data.dict) { // full translation
+      output = [];
+      data.dict.forEach(function(t) {
+          output.push({pos: t.pos, meanings: t.terms});
+      });
+    } else { // single word translation
+      output = data.sentences[0].trans;
+    }
+
+    translation.sl = data.src;
   }
 
   if (! output instanceof String) {
@@ -130,9 +97,9 @@ var last_translation = {};
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     switch (request.handler) {
-      case 'get_last_tat_to_and_from_languages':
-      console.log('get_last_tat_to_and_from_languages');
-      sendResponse({from_lang: localStorage['last_tat_from_language'], to_lang: localStorage['last_tat_to_language']});
+      case 'get_last_tat_tl':
+      console.log('get_last_tat_tl');
+      sendResponse({to_lang: localStorage['last_tat_to_language']});
       break;
       case 'get_options':
       sendResponse({
@@ -151,29 +118,24 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
           })
       });
       break;
-      case 'translate_with_explicit_languages':
-      console.log("type_and_translate", request.word, request.sl, request.tl);
-
-      localStorage['last_tat_from_language'] = request.sl;
-      localStorage['last_tat_to_language'] = request.tl;
-
-      translate(request.word, request.sl, request.tl, last_translation, on_translation_response, sendResponse, 'popup');
-      break;
       case 'translate':
       console.log("received to translate: " + request.word);
 
       chrome.tabs.detectLanguage(null, function(tab_lang) {
-          console.log('tab language', tab_lang);
-          var langs = figureOutLangs(tab_lang);
-
-          translate(request.word, langs.sl, langs.tl, last_translation, on_translation_response, sendResponse, Options.translate_by());
+          console.log('tab language ', tab_lang);
+          if (request.tl) {
+            localStorage['last_tat_to_language'] = request.tl;
+          }
+          var tl = request.tl || figureOutTl(tab_lang);
+          console.log('tl: ', tl)
+          translate(request.word, tl, last_translation, on_translation_response, sendResponse, Options.translate_by());
       });
       break;
       case 'tts':
       if (last_translation.succeeded) {
         console.log("tts: " + last_translation.word + ", sl: " + last_translation.sl);
         _gaq.push(['_trackEvent', 'tts', last_translation.sl, last_translation.tl]);
-        $("<audio autoplay src='http://translate.google.com/translate_tts?q="+last_translation.word+"&tl="+last_translation.sl+"'></audio>");
+        $('<audio autoplay src="http://translate.google.com/translate_tts?q='+last_translation.word+'&tl='+last_translation.sl+'"></audio>');
       }
       sendResponse({});
       break;

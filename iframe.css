@@ -5,10 +5,21 @@ body {
   overflow: hidden;
 }
 
+#tat_input_container {
+  display: flex;
+  margin-bottom: 3px;
+}
+
 #tat_input {
   -webkit-box-sizing: border-box;
-  width: 100%;
   margin-bottom: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
+  flex-grow: 2;
+}
+
+#tat_submit_container {
+  text-align: right;
   margin-right: 5px;
 }
 
