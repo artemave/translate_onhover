@@ -25,7 +25,6 @@
       "lib/xregexp-unicode-base.js",
       "lib/xregexp-unicode-categories.js",
       "lib/tooltip.js",
-      "lib/jquery.hotkeys.js",
       "lib/jaml.js",
       "lib/languages.js",
       "lib/transover_utils.js",
