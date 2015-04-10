@@ -40,9 +40,7 @@
   "permissions": [ "*://translate.google.com/*", "tabs", "tts" ],
   "web_accessible_resources": [
     "iframe.css",
-    "options.html",
-    "refresh_blue.png",
-    "refresh_grey.png"
+    "options.html"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
 }
