@@ -23,6 +23,15 @@ body {
   margin-right: 5px;
 }
 
+#tat_submit {
+  width: 45px;
+  margin-left: 10px;
+}
+
+#tat_to_lang {
+  width: 150px;
+}
+
 #tat_popup {
   min-width: 398px;
 }
