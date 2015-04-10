@@ -53,7 +53,7 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
 
   console.log('raw_translation: ', data);
 
-  if (!data.dict && !data.sentences) {
+  if (!data.dict && !data.sentences || (data.sentences && data.sentences[0].trans == word)) {
     translation.succeeded = false;
 
     if (data.src == tl || Options.do_not_show_oops()) {
