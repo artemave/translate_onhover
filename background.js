@@ -69,13 +69,16 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
     translation.succeeded = true;
     translation.word = word;
 
+    output = [];
     if (data.dict) { // full translation
-      output = [];
       data.dict.forEach(function(t) {
           output.push({pos: t.pos, meanings: t.terms});
       });
-    } else { // single word translation
-      output = data.sentences[0].trans;
+    } else { // single word or sentence(s)
+      data.sentences.forEach(function(s) {
+          output.push(s.trans)
+      })
+      output = output.join(" ")
     }
 
     translation.sl = data.src;
