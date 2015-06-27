@@ -38,3 +38,6 @@ PLATFORMS
 
 DEPENDENCIES
   guard-shell
+
+BUNDLED WITH
+   1.10.3

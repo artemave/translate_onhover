@@ -10,13 +10,13 @@ var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async
 ga.src = 'https://ssl.google-analytics.com/ga.js';
 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 
-function translate(word, tl, last_translation, onresponse, sendResponse, ga_event_name) {
+function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   var options = {
     url: "https://translate.googleapis.com/translate_a/single?dt=t&dt=bd",
     data: {
       client: 'gtx',
       q: word,
-      sl: 'auto',
+      sl: sl,
       tl: tl,
       dj: 1,
       source: 'bubble'
@@ -33,19 +33,21 @@ function translate(word, tl, last_translation, onresponse, sendResponse, ga_even
   $.ajax(options);
 }
 
-function figureOutTl(tab_lang) {
-  var tl;
+function figureOutSlTl(tab_lang) {
+  var res = {};
 
   if (Options.target_lang() == tab_lang && Options.reverse_lang()) {
-    tl = Options.reverse_lang();
-    console.log('reverse translate into: ', tl);
+    res.tl = Options.reverse_lang();
+    res.sl = Options.target_lang();
+    console.log('reverse translate into: ', {tl: res.tl, sl: res.sl});
   }
   else {
-    tl = Options.target_lang();
-    console.log('normal translate into:', tl);
+    res.tl = Options.target_lang();
+    res.sl = Options.from_lang();
+    console.log('normal translate into:', {tl: res.tl, sl: res.sl});
   }
 
-  return tl;
+  return res;
 }
 
 function on_translation_response(data, word, tl, last_translation, sendResponse, ga_event_name) {
@@ -126,13 +128,20 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       console.log("received to translate: " + request.word);
 
       chrome.tabs.detectLanguage(null, function(tab_lang) {
-          console.log('tab language ', tab_lang);
           if (request.tl) {
             localStorage['last_tat_to_language'] = request.tl;
           }
-          var tl = request.tl || figureOutTl(tab_lang);
-          console.log('tl: ', tl)
-          translate(request.word, tl, last_translation, on_translation_response, sendResponse, Options.translate_by());
+          var sl, tl;
+          // hack: presence of request.tl means this came from popup translate
+          if (request.tl) {
+            sl = 'auto';
+            tl = request.tl
+          } else {
+            var sltl = figureOutSlTl(tab_lang);
+            sl = sltl.sl
+            tl = sltl.tl
+          }
+          translate(request.word, sl, tl, last_translation, on_translation_response, sendResponse, Options.translate_by());
       });
       break;
       case 'tts':
