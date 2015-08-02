@@ -104,9 +104,9 @@ var last_translation = {};
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     switch (request.handler) {
-      case 'get_last_tat_tl':
-      console.log('get_last_tat_tl');
-      sendResponse({to_lang: localStorage['last_tat_to_language']});
+      case 'get_last_tat_sl_tl':
+      console.log('get_last_tat_sl_tl');
+      sendResponse({last_tl: localStorage['last_tat_tl'], last_sl: localStorage['last_tat_sl']});
       break;
       case 'get_options':
       sendResponse({
@@ -128,18 +128,17 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       console.log("received to translate: " + request.word);
 
       chrome.tabs.detectLanguage(null, function(tab_lang) {
-          if (request.tl) {
-            localStorage['last_tat_to_language'] = request.tl;
-          }
           var sl, tl;
-          // hack: presence of request.tl means this came from popup translate
-          if (request.tl) {
-            sl = 'auto';
-            tl = request.tl
+          // hack: presence of request.tl/sl means this came from popup translate
+          if (request.tl && request.sl) {
+            localStorage['last_tat_tl'] = request.tl;
+            localStorage['last_tat_sl'] = request.sl;
+            sl = request.sl;
+            tl = request.tl;
           } else {
             var sltl = figureOutSlTl(tab_lang);
-            sl = sltl.sl
-            tl = sltl.tl
+            sl = sltl.sl;
+            tl = sltl.tl;
           }
           translate(request.word, sl, tl, last_translation, on_translation_response, sendResponse, Options.translate_by());
       });
