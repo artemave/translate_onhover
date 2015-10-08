@@ -146,8 +146,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       case 'tts':
       if (last_translation.succeeded) {
         console.log("tts: " + last_translation.word + ", sl: " + last_translation.sl);
-        _gaq.push(['_trackEvent', 'tts', last_translation.sl, last_translation.tl]);
-        $('<audio autoplay src="http://translate.google.com/translate_tts?q='+last_translation.word+'&tl='+last_translation.sl+'"></audio>');
+        var msg = new SpeechSynthesisUtterance();
+        msg.lang = last_translation.sl;
+        msg.text = last_translation.word;
+        speechSynthesis.speak(msg);
       }
       sendResponse({});
       break;
