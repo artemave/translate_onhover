@@ -184,7 +184,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
             return;
           }
 
-          tooltip.show(e.clientX, e.clientY, TransOver.formatTranslation(translation), getLangDirection(response.tl));
+          tooltip.show(e.clientX, e.clientY, TransOver.formatTranslation(translation, getLangDirection(response.tl)));
       });
     }
   }
@@ -257,7 +257,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         }
       }
       // text-to-speech on ctrl press
-      if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && (tooltip.is_visible() || type_and_translate_tooltip.is_visible())) {
+      if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && Tooltip.isVisible()) {
         log("tts");
         chrome.extension.sendRequest({handler: 'tts'});
       }
@@ -314,8 +314,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }, delay);
   });
 
-  if (window == window.top) {
-    var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
-    new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
-  }
+  // if (window == window.top) {
+  //   var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
+  //   new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
+  // }
 });
