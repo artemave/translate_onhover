@@ -33,7 +33,6 @@
       }
 
       .pos_translation {
-        white-space: nowrap;
         padding-bottom: 4px;
       }
 
@@ -64,6 +63,7 @@
         z-index: 2147483647;
         top: -1500px;
         left: 0;
+        box-sizing: content-box;
       }
     </style>
 
@@ -85,17 +85,50 @@
         content: {
           type: String,
           observer: '_updateContent'
+        },
+        contentWidth: {
+          type: Number,
+          reflectToAttribute: true,
+          observer: '_updateContentWidth'
+        },
+        contentHeight: {
+          type: Number,
+          reflectToAttribute: true,
+          observer: '_updateContentHeight'
+        },
+        outerWidth: {
+          type: Number,
+          reflectToAttribute: true
+        },
+        outerHeight: {
+          type: Number,
+          reflectToAttribute: true
         }
       },
 
+      _updateContentWidth: function(newWidth) {
+        this.$.content.style.width = newWidth + 'px';
+      },
+      _updateContentHeight: function(newHeight) {
+        this.$.content.style.height = newHeight + 'px';
+      },
       _updateContent: function(newContent) {
         this.$.content.innerHTML = newContent;
+
+        setTimeout(function() {
+            var style = window.getComputedStyle(this.$.content);
+            this.contentWidth = parseFloat(style.width);
+            this.contentHeight = parseFloat(style.height);
+
+            this.outerWidth = this.$.content.offsetWidth;
+            this.outerHeight = this.$.content.offsetHeight;
+        }.bind(this), 0);
       },
       _updateTop: function(newTop) {
-        this.$.content.style['top'] = newTop + 'px';
+        this.$.content.style.top = newTop + 'px';
       },
       _updateLeft: function(newLeft) {
-        this.$.content.style['left'] = newLeft + 'px';
+        this.$.content.style.left = newLeft + 'px';
       }
     });
   </script>

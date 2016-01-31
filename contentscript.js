@@ -23,47 +23,51 @@
     function showPopup(e, content) {
       var $popup = $('<transover-result-popup>');
       $popup.attr('content', content);
-      $('body').after($popup);
-      var pos = calculatePosition(e.clientX, e.clientY, $popup);
-      $popup
-        .hide()
-        .attr({ top: pos.y, left: pos.x })
-        .fadeIn('fast');
+      $('body').append($popup);
+      setTimeout(function() {
+          var pos = calculatePosition(e.clientX, e.clientY, $popup);
+          $popup
+            .hide()
+            .attr({ top: pos.y, left: pos.x })
+            .fadeIn('fast');
+      }, 50);
     }
 
-    function calculatePosition(x, y, $tooltip) {
+    function calculatePosition(x, y, $popup) {
       var pos = {};
       var margin = 5;
       var anchor = 10;
+      var outerWidth = Number($popup.attr('outer-width'));
+      var outerHeight = Number($popup.attr('outer-height'));
 
       // show popup to the right of the word if it fits into window this way
-      if (x + anchor + $tooltip.outerWidth(true) + margin < $(window).width()) {
+      if (x + anchor + outerWidth + margin < $(window).width()) {
         pos.x = x + anchor;
       }
       // show popup to the left of the word if it fits into window this way
-      else if (x - anchor - $tooltip.outerWidth(true) - margin > 0) {
-        pos.x = x - anchor - $tooltip.outerWidth(true);
+      else if (x - anchor - outerWidth - margin > 0) {
+        pos.x = x - anchor - outerWidth;
       }
       // show popup at the very left if it is not wider than window
-      else if ($tooltip.outerWidth(true) + margin*2 < $(window).width()) {
+      else if (outerWidth + margin*2 < $(window).width()) {
         pos.x = margin;
       }
       // resize popup width to fit into window and position it the very left of the window
       else {
-        var non_content_x = $tooltip.outerWidth(true) - $tooltip.width();
+        var non_content_x = outerWidth - Number($popup.attr('content-width'));
 
-        $tooltip.width( $(window).width() - margin*2 - non_content_x );
-        $tooltip.height($tooltip.height() + 4);
+        $popup.attr('content-width', $(window).width() - margin*2 - non_content_x );
+        $popup.attr('content-height', Number($popup.attr('content-height')) + 4);
 
         pos.x = margin;
       }
 
       // show popup above the word if it fits into window this way
-      if (y - anchor - $tooltip.outerHeight(true) - margin > 0) {
-        pos.y = y - anchor - $tooltip.outerHeight(true);
+      if (y - anchor - outerHeight - margin > 0) {
+        pos.y = y - anchor - outerHeight;
       }
       // show popup below the word if it fits into window this way
-      else if (y + anchor + $tooltip.outerHeight(true) + margin < $(window).height()) {
+      else if (y + anchor + outerHeight + margin < $(window).height()) {
         pos.y = y + anchor;
       }
       // show popup at the very top of the window
