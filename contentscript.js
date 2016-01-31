@@ -20,18 +20,6 @@
       });
     }
 
-    function loadJs(src) {
-      return new Promise(
-        function(resolve, reject) {
-          var script = document.createElement('script');
-          script.setAttribute('src', src);
-          script.onload = function() {
-            resolve(src);
-          };
-          document.head.appendChild(script);
-      });
-    }
-
     function showPopup(e, content) {
       var $popup = $('<transover-result-popup>');
       $popup.attr('content', content);
@@ -86,18 +74,13 @@
       return pos;
     }
 
-    loadJs(chrome.extension.getURL('lib/webcomponents-lite.js'))
-      .then(function() {
-          return new Promise(
-            function(resolve, reject) {
-              var $script = $('<script>');
-              $script.text("window.Polymer = window.Polymer || {}; window.Polymer.dom = 'shadow'")
-              document.head.appendChild($script.get(0));
-              resolve();
-            }
-          )
-        }
-      )
+    new Promise(
+      function(resolve, reject) {
+        var $script = $('<script>');
+        $script.text("window.Polymer = window.Polymer || {}; window.Polymer.dom = 'shadow'")
+        document.head.appendChild($script.get(0));
+        resolve();
+      })
       .then(loadRes(chrome.extension.getURL('lib/polymer.html')))
       .then(loadRes(chrome.extension.getURL('lib/transover-result-popup.html')))
 

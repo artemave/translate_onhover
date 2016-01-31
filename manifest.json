@@ -43,7 +43,6 @@
     "lib/polymer.html",
     "lib/polymer-mini.html",
     "lib/polymer-micro.html",
-    "lib/webcomponents-lite.js",
     "lib/transover-result-popup.html"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
