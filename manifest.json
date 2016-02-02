@@ -29,8 +29,7 @@
       "lib/transover_utils.js",
       "lib/type_and_translate.js",
       "contentscript.js"
-    ],
-    "css": ["page.css"]
+    ]
   }],
   "browser_action": {
     "default_icon": {"38": "to_38.png", "19": "to_19.png"}
@@ -40,10 +39,7 @@
     "refresh_blue.png",
     "refresh_grey.png",
     "options.html",
-    "lib/polymer.html",
-    "lib/polymer-mini.html",
-    "lib/polymer-micro.html",
-    "lib/transover-result-popup.html"
+    "lib/popup.html"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
 }

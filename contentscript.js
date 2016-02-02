@@ -8,29 +8,24 @@
     }
 
     function loadRes(res) {
-      return new Promise(
-        function(resolve, reject) {
-          var link = document.createElement('link');
-          link.setAttribute('rel', 'import');
-          link.setAttribute('href', res);
-          link.onload = function() {
-            resolve(res);
-          };
-          document.head.appendChild(link);
-      });
+      var link = document.createElement('link');
+      link.setAttribute('rel', 'import');
+      link.setAttribute('href', res);
+      document.head.appendChild(link);
     }
 
     function showPopup(e, content) {
-      var $popup = $('<transover-result-popup>');
-      $popup.attr('content', content);
+      var $popup = $('<transover-popup>');
       $('body').append($popup);
-      setTimeout(function() {
+
+      $popup.on("transover-popup_content_updated", function() {
           var pos = calculatePosition(e.clientX, e.clientY, $popup);
           $popup
             .hide()
             .attr({ top: pos.y, left: pos.x })
             .fadeIn('fast');
-      }, 50);
+      });
+      $popup.attr('content', content);
     }
 
     function calculatePosition(x, y, $popup) {
@@ -77,16 +72,6 @@
 
       return pos;
     }
-
-    new Promise(
-      function(resolve, reject) {
-        var $script = $('<script>');
-        $script.text("window.Polymer = window.Polymer || {}; window.Polymer.dom = 'shadow'")
-        document.head.appendChild($script.get(0));
-        resolve();
-      })
-      .then(loadRes(chrome.extension.getURL('lib/polymer.html')))
-      .then(loadRes(chrome.extension.getURL('lib/transover-result-popup.html')))
 
     chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
@@ -337,7 +322,7 @@
               }
             }
             // text-to-speech on ctrl press
-            if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-result-popup').length > 0) {
+            if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
               log("tts");
               chrome.extension.sendRequest({handler: 'tts'});
             }
@@ -371,7 +356,7 @@
 
         // setup mousestop event
         $(document).on('mousemove_without_noise', function(e){
-            $('transover-result-popup').fadeOut('fast', function() {
+            $('transover-popup').fadeOut('fast', function() {
                 $(this).remove();
             });
 
@@ -403,4 +388,6 @@
         //   new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
         // }
     });
+
+    loadRes(chrome.extension.getURL('lib/popup.html'))
 })();
