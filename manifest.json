@@ -39,7 +39,8 @@
     "refresh_blue.png",
     "refresh_grey.png",
     "options.html",
-    "lib/popup.html"
+    "lib/popup.html",
+    "lib/tat_popup.html"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
 }

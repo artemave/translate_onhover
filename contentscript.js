@@ -15,6 +15,8 @@
     }
 
     function showPopup(e, content) {
+      $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
+
       var $popup = $('<transover-popup>');
       $('body').append($popup);
 
@@ -251,7 +253,7 @@
                   return;
                 }
 
-                showPopup(e, TransOver.formatTranslation(translation, getLangDirection(response.tl)));
+                showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
             });
           }
         }
@@ -317,7 +319,7 @@
                       return;
                     }
 
-                    showPopup(e, TransOver.formatTranslation(translation, getLangDirection(response.tl)));
+                    showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
                 });
               }
             }
@@ -325,6 +327,11 @@
             if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
               log("tts");
               chrome.extension.sendRequest({handler: 'tts'});
+            }
+
+            // Hide tat popup on escape
+            if (e.keyCode == 27) {
+              $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
             }
         }).keyup(function(event) {
             if (TransOver.modifierKeys[event.keyCode] == options.popup_show_trigger) {
@@ -356,9 +363,7 @@
 
         // setup mousestop event
         $(document).on('mousemove_without_noise', function(e){
-            $('transover-popup').fadeOut('fast', function() {
-                $(this).remove();
-            });
+            $('transover-popup').fadeOut('fast', function() { this.remove() });
 
             clearTimeout(timer25);
 
@@ -383,6 +388,31 @@
               }, delay);
         });
 
+        chrome.extension.onRequest.addListener(
+          function(request, sender, sendResponse) {
+            if (request == 'open_type_and_translate') {
+              if ($('transover-type-and-translate-popup').length == 0) {
+                chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
+                    var $popup = $('<transover-type-and-translate-popup>');
+                    var languages = $.extend({}, TransOverLanguages);
+
+                    if (response.sl) {
+                      languages[response.sl].selected_sl = true;
+                    }
+                    languages[response.tast_tl || options.target_lang].selected_tl = true;
+
+                    $popup.attr('data-languages', JSON.stringify(languages));
+                    $('body').append($popup);
+                    $popup.fadeIn('fast');
+                })
+              }
+              else {
+                $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
+              }
+            }
+          }
+        );
+
         // if (window == window.top) {
         //   var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
         //   new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
@@ -390,4 +420,27 @@
     });
 
     loadRes(chrome.extension.getURL('lib/popup.html'))
+    loadRes(chrome.extension.getURL('lib/tat_popup.html'))
+
+    window.addEventListener('message', function(event) {
+        // We only accept messages from ourselves
+        if (event.source != window)
+          return;
+
+        if (event.data.type == 'transoverTranslate') {
+          chrome.extension.sendRequest({handler: 'translate', word: event.data.text, sl: event.data.sl, tl: event.data.tl}, function(response) {
+              log('tat response: ', response);
+
+              var translation = TransOver.deserialize(response.translation);
+
+              if (!translation) {
+                log('tat skipping empty translation');
+                return;
+              }
+
+              var e = { clientX: $(window).width(), clientY: 0 };
+              showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
+          });
+        }
+    })
 })();
