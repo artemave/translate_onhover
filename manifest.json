@@ -24,10 +24,8 @@
       "lib/xregexp-min.js",
       "lib/xregexp-unicode-base.js",
       "lib/xregexp-unicode-categories.js",
-      "lib/jaml.js",
       "lib/languages.js",
       "lib/transover_utils.js",
-      "lib/type_and_translate.js",
       "contentscript.js"
     ]
   }],
@@ -36,8 +34,6 @@
   },
   "permissions": [ "*://translate.google.com/*", "tabs", "tts" ],
   "web_accessible_resources": [
-    "refresh_blue.png",
-    "refresh_grey.png",
     "options.html",
     "lib/popup.html",
     "lib/tat_popup.html"
