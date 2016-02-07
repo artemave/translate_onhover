@@ -390,6 +390,8 @@
 
         chrome.extension.onRequest.addListener(
           function(request, sender, sendResponse) {
+            if (window != window.top) return
+
             if (request == 'open_type_and_translate') {
               if ($('transover-type-and-translate-popup').length == 0) {
                 chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
@@ -412,11 +414,6 @@
             }
           }
         );
-
-        // if (window == window.top) {
-        //   var type_and_translate_tooltip = new Tooltip({dismiss_on: 'escape'});
-        //   new TypeAndTranslate(chrome, type_and_translate_tooltip, options, log);
-        // }
     });
 
     loadRes(chrome.extension.getURL('lib/popup.html'))
