@@ -151,6 +151,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
         var msg = new SpeechSynthesisUtterance();
         msg.lang = last_translation.sl;
         msg.text = last_translation.word;
+        msg.rate = 0.7;
         speechSynthesis.speak(msg);
       }
       sendResponse({});
