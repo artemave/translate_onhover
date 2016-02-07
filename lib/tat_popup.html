@@ -113,8 +113,8 @@
       window.postMessage({
         type: 'transoverTranslate',
         text: this.q('#tat_input').value,
-        to: this.q('#tat_to_lang').value,
-        from: this.q('#tat_from_lang').value
+        tl: this.q('#tat_to_lang').value,
+        sl: this.q('#tat_from_lang').value
       }, '*');
     }.bind(this);
 
