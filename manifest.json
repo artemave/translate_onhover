@@ -36,7 +36,9 @@
   "web_accessible_resources": [
     "options.html",
     "lib/popup.html",
-    "lib/tat_popup.html"
+    "lib/popup.js",
+    "lib/tat_popup.html",
+    "lib/tat_popup.js"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
 }
