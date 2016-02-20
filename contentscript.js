@@ -300,7 +300,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
     var show_popup_key_pressed = false;
     $(document).keydown(function(e) {
-        if (TransOver.modifierKeys[event.keyCode] == options.popup_show_trigger) {
+        if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
           show_popup_key_pressed = true;
 
           var selection = window.getSelection().toString();
@@ -318,7 +318,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
                   return;
                 }
 
-                showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
+                var xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y };
+                showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
             });
           }
         }
@@ -332,8 +333,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         if (e.keyCode == 27) {
           $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
         }
-    }).keyup(function(event) {
-        if (TransOver.modifierKeys[event.keyCode] == options.popup_show_trigger) {
+    }).keyup(function(e) {
+        if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
           show_popup_key_pressed = false;
         }
     });
@@ -415,13 +416,13 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     );
 });
 
-window.addEventListener('message', function(event) {
+window.addEventListener('message', function(e) {
     // We only accept messages from ourselves
-    if (event.source != window)
+    if (e.source != window)
       return;
 
-    if (event.data.type == 'transoverTranslate') {
-      chrome.extension.sendRequest({handler: 'translate', word: event.data.text, sl: event.data.sl, tl: event.data.tl}, function(response) {
+    if (e.data.type == 'transoverTranslate') {
+      chrome.extension.sendRequest({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
           log('tat response: ', response);
 
           var translation = TransOver.deserialize(response.translation);
