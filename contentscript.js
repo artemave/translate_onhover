@@ -361,6 +361,10 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var timer25;
     var last_mouse_stop = {x: 0, y: 0};
 
+    $(document).scroll(function() {
+        $('transover-popup').fadeOut('fast', function() { this.remove() });
+    });
+
     // setup mousestop event
     $(document).on('mousemove_without_noise', function(e){
         $('transover-popup').fadeOut('fast', function() { this.remove() });
