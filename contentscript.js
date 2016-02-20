@@ -8,8 +8,9 @@ function log() {
 
 function importIntoHostDocument(res) {
   var link = document.createElement('link');
-  link.setAttribute('rel', 'import');
-  link.setAttribute('href', res);
+  link.href = res;
+  link.rel = 'import';
+  link.setAttribute('async', 'async');
   document.head.appendChild(link);
 }
 
