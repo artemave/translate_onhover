@@ -6,12 +6,24 @@ function log() {
   }
 }
 
-function importIntoHostDocument(res) {
-  var link = document.createElement('link');
-  link.href = res;
-  link.rel = 'import';
-  link.setAttribute('async', 'async');
-  document.head.appendChild(link);
+function registerTransoverComponent(component) {
+  var html = 'lib/' + component + '.html';
+  var script = 'lib/' + component + '.js';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', chrome.extension.getURL(html), true);
+  xhr.responseType = 'document';
+  xhr.onload = function(e) {
+    var doc = e.target.response;
+    document.body.appendChild(doc.querySelector('template'));
+
+    s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = chrome.extension.getURL(script);
+    s.async = true;
+    document.head.appendChild(s);
+  }
+  xhr.send();
 }
 
 function showPopup(e, content) {
@@ -442,9 +454,7 @@ window.addEventListener('message', function(e) {
     }
 });
 
-// Important!!! Injecting imports without waiting for document ready breaks html in subtle ways.
-// example: on freeagent "overview" page, "overdue", "due" and "paid" labels look all squashed together.
 $(function() {
-    importIntoHostDocument(chrome.extension.getURL('lib/popup.html'));
-    importIntoHostDocument(chrome.extension.getURL('lib/tat_popup.html'));
+    registerTransoverComponent('popup');
+    registerTransoverComponent('tat_popup');
 });
