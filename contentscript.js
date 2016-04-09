@@ -15,7 +15,7 @@ function registerTransoverComponent(component) {
   xhr.responseType = 'document';
   xhr.onload = function(e) {
     var doc = e.target.response;
-    document.body.appendChild(doc.querySelector('template'));
+    document.documentElement.appendChild(doc.querySelector('template'));
 
     s = document.createElement('script');
     s.type = 'text/javascript';
