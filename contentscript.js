@@ -6,6 +6,10 @@ function log() {
   }
 }
 
+function ignoreThisPage(options) {
+  return $.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0;
+}
+
 function registerTransoverComponent(component) {
   var html = 'lib/' + component + '.html';
   var script = 'lib/' + component + '.js';
@@ -276,7 +280,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         if (options.word_key_only && !show_popup_key_pressed) { return }
 
         //respect "don't translate these sites"
-        if ($.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0) { return }
+        if (ignoreThisPage(options)) { return }
 
         do_stuff();
       }
@@ -407,6 +411,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     chrome.extension.onRequest.addListener(
       function(request, sender, sendResponse) {
         if (window != window.top) return
+        if (ignoreThisPage(options)) { return }
 
         if (request == 'open_type_and_translate') {
           if ($('transover-type-and-translate-popup').length == 0) {
@@ -430,6 +435,12 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         }
       }
     );
+
+    $(function() {
+      if (ignoreThisPage(options)) { return }
+      registerTransoverComponent('popup');
+      registerTransoverComponent('tat_popup');
+    });
 });
 
 window.addEventListener('message', function(e) {
@@ -452,9 +463,4 @@ window.addEventListener('message', function(e) {
           showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
       });
     }
-});
-
-$(function() {
-    registerTransoverComponent('popup');
-    registerTransoverComponent('tat_popup');
 });
