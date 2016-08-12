@@ -30,8 +30,15 @@ function registerTransoverComponent(component) {
   xhr.send();
 }
 
+function fadeOut(elementType) {
+  $(elementType).each(function() {
+    var self = this;
+    $(this.shadowRoot.querySelector('main')).fadeOut('fast', function() { self.remove() });
+  })
+}
+
 function showPopup(e, content) {
-  $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
+  fadeOut('transover-type-and-translate-popup');
 
   var $popup = $('<transover-popup>');
   $('body').append($popup);
@@ -39,9 +46,13 @@ function showPopup(e, content) {
   $popup.on("transover-popup_content_updated", function() {
       var pos = calculatePosition(e.clientX, e.clientY, $popup);
       $popup
-        .hide()
+        .each(function() {
+          $(this.shadowRoot.querySelector('main')).hide();
+        })
         .attr({ top: pos.y, left: pos.x })
-        .fadeIn('fast');
+        .each(function() {
+          $(this.shadowRoot.querySelector('main')).fadeIn('fast');
+        })
   });
   $popup.attr('content', content);
 }
@@ -347,7 +358,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
         // Hide tat popup on escape
         if (e.keyCode == 27) {
-          $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
+          fadeOut('transover-type-and-translate-popup');
         }
     }).keyup(function(e) {
         if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
@@ -378,12 +389,12 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var last_mouse_stop = {x: 0, y: 0};
 
     $(document).scroll(function() {
-        $('transover-popup').fadeOut('fast', function() { this.remove() });
+      fadeOut('transover-popup');
     });
 
     // setup mousestop event
     $(document).on('mousemove_without_noise', function(e){
-        $('transover-popup').fadeOut('fast', function() { this.remove() });
+        fadeOut('transover-popup');
 
         clearTimeout(timer25);
 
@@ -426,11 +437,13 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
                 $popup.attr('data-languages', JSON.stringify(languages));
                 $('body').append($popup);
-                $popup.fadeIn('fast');
+                $popup.each(function() {
+                  $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast');
+                });
             })
           }
           else {
-            $('transover-type-and-translate-popup').fadeOut('fast', function() { this.remove() });
+            fadeOut('transover-type-and-translate-popup');
           }
         }
       }
