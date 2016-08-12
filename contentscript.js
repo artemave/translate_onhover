@@ -21,7 +21,7 @@ function registerTransoverComponent(component) {
     var doc = e.target.response;
     document.documentElement.appendChild(doc.querySelector('template'));
 
-    s = document.createElement('script');
+    var s = document.createElement('script');
     s.type = 'text/javascript';
     s.src = chrome.extension.getURL(script);
     s.async = true;
