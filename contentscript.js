@@ -10,6 +10,25 @@ function ignoreThisPage(options) {
   return $.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0;
 }
 
+function createPopup(nodeType) {
+  document.documentElement.appendChild(templates[templateIds[nodeType]]);
+  return $('<'+nodeType+'>');
+}
+
+function removePopup(nodeType) {
+  $(nodeType).each(function() {
+    var self = this;
+    $(this.shadowRoot.querySelector('main')).fadeOut('fast', function() { self.remove() });
+  });
+  $('#'+templateIds[nodeType]).remove();
+}
+
+var templates = {};
+var templateIds = {
+  'transover-popup': 'transover-popup-template',
+  'transover-type-and-translate-popup': 'transover-tat-popup-template'
+};
+
 function registerTransoverComponent(component) {
   var html = 'lib/' + component + '.html';
   var script = 'lib/' + component + '.js';
@@ -19,40 +38,34 @@ function registerTransoverComponent(component) {
   xhr.responseType = 'document';
   xhr.onload = function(e) {
     var doc = e.target.response;
-    document.documentElement.appendChild(doc.querySelector('template'));
-
-    var s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = chrome.extension.getURL(script);
-    s.async = true;
-    document.head.appendChild(s);
+    var template = doc.querySelector('template');
+    templates[template.id] = template;
   }
   xhr.send();
-}
 
-function fadeOut(elementType) {
-  $(elementType).each(function() {
-    var self = this;
-    $(this.shadowRoot.querySelector('main')).fadeOut('fast', function() { self.remove() });
-  })
+  var s = document.createElement('script');
+  s.type = 'text/javascript';
+  s.src = chrome.extension.getURL(script);
+  s.async = true;
+  document.head.appendChild(s);
 }
 
 function showPopup(e, content) {
-  fadeOut('transover-type-and-translate-popup');
+  removePopup('transover-type-and-translate-popup');
 
-  var $popup = $('<transover-popup>');
+  var $popup = createPopup('transover-popup');
   $('body').append($popup);
 
   $popup.on("transover-popup_content_updated", function() {
-      var pos = calculatePosition(e.clientX, e.clientY, $popup);
-      $popup
-        .each(function() {
-          $(this.shadowRoot.querySelector('main')).hide();
-        })
-        .attr({ top: pos.y, left: pos.x })
-        .each(function() {
-          $(this.shadowRoot.querySelector('main')).fadeIn('fast');
-        })
+    var pos = calculatePosition(e.clientX, e.clientY, $popup);
+    $popup
+      .each(function() {
+        $(this.shadowRoot.querySelector('main')).hide();
+      })
+      .attr({ top: pos.y, left: pos.x })
+      .each(function() {
+        $(this.shadowRoot.querySelector('main')).fadeIn('fast');
+      })
   });
   $popup.attr('content', content);
 }
@@ -300,29 +313,29 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var options = JSON.parse( response.options );
 
     $(document).on('mousestop', function(e) {
-        withOptionsSatisfied(e, function() {
-            // translate selection unless 'translate selection on alt only' is set
-            if (window.getSelection().toString()) {
-              if (!options.selection_key_only) {
-                process(e);
-              }
-            } else {
-              if (options.translate_by == 'point') {
-                process(e);
-              }
-            }
-        });
+      withOptionsSatisfied(e, function() {
+        // translate selection unless 'translate selection on alt only' is set
+        if (window.getSelection().toString()) {
+          if (!options.selection_key_only) {
+            process(e);
+          }
+        } else {
+          if (options.translate_by == 'point') {
+            process(e);
+          }
+        }
+      });
     });
     $(document).click(function(e) {
-        withOptionsSatisfied(e, function() {
-            if (options.translate_by != 'click')
-              return
-            if ($(e.target).closest('a').length > 0)
-              return
+      withOptionsSatisfied(e, function() {
+        if (options.translate_by != 'click')
+          return
+        if ($(e.target).closest('a').length > 0)
+          return
 
-            process(e);
-        });
-        return true;
+        process(e);
+      });
+      return true;
     });
 
     var show_popup_key_pressed = false;
@@ -358,7 +371,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
         // Hide tat popup on escape
         if (e.keyCode == 27) {
-          fadeOut('transover-type-and-translate-popup');
+          removePopup('transover-type-and-translate-popup');
         }
     }).keyup(function(e) {
         if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
@@ -389,34 +402,34 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     var last_mouse_stop = {x: 0, y: 0};
 
     $(document).scroll(function() {
-      fadeOut('transover-popup');
+      removePopup('transover-popup');
     });
 
     // setup mousestop event
     $(document).on('mousemove_without_noise', function(e){
-        fadeOut('transover-popup');
+      removePopup('transover-popup');
 
-        clearTimeout(timer25);
+      clearTimeout(timer25);
 
-        var delay = options.delay;
+      var delay = options.delay;
 
-        if (window.getSelection().toString()) {
-          if (options.selection_key_only) {
-            delay = 200;
-          }
-        } else {
-          if (options.word_key_only) {
-            delay = 200;
-          }
+      if (window.getSelection().toString()) {
+        if (options.selection_key_only) {
+          delay = 200;
         }
+      } else {
+        if (options.word_key_only) {
+          delay = 200;
+        }
+      }
 
-        timer25 = setTimeout(function() {
-            var mousestop = new $.Event("mousestop");
-            last_mouse_stop.x = mousestop.clientX = e.clientX;
-            last_mouse_stop.y = mousestop.clientY = e.clientY;
+      timer25 = setTimeout(function() {
+        var mousestop = new $.Event("mousestop");
+        last_mouse_stop.x = mousestop.clientX = e.clientX;
+        last_mouse_stop.y = mousestop.clientY = e.clientY;
 
-            $(document).trigger(mousestop);
-          }, delay);
+        $(document).trigger(mousestop);
+      }, delay);
     });
 
     chrome.extension.onRequest.addListener(
@@ -427,30 +440,29 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         if (request == 'open_type_and_translate') {
           if ($('transover-type-and-translate-popup').length == 0) {
             chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
-                var $popup = $('<transover-type-and-translate-popup>');
-                var languages = $.extend({}, TransOverLanguages);
+              var $popup = createPopup('transover-type-and-translate-popup');
+              var languages = $.extend({}, TransOverLanguages);
 
-                if (response.sl) {
-                  languages[response.sl].selected_sl = true;
-                }
-                languages[response.tast_tl || options.target_lang].selected_tl = true;
+              if (response.sl) {
+                languages[response.sl].selected_sl = true;
+              }
+              languages[response.tast_tl || options.target_lang].selected_tl = true;
 
-                $popup.attr('data-languages', JSON.stringify(languages));
-                $('body').append($popup);
-                $popup.each(function() {
-                  $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast');
-                });
+              $popup.attr('data-languages', JSON.stringify(languages));
+              $('body').append($popup);
+              $popup.each(function() {
+                $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast');
+              });
             })
           }
           else {
-            fadeOut('transover-type-and-translate-popup');
+            removePopup('transover-type-and-translate-popup');
           }
         }
       }
     );
 
     $(function() {
-      if (ignoreThisPage(options)) { return }
       registerTransoverComponent('popup');
       registerTransoverComponent('tat_popup');
     });
