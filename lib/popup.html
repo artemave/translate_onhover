@@ -1,7 +1,7 @@
 <template id="transover-popup-template">
   <style>
     .pos_translation {
-      padding-bottom: 4px;
+      padding-bottom: 3px;
     }
 
     .rtl {
@@ -11,7 +11,7 @@
     main {
       color: #333;
       font-family: Arial, sans-serif;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 300;
       line-height: 19px;
       letter-spacing: initial;
@@ -23,12 +23,15 @@
       border-color: #ccc;
       box-shadow: rgba(0,0,0,0.2) 0px 2px 5px;
       border-radius: 5px;
-      padding: 7px 9px 3px 9px;
+      padding: 6px 8px 3px 8px;
       position: fixed;
       z-index: 2147483647;
       top: -1500px;
       left: 0;
       box-sizing: content-box;
+      -webkit-font-smoothing: antialiased;
+      font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
   </style>
 
