@@ -363,8 +363,9 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
             });
           }
         }
+
         // text-to-speech on ctrl press
-        if (TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
+        if (!e.originalEvent.repeat && TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
           log("tts");
           chrome.extension.sendRequest({handler: 'tts'});
         }
