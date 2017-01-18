@@ -112,6 +112,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       sendResponse({
           options: JSON.stringify({
               except_urls: Options.except_urls(),
+              only_urls: Options.only_urls(),
               target_lang: Options.target_lang(),
               reverse_lang: Options.reverse_lang(),
               delay: Options.delay(),

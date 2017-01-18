@@ -10,6 +10,11 @@ function ignoreThisPage(options) {
   return $.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0;
 }
 
+function whiteList(options) {
+    return $.grep(options.only_urls, function(url) { return RegExp(url).test(window.location.href); }).length > 0 ||
+        options.only_urls.length === 0;
+}
+
 function createPopup(nodeType) {
   document.documentElement.appendChild(templates[templateIds[nodeType]]);
   return $('<'+nodeType+'>');
@@ -305,6 +310,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
         //respect "don't translate these sites"
         if (ignoreThisPage(options)) { return }
+        //respect 'whitelist'
+        if (!whiteList(options)) {return;}
 
         do_stuff();
       }
@@ -437,6 +444,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       function(request, sender, sendResponse) {
         if (window != window.top) return
         if (ignoreThisPage(options)) { return }
+          if (!whiteList(options)) {return;}
 
         if (request == 'open_type_and_translate') {
           if ($('transover-type-and-translate-popup').length == 0) {
