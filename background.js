@@ -164,7 +164,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 });
 
 chrome.browserAction.onClicked.addListener(function(tab) {
-    chrome.tabs.sendRequest(tab.id, 'open_type_and_translate');
+    chrome.tabs.sendMessage(tab.id, 'open_type_and_translate');
 });
 
 chrome.runtime.onInstalled.addListener(function(details) {
@@ -172,3 +172,15 @@ chrome.runtime.onInstalled.addListener(function(details) {
       chrome.tabs.create({url: chrome.extension.getURL('options.html')});
     }
 });
+
+chrome.commands.onCommand.addListener(function(command) {
+  switch (command) {
+    case 'copy-translation-to-clipboard':
+      chrome.tabs.query({active: true}, ([activeTab]) => {
+        chrome.tabs.sendMessage(activeTab.id, 'copy-translation-to-clipboard')
+      })
+      break;
+    default:
+      console.log("Unknown command %s", command)
+  }
+})

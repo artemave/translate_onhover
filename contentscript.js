@@ -1,4 +1,4 @@
-var debug = false;
+var debug = false
 
 function log() {
   if (debug) {
@@ -6,13 +6,23 @@ function log() {
   }
 }
 
-function ignoreThisPage(options) {
-  return $.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0;
+function copyToClipboard(text) {
+  const input = document.createElement('input');
+  input.style.position = 'fixed';
+  input.style.opacity = 0;
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  const r = document.execCommand('copy');
+  document.body.removeChild(input);
 }
 
-function whiteList(options) {
-    return $.grep(options.only_urls, function(url) { return RegExp(url).test(window.location.href); }).length > 0 ||
-        options.only_urls.length === 0;
+function ignoreThisPage(options) {
+  const isBlacklisted = $.grep(options.except_urls, function(url) { return RegExp(url).test(window.location.href) }).length > 0
+  const isWhitelisted = $.grep(options.only_urls, function(url) { return RegExp(url).test(window.location.href); }).length > 0 ||
+    options.only_urls.length === 0
+
+  return isBlacklisted || !isWhitelisted
 }
 
 function createPopup(nodeType) {
@@ -54,6 +64,8 @@ function registerTransoverComponent(component) {
   s.async = true;
   document.head.appendChild(s);
 }
+
+let last_translation
 
 function showPopup(e, content) {
   removePopup('transover-type-and-translate-popup');
@@ -298,6 +310,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
               return;
             }
 
+            last_translation = translation
             showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
         });
       }
@@ -310,8 +323,6 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
         //respect "don't translate these sites"
         if (ignoreThisPage(options)) { return }
-        //respect 'whitelist'
-        if (!whiteList(options)) {return;}
 
         do_stuff();
       }
@@ -366,6 +377,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
                 }
 
                 var xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y };
+                last_translation = translation
                 showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
             });
           }
@@ -440,11 +452,10 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       }, delay);
     });
 
-    chrome.extension.onRequest.addListener(
+    chrome.runtime.onMessage.addListener(
       function(request, sender, sendResponse) {
         if (window != window.top) return
-        if (ignoreThisPage(options)) { return }
-          if (!whiteList(options)) {return;}
+        if (ignoreThisPage(options)) return
 
         if (request == 'open_type_and_translate') {
           if ($('transover-type-and-translate-popup').length == 0) {
@@ -466,6 +477,24 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
           }
           else {
             removePopup('transover-type-and-translate-popup');
+          }
+        } else if (request == 'copy-translation-to-clipboard') {
+          log('received copy-translation-to-clipboard')
+          if ($('transover-popup').length > 0) {
+            let toClipboard
+            if (Array.isArray(last_translation)) {
+              toClipboard = last_translation.map(t => {
+                let line = ''
+                if (t.pos) {
+                  line = t.pos + ': '
+                }
+                line = line + t.meanings.slice(0,5).join(', ')
+                return line
+              }).join("; ")
+            } else {
+              toClipboard = last_translation
+            }
+            copyToClipboard(toClipboard)
           }
         }
       }
@@ -494,6 +523,7 @@ window.addEventListener('message', function(e) {
           }
 
           var e = { clientX: $(window).width(), clientY: 0 };
+          last_translation = translation
           showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
       });
     }

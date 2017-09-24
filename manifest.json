@@ -1,9 +1,9 @@
 {
   "name": "TransOver",
   "manifest_version": 2,
-  "version": "1.38",
+  "version": "1.39",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
-  "description": "Hover, click or select to translate (with text-to-speech)",
+  "description": "Hover, click or select to translate (with text-to-speech). Translator.",
   "background": { "scripts": [
       "lib/jquery-3.1.0.min.js",
       "lib/lodash.min.js",
@@ -31,6 +31,11 @@
   }],
   "browser_action": {
     "default_icon": {"38": "to_38.png", "19": "to_19.png"}
+  },
+  "commands": {
+    "copy-translation-to-clipboard": {
+      "description": "Copy translation to clipboard"
+    }
   },
   "permissions": [ "*://translate.google.com/*", "tabs", "tts" ],
   "web_accessible_resources": [
