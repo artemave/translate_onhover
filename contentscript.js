@@ -311,7 +311,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
             }
 
             last_translation = translation
-            showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
+            showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options));
         });
       }
     }
@@ -319,10 +319,10 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     function withOptionsSatisfied(e, do_stuff) {
       if (options.target_lang) {
         //respect 'translate only when alt pressed' option
-        if (options.word_key_only && !show_popup_key_pressed) { return }
+        if (options.word_key_only && !show_popup_key_pressed) return
 
         //respect "don't translate these sites"
-        if (ignoreThisPage(options)) { return }
+        if (ignoreThisPage(options)) return
 
         do_stuff();
       }
@@ -378,7 +378,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
                 var xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y };
                 last_translation = translation
-                showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
+                showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options));
             });
           }
         }
@@ -524,7 +524,7 @@ window.addEventListener('message', function(e) {
 
           var e = { clientX: $(window).width(), clientY: 0 };
           last_translation = translation
-          showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction));
+          showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options));
       });
     }
 });

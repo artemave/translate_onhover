@@ -109,21 +109,22 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       sendResponse({last_tl: localStorage['last_tat_tl'], last_sl: localStorage['last_tat_sl']});
       break;
       case 'get_options':
-      sendResponse({
+        sendResponse({
           options: JSON.stringify({
-              except_urls: Options.except_urls(),
-              only_urls: Options.only_urls(),
-              target_lang: Options.target_lang(),
-              reverse_lang: Options.reverse_lang(),
-              delay: Options.delay(),
-              word_key_only: Options.word_key_only(),
-              selection_key_only: Options.selection_key_only(),
-              tts: Options.tts(),
-              tts_key: Options.tts_key(),
-              popup_show_trigger: Options.popup_show_trigger(),
-              translate_by: Options.translate_by()
+            except_urls: Options.except_urls(),
+            only_urls: Options.only_urls(),
+            target_lang: Options.target_lang(),
+            reverse_lang: Options.reverse_lang(),
+            delay: Options.delay(),
+            word_key_only: Options.word_key_only(),
+            selection_key_only: Options.selection_key_only(),
+            tts: Options.tts(),
+            tts_key: Options.tts_key(),
+            popup_show_trigger: Options.popup_show_trigger(),
+            translate_by: Options.translate_by(),
+            show_from_lang: Options.show_from_lang()
           })
-      });
+        });
       break;
       case 'translate':
       console.log("received to translate: " + request.word);
