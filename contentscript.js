@@ -1,4 +1,5 @@
 var debug = false
+var options
 
 function log() {
   if (debug) {
@@ -328,7 +329,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       }
     }
 
-    var options = JSON.parse( response.options );
+    options = JSON.parse( response.options );
 
     $(document).on('mousestop', function(e) {
       withOptionsSatisfied(e, function() {
