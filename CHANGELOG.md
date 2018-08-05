@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+1.42
+  - Change google translate API url. The old one seems to be getting blocked more and more.
+1.41
+  - Fix regression. T&T popup wasn't showing translation.
 1.40
   - Optionally show "translated from" language in a popup. Because source langage autodetect often makes funny choices and then people blame TransOver for incorrect/missing translations. This will hopefully act as a hint to go and change "translate from" option from autodetect to a set language.
 1.39

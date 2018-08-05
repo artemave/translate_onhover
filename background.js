@@ -1,7 +1,3 @@
-RegExp.quote = function(str) {
-  return (str+'').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
-};
-
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-46863240-1']);
 _gaq.push(['_trackPageview']);
@@ -12,14 +8,11 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   var options = {
-    url: "https://translate.googleapis.com/translate_a/single?dt=t&dt=bd",
+    url: "https://clients5.google.com/translate_a/t?client=dict-chrome-ex",
     data: {
-      client: 'gtx',
       q: word,
       sl: sl,
       tl: tl,
-      dj: 1,
-      source: 'bubble'
     },
     dataType: 'json',
     success: function on_success(data) {
@@ -50,24 +43,25 @@ function figureOutSlTl(tab_lang) {
   return res;
 }
 
+function translationIsTheSameAsInput(sentences, input) {
+  input = input.replace(/^ *| *$/g, '')
+  return sentences[0].trans.match(new RegExp(TransOver.regexp_escape(input), 'i'))
+}
+
 function on_translation_response(data, word, tl, last_translation, sendResponse, ga_event_name) {
   var output, translation = {tl: tl};
 
   console.log('raw_translation: ', data);
 
-  if (!data.dict && !data.sentences ||
-    (data.sentences && data.sentences[0].trans.match(new RegExp(TransOver.regexp_escape(word), 'i')))) {
-
+  if ((!data.dict && !data.sentences) || (!data.dict && translationIsTheSameAsInput(data.sentences, word))) {
     translation.succeeded = false;
 
-    if (data.src == tl || Options.do_not_show_oops()) {
+    if (Options.do_not_show_oops()) {
       output = '';
-    }
-    else {
+    } else {
       output = 'Oops.. No translation found.';
     }
-  }
-  else {
+  } else {
     translation.succeeded = true;
     translation.word = word;
 
