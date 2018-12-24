@@ -1,19 +1,19 @@
 import Options from './lib/options'
 import TransOver from './lib/transover_utils'
 
-var _gaq = _gaq || []
+const _gaq = []
 _gaq.push(['_setAccount', 'UA-46863240-1'])
 _gaq.push(['_trackPageview'])
 
-var ga = document.createElement('script')
+const ga = document.createElement('script')
 ga.type = 'text/javascript'
 ga.async = true
 ga.src = 'https://ssl.google-analytics.com/ga.js'
-var s = document.getElementsByTagName('script')[0]
+const s = document.getElementsByTagName('script')[0]
 s.parentNode.insertBefore(ga, s)
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
-  var options = {
+  const options = {
     url: 'https://clients5.google.com/translate_a/t?client=dict-chrome-ex',
     data: {
       q: word,
@@ -33,7 +33,7 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
 }
 
 function figureOutSlTl(tab_lang) {
-  var res = {}
+  const res = {}
 
   if (Options.target_lang() == tab_lang && Options.reverse_lang()) {
     res.tl = Options.reverse_lang()
@@ -55,7 +55,8 @@ function translationIsTheSameAsInput(sentences, input) {
 }
 
 function on_translation_response(data, word, tl, last_translation, sendResponse, ga_event_name) {
-  var output, translation = {tl: tl}
+  let output
+  const translation = {tl: tl}
 
   console.log('raw_translation: ', data)
 
@@ -100,7 +101,7 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
   sendResponse(translation)
 }
 
-var last_translation = {}
+const last_translation = {}
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   switch (request.handler) {
@@ -130,7 +131,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     console.log('received to translate: ' + request.word)
 
     chrome.tabs.detectLanguage(null, function(tab_lang) {
-      var sl, tl
+      let sl, tl
       // hack: presence of request.tl/sl means this came from popup translate
       if (request.tl && request.sl) {
         localStorage['last_tat_tl'] = request.tl
@@ -138,7 +139,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
         sl = request.sl
         tl = request.tl
       } else {
-        var sltl = figureOutSlTl(tab_lang)
+        const sltl = figureOutSlTl(tab_lang)
         sl = sltl.sl
         tl = sltl.tl
       }
@@ -150,7 +151,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       console.log('tts: ' + last_translation.word + ', sl: ' + last_translation.sl)
       _gaq.push(['_trackEvent', 'tts', last_translation.sl, last_translation.tl])
 
-      var msg = new SpeechSynthesisUtterance()
+      const msg = new SpeechSynthesisUtterance()
       msg.lang = last_translation.sl
       msg.text = last_translation.word
       msg.rate = 0.7

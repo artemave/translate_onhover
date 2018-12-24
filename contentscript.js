@@ -1,8 +1,8 @@
 import TransOver from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
 
-var debug = false
-var options
+const debug = false
+let options
 
 function log() {
   if (debug) {
@@ -36,33 +36,33 @@ function createPopup(nodeType) {
 
 function removePopup(nodeType) {
   $(nodeType).each(function() {
-    var self = this
+    const self = this
     $(this.shadowRoot.querySelector('main')).fadeOut('fast', function() { self.remove() })
   })
   $('#'+templateIds[nodeType]).remove()
 }
 
-var templates = {}
-var templateIds = {
+const templates = {}
+const templateIds = {
   'transover-popup': 'transover-popup-template',
   'transover-type-and-translate-popup': 'transover-tat-popup-template'
 }
 
 function registerTransoverComponent(component) {
-  var html = component + '.html'
-  var script = component + '.js'
+  const html = component + '.html'
+  const script = component + '.js'
 
-  var xhr = new XMLHttpRequest()
+  const xhr = new XMLHttpRequest()
   xhr.open('GET', chrome.extension.getURL(html), true)
   xhr.responseType = 'document'
   xhr.onload = function(e) {
-    var doc = e.target.response
-    var template = doc.querySelector('template')
+    const doc = e.target.response
+    const template = doc.querySelector('template')
     templates[template.id] = template
   }
   xhr.send()
 
-  var s = document.createElement('script')
+  const s = document.createElement('script')
   s.type = 'text/javascript'
   s.src = chrome.extension.getURL(script)
   s.async = true
@@ -74,11 +74,11 @@ let last_translation
 function showPopup(e, content) {
   removePopup('transover-type-and-translate-popup')
 
-  var $popup = createPopup('transover-popup')
+  const $popup = createPopup('transover-popup')
   $('body').append($popup)
 
   $popup.on('transover-popup_content_updated', function() {
-    var pos = calculatePosition(e.clientX, e.clientY, $popup)
+    const pos = calculatePosition(e.clientX, e.clientY, $popup)
     $popup
       .each(function() {
         $(this.shadowRoot.querySelector('main')).hide()
@@ -92,11 +92,11 @@ function showPopup(e, content) {
 }
 
 function calculatePosition(x, y, $popup) {
-  var pos = {}
-  var margin = 5
-  var anchor = 10
-  var outerWidth = Number($popup.attr('outer-width'))
-  var outerHeight = Number($popup.attr('outer-height'))
+  const pos = {}
+  const margin = 5
+  const anchor = 10
+  const outerWidth = Number($popup.attr('outer-width'))
+  const outerHeight = Number($popup.attr('outer-height'))
 
   // show popup to the right of the word if it fits into window this way
   if (x + anchor + outerWidth + margin < $(window).width()) {
@@ -112,7 +112,7 @@ function calculatePosition(x, y, $popup) {
   }
   // resize popup width to fit into window and position it the very left of the window
   else {
-    var non_content_x = outerWidth - Number($popup.attr('content-width'))
+    const non_content_x = outerWidth - Number($popup.attr('content-width'))
 
     $popup.attr('content-width', $(window).width() - margin*2 - non_content_x )
     $popup.attr('content-height', Number($popup.attr('content-height')) + 4)
@@ -144,14 +144,14 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
       function restorable(node, do_stuff) {
         $(node).wrap('<transwrapper />')
-        var res = do_stuff(node)
+        const res = do_stuff(node)
         $('transwrapper').replaceWith(TransOver.escape_html( $('transwrapper').text() ))
         return res
       }
 
       function getExactTextNode(nodes, e) {
         $(text_nodes).wrap('<transblock />')
-        var hit_text_node = document.elementFromPoint(e.clientX, e.clientY)
+        let hit_text_node = document.elementFromPoint(e.clientX, e.clientY)
 
         //means we hit between the lines
         if (hit_text_node.nodeName != 'TRANSBLOCK') {
@@ -166,15 +166,15 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         return hit_text_node
       }
 
-      var hit_elem = $(document.elementFromPoint(e.clientX, e.clientY))
-      var word_re = '\\p{L}+(?:[\'’]\\p{L}+)*'
-      var parent_font_style = {
+      const hit_elem = $(document.elementFromPoint(e.clientX, e.clientY))
+      const word_re = '\\p{L}+(?:[\'’]\\p{L}+)*'
+      const parent_font_style = {
         'line-height': hit_elem.css('line-height'),
         'font-size': '1em',
         'font-family': hit_elem.css('font-family')
       }
 
-      var text_nodes = hit_elem.contents().filter(function(){
+      const text_nodes = hit_elem.contents().filter(function(){
         return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
       })
 
@@ -183,14 +183,14 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         return ''
       }
 
-      var hit_text_node = getExactTextNode(text_nodes, e)
+      const hit_text_node = getExactTextNode(text_nodes, e)
       if (!hit_text_node) {
         log('hit between lines')
         return ''
       }
 
-      var hit_word = restorable(hit_text_node, function() {
-        var hw = ''
+      const hit_word = restorable(hit_text_node, function() {
+        let hw = ''
 
         function getHitText(node, parent_font_style) {
           log('getHitText: \'' + node.textContent + '\'')
@@ -204,7 +204,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
             $('transblock').css(parent_font_style)
 
-            var next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0]
+            const next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0]
 
             if (next_node.textContent == node.textContent) {
               return next_node
@@ -218,7 +218,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
           }
         }
 
-        var minimal_text_node = getHitText(hit_text_node, parent_font_style)
+        const minimal_text_node = getHitText(hit_text_node, parent_font_style)
 
         if (minimal_text_node) {
           //wrap words inside text node into <transover> element
@@ -236,7 +236,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
           $('transover').css(parent_font_style)
 
           //get the exact word under cursor
-          var hit_word_elem = document.elementFromPoint(e.clientX, e.clientY)
+          const hit_word_elem = document.elementFromPoint(e.clientX, e.clientY)
 
           //no word under cursor? we are done
           if (hit_word_elem.nodeName != 'TRANSOVER') {
@@ -254,8 +254,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       return hit_word
     }
 
-    var selection = window.getSelection()
-    var hit_elem = document.elementFromPoint(e.clientX, e.clientY)
+    const selection = window.getSelection()
+    const hit_elem = document.elementFromPoint(e.clientX, e.clientY)
 
     // happens sometimes on page resize (I think)
     if (!hit_elem) {
@@ -269,7 +269,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       return
     }
 
-    var word = ''
+    let word = ''
     if (selection.toString()) {
 
       if (options.selection_key_only) {
@@ -279,7 +279,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
       log('Got selection: ' + selection.toString())
 
-      var sel_container = selection.getRangeAt(0).commonAncestorContainer
+      let sel_container = selection.getRangeAt(0).commonAncestorContainer
 
       while (sel_container.nodeType != Node.ELEMENT_NODE) {
         sel_container = sel_container.parentNode
@@ -307,7 +307,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       chrome.extension.sendRequest({handler: 'translate', word: word}, function(response) {
         log('response: ', response)
 
-        var translation = TransOver.deserialize(response.translation)
+        const translation = TransOver.deserialize(response.translation)
 
         if (!translation) {
           log('skipping empty translation')
@@ -360,12 +360,12 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     return true
   })
 
-  var show_popup_key_pressed = false
+  let show_popup_key_pressed = false
   $(document).keydown(function(e) {
     if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
       show_popup_key_pressed = true
 
-      var selection = window.getSelection().toString()
+      const selection = window.getSelection().toString()
 
       if (options.selection_key_only && selection) {
         log('Got selection_key_only')
@@ -373,14 +373,14 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
           log('response: ', response)
 
-          var translation = TransOver.deserialize(response.translation)
+          const translation = TransOver.deserialize(response.translation)
 
           if (!translation) {
             log('skipping empty translation')
             return
           }
 
-          var xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y }
+          const xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y }
           last_translation = translation
           showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
         })
@@ -404,7 +404,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
   })
 
   function hasMouseReallyMoved(e) { //or is it a tremor?
-    var left_boundry = parseInt(last_mouse_stop.x) - 5,
+    const left_boundry = parseInt(last_mouse_stop.x) - 5,
       right_boundry  = parseInt(last_mouse_stop.x) + 5,
       top_boundry    = parseInt(last_mouse_stop.y) - 5,
       bottom_boundry = parseInt(last_mouse_stop.y) + 5
@@ -414,7 +414,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
   $(document).mousemove(function(e) {
     if (hasMouseReallyMoved(e)) {
-      var mousemove_without_noise = new $.Event('mousemove_without_noise')
+      const mousemove_without_noise = new $.Event('mousemove_without_noise')
       mousemove_without_noise.clientX = e.clientX
       mousemove_without_noise.clientY = e.clientY
 
@@ -422,8 +422,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }
   })
 
-  var timer25
-  var last_mouse_stop = {x: 0, y: 0}
+  let timer25
+  const last_mouse_stop = {x: 0, y: 0}
 
   $(document).scroll(function() {
     removePopup('transover-popup')
@@ -435,7 +435,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
     clearTimeout(timer25)
 
-    var delay = options.delay
+    let delay = options.delay
 
     if (window.getSelection().toString()) {
       if (options.selection_key_only) {
@@ -448,7 +448,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }
 
     timer25 = setTimeout(function() {
-      var mousestop = new $.Event('mousestop')
+      const mousestop = new $.Event('mousestop')
       last_mouse_stop.x = mousestop.clientX = e.clientX
       last_mouse_stop.y = mousestop.clientY = e.clientY
 
@@ -464,8 +464,8 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       if (request == 'open_type_and_translate') {
         if ($('transover-type-and-translate-popup').length == 0) {
           chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
-            var $popup = createPopup('transover-type-and-translate-popup')
-            var languages = $.extend({}, TransOverLanguages)
+            const $popup = createPopup('transover-type-and-translate-popup')
+            const languages = $.extend({}, TransOverLanguages)
 
             if (response.sl) {
               languages[response.sl].selected_sl = true
@@ -519,14 +519,14 @@ window.addEventListener('message', function(e) {
     chrome.extension.sendRequest({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
       log('tat response: ', response)
 
-      var translation = TransOver.deserialize(response.translation)
+      const translation = TransOver.deserialize(response.translation)
 
       if (!translation) {
         log('tat skipping empty translation')
         return
       }
 
-      var e = { clientX: $(window).width(), clientY: 0 }
+      const e = { clientX: $(window).width(), clientY: 0 }
       last_translation = translation
       showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
     })
