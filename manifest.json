@@ -5,13 +5,8 @@
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate (with text-to-speech). Translator.",
   "background": { "scripts": [
-      "lib/jquery-3.1.0.min.js",
-      "lib/lodash.min.js",
-      "lib/xregexp-min.js",
-      "lib/xregexp-unicode-base.js",
-      "lib/xregexp-unicode-categories.js",
-      "lib/transover_utils.js",
-      "lib/options.js",
+      "jquery.min.js",
+      "xregexp-all.js",
       "background.js"
     ]
   },
@@ -20,12 +15,8 @@
     "matches": [ "<all_urls>" ],
     "all_frames": true,
     "js": [
-      "lib/jquery-3.1.0.min.js",
-      "lib/xregexp-min.js",
-      "lib/xregexp-unicode-base.js",
-      "lib/xregexp-unicode-categories.js",
-      "lib/languages.js",
-      "lib/transover_utils.js",
+      "jquery.min.js",
+      "xregexp-all.js",
       "contentscript.js"
     ]
   }],
@@ -40,10 +31,10 @@
   "permissions": [ "*://translate.google.com/*", "tabs", "tts" ],
   "web_accessible_resources": [
     "options.html",
-    "lib/popup.html",
-    "lib/popup.js",
-    "lib/tat_popup.html",
-    "lib/tat_popup.js"
+    "popup.html",
+    "popup.js",
+    "tat_popup.html",
+    "tat_popup.js"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
 }

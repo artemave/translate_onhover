@@ -1,0 +1,26 @@
+env:
+  browser: true
+  es6: true
+  node: true
+  webextensions: true
+  jquery: true
+globals:
+  XRegExp: true
+extends: 'eslint:recommended'
+parserOptions:
+  ecmaVersion: 2016
+  sourceType: module
+rules:
+  indent:
+    - error
+    - 2
+  linebreak-style:
+    - error
+    - unix
+  quotes:
+    - error
+    - single
+  semi:
+    - error
+    - never
+  no-console: "warn"

@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "build": "NODE_ENV=production webpack && zip -FS -r -j translate_onhover dist",
+    "dev": "webpack --watch",
+    "lint": "eslint --ignore-pattern dist ."
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^1.0.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "eslint": "^5.11.0",
+    "webpack": "^4.28.2",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "xregexp": "^4.2.0"
+  }
+}
