@@ -1,14 +1,8 @@
 import TransOver from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
+const debug = require('debug')('transover')
 
-const debug = false
 let options
-
-function log() {
-  if (debug) {
-    console.log(arguments)
-  }
-}
 
 function copyToClipboard(text) {
   const input = document.createElement('input')
@@ -179,13 +173,13 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       })
 
       if (text_nodes.length == 0) {
-        log('no text')
+        debug('no text')
         return ''
       }
 
       const hit_text_node = getExactTextNode(text_nodes, e)
       if (!hit_text_node) {
-        log('hit between lines')
+        debug('hit between lines')
         return ''
       }
 
@@ -193,7 +187,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
         let hw = ''
 
         function getHitText(node, parent_font_style) {
-          log('getHitText: \'' + node.textContent + '\'')
+          debug('getHitText: \'' + node.textContent + '\'')
 
           if (XRegExp(word_re).test( node.textContent )) {
             $(node).replaceWith(function() {
@@ -240,11 +234,11 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
           //no word under cursor? we are done
           if (hit_word_elem.nodeName != 'TRANSOVER') {
-            log('missed!')
+            debug('missed!')
           }
           else  {
             hw = $(hit_word_elem).text()
-            log('got it: \''+hw+'\'')
+            debug('got it: \''+hw+'\'')
           }
         }
 
@@ -273,11 +267,11 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     if (selection.toString()) {
 
       if (options.selection_key_only) {
-        log('Skip because "selection_key_only"')
+        debug('Skip because "selection_key_only"')
         return
       }
 
-      log('Got selection: ' + selection.toString())
+      debug('Got selection: ' + selection.toString())
 
       let sel_container = selection.getRangeAt(0).commonAncestorContainer
 
@@ -305,12 +299,12 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
     }
     if (word != '') {
       chrome.extension.sendRequest({handler: 'translate', word: word}, function(response) {
-        log('response: ', response)
+        debug('response: ', response)
 
         const translation = TransOver.deserialize(response.translation)
 
         if (!translation) {
-          log('skipping empty translation')
+          debug('skipping empty translation')
           return
         }
 
@@ -368,15 +362,15 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
       const selection = window.getSelection().toString()
 
       if (options.selection_key_only && selection) {
-        log('Got selection_key_only')
+        debug('Got selection_key_only')
 
         chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
-          log('response: ', response)
+          debug('response: ', response)
 
           const translation = TransOver.deserialize(response.translation)
 
           if (!translation) {
-            log('skipping empty translation')
+            debug('skipping empty translation')
             return
           }
 
@@ -389,7 +383,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
 
     // text-to-speech on ctrl press
     if (!e.originalEvent.repeat && TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
-      log('tts')
+      debug('tts')
       chrome.extension.sendRequest({handler: 'tts'})
     }
 
@@ -483,7 +477,7 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
           removePopup('transover-type-and-translate-popup')
         }
       } else if (request == 'copy-translation-to-clipboard') {
-        log('received copy-translation-to-clipboard')
+        debug('received copy-translation-to-clipboard')
         if ($('transover-popup').length > 0) {
           let toClipboard
           if (Array.isArray(last_translation)) {
@@ -517,12 +511,12 @@ window.addEventListener('message', function(e) {
 
   if (e.data.type == 'transoverTranslate') {
     chrome.extension.sendRequest({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
-      log('tat response: ', response)
+      debug('tat response: ', response)
 
       const translation = TransOver.deserialize(response.translation)
 
       if (!translation) {
-        log('tat skipping empty translation')
+        debug('tat skipping empty translation')
         return
       }
 
