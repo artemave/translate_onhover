@@ -3,6 +3,7 @@ import TransOverLanguages from './lib/languages'
 const debug = require('debug')('transover')
 
 let options
+let disable_on_this_page
 
 function copyToClipboard(text) {
   const input = document.createElement('input')
@@ -131,174 +132,253 @@ function calculatePosition(x, y, $popup) {
 }
 
 chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
+  options = JSON.parse( response.options )
+  disable_on_this_page = ignoreThisPage(options)
+  chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
+})
 
-  function process(e) {
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) {
+    chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
+      options = JSON.parse( response.options )
+      disable_on_this_page = ignoreThisPage(options)
+      chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
+    })
+  }
+}, false)
 
-    function getHitWord(e) {
+function process(e) {
 
-      function restorable(node, do_stuff) {
-        $(node).wrap('<transwrapper />')
-        const res = do_stuff(node)
-        $('transwrapper').replaceWith(TransOver.escape_html( $('transwrapper').text() ))
-        return res
-      }
+  function getHitWord(e) {
 
-      function getExactTextNode(nodes, e) {
-        $(text_nodes).wrap('<transblock />')
-        let hit_text_node = document.elementFromPoint(e.clientX, e.clientY)
+    function restorable(node, do_stuff) {
+      $(node).wrap('<transwrapper />')
+      const res = do_stuff(node)
+      $('transwrapper').replaceWith(TransOver.escape_html( $('transwrapper').text() ))
+      return res
+    }
 
-        //means we hit between the lines
-        if (hit_text_node.nodeName != 'TRANSBLOCK') {
-          $(text_nodes).unwrap()
-          return null
-        }
+    function getExactTextNode(nodes, e) {
+      $(text_nodes).wrap('<transblock />')
+      let hit_text_node = document.elementFromPoint(e.clientX, e.clientY)
 
-        hit_text_node = hit_text_node.childNodes[0]
-
+      //means we hit between the lines
+      if (hit_text_node.nodeName != 'TRANSBLOCK') {
         $(text_nodes).unwrap()
-
-        return hit_text_node
+        return null
       }
 
-      const hit_elem = $(document.elementFromPoint(e.clientX, e.clientY))
-      const word_re = '\\p{L}+(?:[\'’]\\p{L}+)*'
-      const parent_font_style = {
-        'line-height': hit_elem.css('line-height'),
-        'font-size': '1em',
-        'font-family': hit_elem.css('font-family')
-      }
+      hit_text_node = hit_text_node.childNodes[0]
 
-      const text_nodes = hit_elem.contents().filter(function(){
-        return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
-      })
+      $(text_nodes).unwrap()
 
-      if (text_nodes.length == 0) {
-        debug('no text')
-        return ''
-      }
+      return hit_text_node
+    }
 
-      const hit_text_node = getExactTextNode(text_nodes, e)
-      if (!hit_text_node) {
-        debug('hit between lines')
-        return ''
-      }
+    const hit_elem = $(document.elementFromPoint(e.clientX, e.clientY))
+    const word_re = '\\p{L}+(?:[\'’]\\p{L}+)*'
+    const parent_font_style = {
+      'line-height': hit_elem.css('line-height'),
+      'font-size': '1em',
+      'font-family': hit_elem.css('font-family')
+    }
 
-      const hit_word = restorable(hit_text_node, function() {
-        let hw = ''
+    const text_nodes = hit_elem.contents().filter(function(){
+      return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
+    })
 
-        function getHitText(node, parent_font_style) {
-          debug('getHitText: \'' + node.textContent + '\'')
+    if (text_nodes.length == 0) {
+      debug('no text')
+      return ''
+    }
 
-          if (XRegExp(word_re).test( node.textContent )) {
-            $(node).replaceWith(function() {
-              return this.textContent.replace(XRegExp('^(.{'+Math.round( node.textContent.length/2 )+'}(?:\\p{L}|[\'’](?=\\p{L}))*)(.*)', 's'), function($0, $1, $2) {
-                return '<transblock>'+TransOver.escape_html($1)+'</transblock><transblock>'+TransOver.escape_html($2)+'</transblock>'
-              })
-            })
+    const hit_text_node = getExactTextNode(text_nodes, e)
+    if (!hit_text_node) {
+      debug('hit between lines')
+      return ''
+    }
 
-            $('transblock').css(parent_font_style)
+    const hit_word = restorable(hit_text_node, function() {
+      let hw = ''
 
-            const next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0]
+      function getHitText(node, parent_font_style) {
+        debug('getHitText: \'' + node.textContent + '\'')
 
-            if (next_node.textContent == node.textContent) {
-              return next_node
-            }
-            else {
-              return getHitText(next_node, parent_font_style)
-            }
-          }
-          else {
-            return null
-          }
-        }
-
-        const minimal_text_node = getHitText(hit_text_node, parent_font_style)
-
-        if (minimal_text_node) {
-          //wrap words inside text node into <transover> element
-          $(minimal_text_node).replaceWith(function() {
-            return this.textContent.replace(XRegExp('(<|>|&|'+word_re+')', 'gs'), function ($0, $1) {
-              switch ($1) {
-              case '<': return '&lt;'
-              case '>': return '&gt;'
-              case '&': return '&amp;'
-              default: return '<transover>'+$1+'</transover>'
-              }
+        if (XRegExp(word_re).test( node.textContent )) {
+          $(node).replaceWith(function() {
+            return this.textContent.replace(XRegExp('^(.{'+Math.round( node.textContent.length/2 )+'}(?:\\p{L}|[\'’](?=\\p{L}))*)(.*)', 's'), function($0, $1, $2) {
+              return '<transblock>'+TransOver.escape_html($1)+'</transblock><transblock>'+TransOver.escape_html($2)+'</transblock>'
             })
           })
 
-          $('transover').css(parent_font_style)
+          $('transblock').css(parent_font_style)
 
-          //get the exact word under cursor
-          const hit_word_elem = document.elementFromPoint(e.clientX, e.clientY)
+          const next_node = document.elementFromPoint(e.clientX, e.clientY).childNodes[0]
 
-          //no word under cursor? we are done
-          if (hit_word_elem.nodeName != 'TRANSOVER') {
-            debug('missed!')
+          if (next_node.textContent == node.textContent) {
+            return next_node
           }
-          else  {
-            hw = $(hit_word_elem).text()
-            debug('got it: \''+hw+'\'')
+          else {
+            return getHitText(next_node, parent_font_style)
           }
         }
+        else {
+          return null
+        }
+      }
 
-        return hw
-      })
+      const minimal_text_node = getHitText(hit_text_node, parent_font_style)
 
-      return hit_word
-    }
+      if (minimal_text_node) {
+        //wrap words inside text node into <transover> element
+        $(minimal_text_node).replaceWith(function() {
+          return this.textContent.replace(XRegExp('(<|>|&|'+word_re+')', 'gs'), function ($0, $1) {
+            switch ($1) {
+            case '<': return '&lt;'
+            case '>': return '&gt;'
+            case '&': return '&amp;'
+            default: return '<transover>'+$1+'</transover>'
+            }
+          })
+        })
 
-    const selection = window.getSelection()
-    const hit_elem = document.elementFromPoint(e.clientX, e.clientY)
+        $('transover').css(parent_font_style)
 
-    // happens sometimes on page resize (I think)
-    if (!hit_elem) {
+        //get the exact word under cursor
+        const hit_word_elem = document.elementFromPoint(e.clientX, e.clientY)
+
+        //no word under cursor? we are done
+        if (hit_word_elem.nodeName != 'TRANSOVER') {
+          debug('missed!')
+        }
+        else  {
+          hw = $(hit_word_elem).text()
+          debug('got it: \''+hw+'\'')
+        }
+      }
+
+      return hw
+    })
+
+    return hit_word
+  }
+
+  const selection = window.getSelection()
+  const hit_elem = document.elementFromPoint(e.clientX, e.clientY)
+
+  // happens sometimes on page resize (I think)
+  if (!hit_elem) {
+    return
+  }
+
+  //skip inputs and editable divs
+  if (/INPUT|TEXTAREA/.test( hit_elem.nodeName ) || hit_elem.isContentEditable
+      || $(hit_elem).parents().filter(function() { return this.isContentEditable }).length > 0) {
+
+    return
+  }
+
+  let word = ''
+  if (selection.toString()) {
+
+    if (options.selection_key_only) {
+      debug('Skip because "selection_key_only"')
       return
     }
 
-    //skip inputs and editable divs
-    if (/INPUT|TEXTAREA/.test( hit_elem.nodeName ) || hit_elem.isContentEditable
-        || $(hit_elem).parents().filter(function() { return this.isContentEditable }).length > 0) {
+    debug('Got selection: ' + selection.toString())
 
-      return
+    let sel_container = selection.getRangeAt(0).commonAncestorContainer
+
+    while (sel_container.nodeType != Node.ELEMENT_NODE) {
+      sel_container = sel_container.parentNode
     }
 
-    let word = ''
-    if (selection.toString()) {
+    if (
+    // only choose selection if mouse stopped within immediate parent of selection
+      ( $(hit_elem).is(sel_container) || $.contains(sel_container, hit_elem) )
+        // and since it can still be quite a large area
+        // narrow it down by only choosing selection if mouse points at the element that is (partially) inside selection
+        && selection.containsNode(hit_elem, true)
+        // But what is the point for the first part of condition? Well, without it, pointing at body for instance would also satisfy the second part
+        // resulting in selection translation showing up in random places
+    ) {
+      word = selection.toString()
+    }
+    else if (options.translate_by == 'point') {
+      word = getHitWord(e)
+    }
+  }
+  else {
+    word = getHitWord(e)
+  }
+  if (word != '') {
+    chrome.extension.sendRequest({handler: 'translate', word: word}, function(response) {
+      debug('response: ', response)
 
-      if (options.selection_key_only) {
-        debug('Skip because "selection_key_only"')
+      const translation = TransOver.deserialize(response.translation)
+
+      if (!translation) {
+        debug('skipping empty translation')
         return
       }
 
-      debug('Got selection: ' + selection.toString())
+      last_translation = translation
+      showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
+    })
+  }
+}
 
-      let sel_container = selection.getRangeAt(0).commonAncestorContainer
+function withOptionsSatisfied(e, do_stuff) {
+  if (options.target_lang) {
+    //respect 'translate only when alt pressed' option
+    if (options.word_key_only && !show_popup_key_pressed) return
 
-      while (sel_container.nodeType != Node.ELEMENT_NODE) {
-        sel_container = sel_container.parentNode
+    //respect "don't translate these sites"
+    if (disable_on_this_page) return
+
+    do_stuff()
+  }
+}
+
+$(document).on('mousestop', function(e) {
+  withOptionsSatisfied(e, function() {
+    // translate selection unless 'translate selection on alt only' is set
+    if (window.getSelection().toString()) {
+      if (!options.selection_key_only) {
+        process(e)
       }
-
-      if (
-      // only choose selection if mouse stopped within immediate parent of selection
-        ( $(hit_elem).is(sel_container) || $.contains(sel_container, hit_elem) )
-          // and since it can still be quite a large area
-          // narrow it down by only choosing selection if mouse points at the element that is (partially) inside selection
-          && selection.containsNode(hit_elem, true)
-          // But what is the point for the first part of condition? Well, without it, pointing at body for instance would also satisfy the second part
-          // resulting in selection translation showing up in random places
-      ) {
-        word = selection.toString()
-      }
-      else if (options.translate_by == 'point') {
-        word = getHitWord(e)
+    } else {
+      if (options.translate_by == 'point') {
+        process(e)
       }
     }
-    else {
-      word = getHitWord(e)
-    }
-    if (word != '') {
-      chrome.extension.sendRequest({handler: 'translate', word: word}, function(response) {
+  })
+})
+
+$(document).click(function(e) {
+  withOptionsSatisfied(e, function() {
+    if (options.translate_by != 'click')
+      return
+    if ($(e.target).closest('a').length > 0)
+      return
+
+    process(e)
+  })
+  return true
+})
+
+let show_popup_key_pressed = false
+$(document).keydown(function(e) {
+  if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
+    show_popup_key_pressed = true
+
+    const selection = window.getSelection().toString()
+
+    if (options.selection_key_only && selection) {
+      debug('Got selection_key_only')
+
+      chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
         debug('response: ', response)
 
         const translation = TransOver.deserialize(response.translation)
@@ -308,200 +388,133 @@ chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
           return
         }
 
+        const xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y }
         last_translation = translation
-        showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
+        showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
       })
     }
   }
 
-  function withOptionsSatisfied(e, do_stuff) {
-    if (options.target_lang) {
-      //respect 'translate only when alt pressed' option
-      if (options.word_key_only && !show_popup_key_pressed) return
+  // text-to-speech on ctrl press
+  if (!e.originalEvent.repeat && TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
+    debug('tts')
+    chrome.extension.sendRequest({handler: 'tts'})
+  }
 
-      //respect "don't translate these sites"
-      if (ignoreThisPage(options)) return
+  // Hide tat popup on escape
+  if (e.keyCode == 27) {
+    removePopup('transover-type-and-translate-popup')
+  }
+}).keyup(function(e) {
+  if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
+    show_popup_key_pressed = false
+  }
+})
 
-      do_stuff()
+function hasMouseReallyMoved(e) { //or is it a tremor?
+  const left_boundry = parseInt(last_mouse_stop.x) - 5,
+    right_boundry  = parseInt(last_mouse_stop.x) + 5,
+    top_boundry    = parseInt(last_mouse_stop.y) - 5,
+    bottom_boundry = parseInt(last_mouse_stop.y) + 5
+
+  return e.clientX > right_boundry || e.clientX < left_boundry || e.clientY > bottom_boundry || e.clientY < top_boundry
+}
+
+$(document).mousemove(function(e) {
+  if (hasMouseReallyMoved(e)) {
+    const mousemove_without_noise = new $.Event('mousemove_without_noise')
+    mousemove_without_noise.clientX = e.clientX
+    mousemove_without_noise.clientY = e.clientY
+
+    $(document).trigger(mousemove_without_noise)
+  }
+})
+
+let timer25
+const last_mouse_stop = {x: 0, y: 0}
+
+$(document).scroll(function() {
+  removePopup('transover-popup')
+})
+
+// setup mousestop event
+$(document).on('mousemove_without_noise', function(e){
+  removePopup('transover-popup')
+
+  clearTimeout(timer25)
+
+  let delay = options.delay
+
+  if (window.getSelection().toString()) {
+    if (options.selection_key_only) {
+      delay = 200
+    }
+  } else {
+    if (options.word_key_only) {
+      delay = 200
     }
   }
 
-  options = JSON.parse( response.options )
+  timer25 = setTimeout(function() {
+    const mousestop = new $.Event('mousestop')
+    last_mouse_stop.x = mousestop.clientX = e.clientX
+    last_mouse_stop.y = mousestop.clientY = e.clientY
 
-  $(document).on('mousestop', function(e) {
-    withOptionsSatisfied(e, function() {
-      // translate selection unless 'translate selection on alt only' is set
-      if (window.getSelection().toString()) {
-        if (!options.selection_key_only) {
-          process(e)
-        }
-      } else {
-        if (options.translate_by == 'point') {
-          process(e)
-        }
-      }
-    })
-  })
-  $(document).click(function(e) {
-    withOptionsSatisfied(e, function() {
-      if (options.translate_by != 'click')
-        return
-      if ($(e.target).closest('a').length > 0)
-        return
+    $(document).trigger(mousestop)
+  }, delay)
+})
 
-      process(e)
-    })
-    return true
-  })
+chrome.runtime.onMessage.addListener(
+  function(request) {
+    if (window != window.top) return
 
-  let show_popup_key_pressed = false
-  $(document).keydown(function(e) {
-    if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
-      show_popup_key_pressed = true
+    if (request == 'open_type_and_translate') {
+      if ($('transover-type-and-translate-popup').length == 0) {
+        chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
+          const $popup = createPopup('transover-type-and-translate-popup')
+          const languages = $.extend({}, TransOverLanguages)
 
-      const selection = window.getSelection().toString()
-
-      if (options.selection_key_only && selection) {
-        debug('Got selection_key_only')
-
-        chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
-          debug('response: ', response)
-
-          const translation = TransOver.deserialize(response.translation)
-
-          if (!translation) {
-            debug('skipping empty translation')
-            return
+          if (response.sl) {
+            languages[response.sl].selected_sl = true
           }
+          languages[response.tast_tl || options.target_lang].selected_tl = true
 
-          const xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y }
-          last_translation = translation
-          showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
+          $popup.attr('data-languages', JSON.stringify(languages))
+          $popup.attr('data-disable_on_this_page', disable_on_this_page)
+          $('body').append($popup)
+          $popup.each(function() {
+            $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast')
+          })
         })
       }
-    }
-
-    // text-to-speech on ctrl press
-    if (!e.originalEvent.repeat && TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
-      debug('tts')
-      chrome.extension.sendRequest({handler: 'tts'})
-    }
-
-    // Hide tat popup on escape
-    if (e.keyCode == 27) {
-      removePopup('transover-type-and-translate-popup')
-    }
-  }).keyup(function(e) {
-    if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
-      show_popup_key_pressed = false
-    }
-  })
-
-  function hasMouseReallyMoved(e) { //or is it a tremor?
-    const left_boundry = parseInt(last_mouse_stop.x) - 5,
-      right_boundry  = parseInt(last_mouse_stop.x) + 5,
-      top_boundry    = parseInt(last_mouse_stop.y) - 5,
-      bottom_boundry = parseInt(last_mouse_stop.y) + 5
-
-    return e.clientX > right_boundry || e.clientX < left_boundry || e.clientY > bottom_boundry || e.clientY < top_boundry
-  }
-
-  $(document).mousemove(function(e) {
-    if (hasMouseReallyMoved(e)) {
-      const mousemove_without_noise = new $.Event('mousemove_without_noise')
-      mousemove_without_noise.clientX = e.clientX
-      mousemove_without_noise.clientY = e.clientY
-
-      $(document).trigger(mousemove_without_noise)
-    }
-  })
-
-  let timer25
-  const last_mouse_stop = {x: 0, y: 0}
-
-  $(document).scroll(function() {
-    removePopup('transover-popup')
-  })
-
-  // setup mousestop event
-  $(document).on('mousemove_without_noise', function(e){
-    removePopup('transover-popup')
-
-    clearTimeout(timer25)
-
-    let delay = options.delay
-
-    if (window.getSelection().toString()) {
-      if (options.selection_key_only) {
-        delay = 200
+      else {
+        removePopup('transover-type-and-translate-popup')
       }
-    } else {
-      if (options.word_key_only) {
-        delay = 200
-      }
-    }
-
-    timer25 = setTimeout(function() {
-      const mousestop = new $.Event('mousestop')
-      last_mouse_stop.x = mousestop.clientX = e.clientX
-      last_mouse_stop.y = mousestop.clientY = e.clientY
-
-      $(document).trigger(mousestop)
-    }, delay)
-  })
-
-  chrome.runtime.onMessage.addListener(
-    function(request) {
-      if (window != window.top) return
-      if (ignoreThisPage(options)) return
-
-      if (request == 'open_type_and_translate') {
-        if ($('transover-type-and-translate-popup').length == 0) {
-          chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
-            const $popup = createPopup('transover-type-and-translate-popup')
-            const languages = $.extend({}, TransOverLanguages)
-
-            if (response.sl) {
-              languages[response.sl].selected_sl = true
+    } else if (request == 'copy-translation-to-clipboard') {
+      debug('received copy-translation-to-clipboard')
+      if ($('transover-popup').length > 0) {
+        let toClipboard
+        if (Array.isArray(last_translation)) {
+          toClipboard = last_translation.map(t => {
+            let line = ''
+            if (t.pos) {
+              line = t.pos + ': '
             }
-            languages[response.tast_tl || options.target_lang].selected_tl = true
-
-            $popup.attr('data-languages', JSON.stringify(languages))
-            $('body').append($popup)
-            $popup.each(function() {
-              $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast')
-            })
-          })
+            line = line + t.meanings.slice(0,5).join(', ')
+            return line
+          }).join('; ')
+        } else {
+          toClipboard = last_translation
         }
-        else {
-          removePopup('transover-type-and-translate-popup')
-        }
-      } else if (request == 'copy-translation-to-clipboard') {
-        debug('received copy-translation-to-clipboard')
-        if ($('transover-popup').length > 0) {
-          let toClipboard
-          if (Array.isArray(last_translation)) {
-            toClipboard = last_translation.map(t => {
-              let line = ''
-              if (t.pos) {
-                line = t.pos + ': '
-              }
-              line = line + t.meanings.slice(0,5).join(', ')
-              return line
-            }).join('; ')
-          } else {
-            toClipboard = last_translation
-          }
-          copyToClipboard(toClipboard)
-        }
+        copyToClipboard(toClipboard)
       }
     }
-  )
+  }
+)
 
-  $(function() {
-    registerTransoverComponent('popup')
-    registerTransoverComponent('tat_popup')
-  })
+$(function() {
+  registerTransoverComponent('popup')
+  registerTransoverComponent('tat_popup')
 })
 
 window.addEventListener('message', function(e) {
@@ -524,5 +537,16 @@ window.addEventListener('message', function(e) {
       last_translation = translation
       showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
     })
+  } else if (e.data.type === 'toggle_disable_on_this_page') {
+    disable_on_this_page = e.data.disable_on_this_page
+    chrome.extension.sendRequest({
+      handler: 'toggle_disable_on_this_page',
+      disable_on_this_page,
+      current_url: window.location.origin
+    })
+    chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
+    removePopup('transover-type-and-translate-popup')
+  } else if (e.data.type === 'tat_close') {
+    removePopup('transover-type-and-translate-popup')
   }
 })

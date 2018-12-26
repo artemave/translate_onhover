@@ -78,9 +78,38 @@
       font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
+
+    #disable_on_this_page_container {
+      margin-bottom: 8px;
+      color: blue;
+    }
+
+    #disable_on_this_page {
+      position: relative;
+      vertical-align: middle;
+      bottom: 1px;
+      margin-right: 5px;
+    }
+
+    #top_row_container {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #tat_close{
+      width: 12px;
+      height: 12px;
+      background: -webkit-linear-gradient(-45deg, transparent 0%, transparent 46%, darkgrey 46%, darkgrey 56%,transparent 56%, transparent 100%), -webkit-linear-gradient(45deg, transparent 0%, transparent 46%, darkgrey 46%,  darkgrey 56%,transparent 56%, transparent 100%);
+    }
   </style>
 
   <main>
+    <div id="top_row_container">
+      <div id="disable_on_this_page_container">
+        <label><input id="disable_on_this_page" type="checkbox"/>Disable on this site</label>
+      </div>
+      <a href="#" id="tat_close"></a>
+    </div>
     <div id="tat_input_container">
       <label for="tat_from_lang">Translate</label>
       <input id="tat_input" type="text">

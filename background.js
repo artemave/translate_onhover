@@ -104,10 +104,15 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
 const last_translation = {}
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  const except_urls = Options.except_urls()
+
   switch (request.handler) {
   case 'get_last_tat_sl_tl':
     console.log('get_last_tat_sl_tl')
-    sendResponse({last_tl: localStorage['last_tat_tl'], last_sl: localStorage['last_tat_sl']})
+    sendResponse({
+      last_tl: localStorage['last_tat_tl'],
+      last_sl: localStorage['last_tat_sl']
+    })
     break
   case 'get_options':
     sendResponse({
@@ -159,8 +164,26 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     }
     sendResponse({})
     break
+  case 'setIcon':
+    chrome.browserAction.setIcon({path: request.disabled ? 'to_bw_38.png' : 'to_38.png'})
+    break
+  case 'toggle_disable_on_this_page':
+    if (request.disable_on_this_page) {
+      if (!except_urls.find(u => u.match(request.current_url))) {
+        Options.except_urls(
+          [request.current_url, ...except_urls]
+        )
+      }
+    } else {
+      if (except_urls.find(u => u.match(request.current_url))) {
+        Options.except_urls(
+          except_urls.filter(u => !u.match(request.current_url))
+        )
+      }
+    }
+    break
   default:
-    console.log('Error! Unknown handler')
+    console.error('Unknown handler')
     sendResponse({})
   }
 })
