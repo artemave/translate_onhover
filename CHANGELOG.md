@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+1.43
+  - Add "disable on this page" checkbox to type-and-translate popup.
+  - Changing options no longer requires to reload pages.
+  - Fix web components deprecation warnings.
 1.42
   - Change google translate API url. The old one seems to be getting blocked more and more.
 1.41
