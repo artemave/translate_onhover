@@ -74,6 +74,29 @@
       .disabled {
         color: #ccc;
       }
+
+      .pulse {
+        border-radius: 3%;
+        border: 1px solid red;
+        box-shadow: 0 0 0 rgba(255, 0, 0, 0.4);
+        animation: pulse 2s infinite;
+      }
+
+      .pulse:hover {
+        animation: none;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+        }
+      }
     </style>
   </head>
   <body>
