@@ -443,25 +443,27 @@ $(document).on('mousemove_without_noise', function(e){
 
   clearTimeout(timer25)
 
-  let delay = options.delay
+  if (options) {
+    let delay = options.delay
 
-  if (window.getSelection().toString()) {
-    if (options.selection_key_only) {
-      delay = 200
+    if (window.getSelection().toString()) {
+      if (options.selection_key_only) {
+        delay = 200
+      }
+    } else {
+      if (options.word_key_only) {
+        delay = 200
+      }
     }
-  } else {
-    if (options.word_key_only) {
-      delay = 200
-    }
+
+    timer25 = setTimeout(function() {
+      const mousestop = new $.Event('mousestop')
+      last_mouse_stop.x = mousestop.clientX = e.clientX
+      last_mouse_stop.y = mousestop.clientY = e.clientY
+
+      $(document).trigger(mousestop)
+    }, delay)
   }
-
-  timer25 = setTimeout(function() {
-    const mousestop = new $.Event('mousestop')
-    last_mouse_stop.x = mousestop.clientX = e.clientX
-    last_mouse_stop.y = mousestop.clientY = e.clientY
-
-    $(document).trigger(mousestop)
-  }, delay)
 })
 
 chrome.runtime.onMessage.addListener(
