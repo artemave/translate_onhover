@@ -1,5 +1,10 @@
 # CHANGE LOG
 
+1.45
+  - fix not working on youtube
+1.44
+  - make "translate into" field look more like a required field
+  - fix occasional exception showing up in dev tools
 1.43
   - Add "disable on this page" checkbox to type-and-translate popup.
   - Changing options no longer requires to reload pages.
