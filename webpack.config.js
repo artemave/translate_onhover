@@ -41,8 +41,7 @@ const config = {
       'lib/popup.html',
       'lib/tat_popup.html',
       'node_modules/jquery/dist/jquery.min.js',
-      'node_modules/xregexp/xregexp-all.js',
-      'node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js'
+      'node_modules/xregexp/xregexp-all.js'
     ], {to: 'dist'})
   ]
 }
