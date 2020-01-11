@@ -83,7 +83,7 @@ function showPopup(e, content) {
         $(this.shadowRoot.querySelector('main')).fadeIn('fast')
       })
   })
-  $popup.attr('content', content)
+  $popup.attr({content, options: JSON.stringify(options)})
 }
 
 function calculatePosition(x, y, $popup) {
@@ -131,19 +131,18 @@ function calculatePosition(x, y, $popup) {
   return pos
 }
 
-chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
-  options = JSON.parse( response.options )
-  disable_on_this_page = ignoreThisPage(options)
-  chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
-})
+function loadOptions() {
+  chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
+    options = JSON.parse( response.options )
+    disable_on_this_page = ignoreThisPage(options)
+    chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
+  })
+}
+loadOptions()
 
 document.addEventListener('visibilitychange', function () {
   if (!document.hidden) {
-    chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
-      options = JSON.parse( response.options )
-      disable_on_this_page = ignoreThisPage(options)
-      chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
-    })
+    loadOptions()
   }
 }, false)
 
