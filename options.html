@@ -101,7 +101,7 @@
   </head>
   <body>
     <div class="content">
-      <div class="heading">TransOver options</div>
+      <h1>Configuration</h1>
       <div class="option">
         <label for="target_lang">Translate into</label>
         <select id="target_lang"></select>
@@ -171,6 +171,11 @@
         <div class="option">
           <input type="checkbox" id="do_not_show_oops" name="do_not_show_oops"/>
           <label for="do_not_show_oops">Do not show 'Oops... No translation found'</label>
+        </div>
+
+        <div class="option">
+          <label for="fontSize">Font size</label>
+          <input type="number" name="fontSize" id="fontSize" min="10", max="24">&nbsp;px
         </div>
 
         <div class="option">Don't translate words on these sites:</div>

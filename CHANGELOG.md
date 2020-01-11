@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+1.47
+  - Add ability to configure font size
+1.46
+  - remove youtube fix - it seems to be no longer required
 1.45
   - fix not working on youtube
 1.44

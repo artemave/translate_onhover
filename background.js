@@ -116,20 +116,12 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     break
   case 'get_options':
     sendResponse({
-      options: JSON.stringify({
-        except_urls: Options.except_urls(),
-        only_urls: Options.only_urls(),
-        target_lang: Options.target_lang(),
-        reverse_lang: Options.reverse_lang(),
-        delay: Options.delay(),
-        word_key_only: Options.word_key_only(),
-        selection_key_only: Options.selection_key_only(),
-        tts: Options.tts(),
-        tts_key: Options.tts_key(),
-        popup_show_trigger: Options.popup_show_trigger(),
-        translate_by: Options.translate_by(),
-        show_from_lang: Options.show_from_lang()
-      })
+      options: JSON.stringify(
+        Object.keys(Options).reduce((result, key) => {
+          result[key] = Options[key]()
+          return result
+        }, {})
+      )
     })
     break
   case 'translate':
