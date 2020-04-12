@@ -1,5 +1,7 @@
 # CHANGE LOG
 
+1.48
+  - Fix hover menus closing unintentionally (thanks https://github.com/WofWca)
 1.47
   - Add ability to configure font size
 1.46
