@@ -28,7 +28,7 @@
       "description": "Copy translation to clipboard"
     }
   },
-  "permissions": [ "*://translate.google.com/*", "tabs", "tts" ],
+  "permissions": [ "https://clients5.google.com/*", "tabs" ],
   "web_accessible_resources": [
     "options.html",
     "popup.html",
@@ -36,5 +36,5 @@
     "tat_popup.html",
     "tat_popup.js"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://translate.google.com; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://clients5.google.com; object-src 'self'"
 }
