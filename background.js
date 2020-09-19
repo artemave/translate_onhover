@@ -75,17 +75,20 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
     output = []
     if (data.dict) { // full translation
       data.dict.forEach(function(t) {
-        output.push({pos: t.pos, meanings: t.terms})
+        const translationItem = {pos: t.pos, meanings: t.terms}
+
+        output.push(translationItem)
+
         if (t.pos === 'noun' && data.query_inflections) {
           for (let i of data.query_inflections) {
             if (i.written_form === word && i.features.gender) {
               if (i.features.gender === 1)
-                output[output.length - 1].gender = 'm.';
+                translationItem.gender = 'm'
               if (i.features.gender === 2)
-                output[output.length - 1].gender = 'f.';
+                translationItem.gender = 'f'
               if (i.features.gender === 3)
-                output[output.length - 1].gender = 'n.';
-              break;
+                translationItem.gender = 'n'
+              break
             }
           }
         }
