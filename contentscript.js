@@ -1,6 +1,12 @@
 import TransOver from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
-const debug = require('debug')('transover')
+
+let debug
+if (process.env.NODE_ENV !== 'production') {
+  debug = require('debug')('transover')
+} else {
+  debug = () => {}
+}
 
 let options
 let disable_on_this_page
@@ -146,7 +152,7 @@ document.addEventListener('visibilitychange', function () {
   }
 }, false)
 
-function process(e) {
+function processEvent(e) {
 
   function getHitWord(e) {
 
@@ -345,11 +351,11 @@ $(document).on('mousestop', function(e) {
     // translate selection unless 'translate selection on alt only' is set
     if (window.getSelection().toString()) {
       if (!options.selection_key_only) {
-        process(e)
+        processEvent(e)
       }
     } else {
       if (options.translate_by == 'point') {
-        process(e)
+        processEvent(e)
       }
     }
   })
@@ -362,7 +368,7 @@ $(document).click(function(e) {
     if ($(e.target).closest('a').length > 0)
       return
 
-    process(e)
+    processEvent(e)
   })
   return true
 })
