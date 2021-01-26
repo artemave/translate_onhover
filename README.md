@@ -2,15 +2,25 @@
 
 Simply the best Google Chrome translation extension - https://chrome.google.com/webstore/detail/aggiiclaiamajehmlfpkjmlbadmkledi
 
-### Development
+### Run local version
 
-You'll need Nodejs.
+You'll need a terminal and NodeJs. Then clone/download this repository.
 
-Install dependencies (run this in a terminal):
+In the project directory, install dependencies (run this in a terminal):
 
 ```bash
 npm install -g yarn
 yarn install
 ```
 
-Then run `yarn dev` to start webpack compilation (in watch mode). You can then load `dist` directory as unpacked extension. For as long as `yarn dev` is running, `dist` will stay updated with code changes.
+Then build:
+
+```
+yarn build
+```
+
+Now you can "Load unpacked" the `./dist` folder.
+
+### Development
+
+In addition to the above, there is `yarn dev`. For as long as it is running, `dist` will stay updated with code changes.
