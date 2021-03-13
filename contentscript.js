@@ -123,7 +123,6 @@ function loadOptions() {
     chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
   })
 }
-loadOptions()
 
 document.addEventListener('visibilitychange', function () {
   if (!document.hidden) {
@@ -503,6 +502,7 @@ $(function() {
   $(tatPopupTemplate).appendTo(document.documentElement)
   registerTransoverComponent('popup')
   registerTransoverComponent('tat_popup')
+  loadOptions()
 })
 
 window.addEventListener('message', function(e) {

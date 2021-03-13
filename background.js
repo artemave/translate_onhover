@@ -194,6 +194,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.error('Unknown handler')
     sendResponse({})
   }
+  // Without this, firefox sends empty async response
+  // Details: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage
+  return true
 })
 
 chrome.browserAction.onClicked.addListener(function(tab) {

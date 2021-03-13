@@ -6,7 +6,8 @@
     <style type="text/css">
       body {
         margin: 10px auto;
-        width: 800px;
+        padding: 0 20px;
+        width: 550px;
       }
       body, table {
         color: #4f4f4f;
@@ -36,6 +37,7 @@
       }
 
       .option {
+        min-width: 200px;
         margin-top: 25px;
       }
 
@@ -84,6 +86,10 @@
 
       .pulse:hover {
         animation: none;
+      }
+
+      .u-hidden {
+        display: none;
       }
 
       @keyframes pulse {
@@ -143,10 +149,6 @@
         </div>
 
         <div class="option">
-          Configure "type and translate" and "copy translation" hotkeys <a class="set_hotkey" href='#'>here</a>
-        </div>
-
-        <div class="option">
           <input type="checkbox" id="word_key_only" name="word_key_only"/>
           <label for="word_key_only">Only show word translation when</label>
           <label for="word_key_only_key"> I hold the
@@ -176,6 +178,14 @@
         <div class="option">
           <label for="fontSize">Font size</label>
           <input type="number" name="fontSize" id="fontSize" min="10", max="24">&nbsp;px
+        </div>
+
+        <div class="option firefox-option u-hidden">
+          Configure "copy translation" hotkey in "Manage Extension Shortcuts".
+        </div>
+
+        <div class="option chrome-option u-hidden">
+          Configure "type and translate" and "copy translation" hotkeys <a class="set_hotkey" href='#'>here</a>
         </div>
 
         <div class="option">Don't translate words on these sites:</div>
