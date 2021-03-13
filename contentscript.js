@@ -1,5 +1,8 @@
 import TransOver from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
+const popupTemplate = require('./lib/popup.html')
+const tatPopupTemplate = require('./lib/tat_popup.html')
+
 let debug
 if (process.env.NODE_ENV !== 'production') {
   debug = require('debug')('transover')
