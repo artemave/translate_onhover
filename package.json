@@ -16,7 +16,7 @@
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.0",
     "xregexp": "^4.2.0"
   }
 }
