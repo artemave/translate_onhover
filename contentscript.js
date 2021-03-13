@@ -1,6 +1,5 @@
 import TransOver from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
-
 let debug
 if (process.env.NODE_ENV !== 'production') {
   debug = require('debug')('transover')
@@ -31,41 +30,21 @@ function ignoreThisPage(options) {
 }
 
 function createPopup(nodeType) {
-  document.documentElement.appendChild(templates[templateIds[nodeType]])
-  return $('<'+nodeType+'>')
+  return $(document.createElement(nodeType))
 }
 
 function removePopup(nodeType) {
   $(nodeType).each(function() {
-    const self = this
-    $(this.shadowRoot.querySelector('main')).fadeOut('fast', function() { self.remove() })
+    $(this.shadowRoot.querySelector('main')).fadeOut('fast', () => this.remove())
   })
-  $('#'+templateIds[nodeType]).remove()
-}
-
-const templates = {}
-const templateIds = {
-  'transover-popup': 'transover-popup-template',
-  'transover-type-and-translate-popup': 'transover-tat-popup-template'
 }
 
 function registerTransoverComponent(component) {
-  const html = component + '.html'
   const script = component + '.js'
-
-  const xhr = new XMLHttpRequest()
-  xhr.open('GET', chrome.extension.getURL(html), true)
-  xhr.responseType = 'document'
-  xhr.onload = function(e) {
-    const doc = e.target.response
-    const template = doc.querySelector('template')
-    templates[template.id] = template
-  }
-  xhr.send()
 
   const s = document.createElement('script')
   s.type = 'text/javascript'
-  s.src = chrome.extension.getURL(script)
+  s.src = chrome.runtime.getURL(script)
   s.async = true
   document.head.appendChild(s)
 }
@@ -138,10 +117,10 @@ function calculatePosition(x, y, $popup) {
 }
 
 function loadOptions() {
-  chrome.extension.sendRequest({handler: 'get_options'}, function(response) {
+  chrome.runtime.sendMessage({handler: 'get_options'}, function(response) {
     options = JSON.parse( response.options )
     disable_on_this_page = ignoreThisPage(options)
-    chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
+    chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
   })
 }
 loadOptions()
@@ -318,7 +297,7 @@ function processEvent(e) {
     word = getHitWord(e)
   }
   if (word != '') {
-    chrome.extension.sendRequest({handler: 'translate', word: word}, function(response) {
+    chrome.runtime.sendMessage({handler: 'translate', word: word}, function(response) {
       debug('response: ', response)
 
       const translation = TransOver.deserialize(response.translation)
@@ -383,7 +362,7 @@ $(document).keydown(function(e) {
     if (options.selection_key_only && selection) {
       debug('Got selection_key_only')
 
-      chrome.extension.sendRequest({handler: 'translate', word: selection}, function(response) {
+      chrome.runtime.sendMessage({handler: 'translate', word: selection}, function(response) {
         debug('response: ', response)
 
         const translation = TransOver.deserialize(response.translation)
@@ -403,7 +382,7 @@ $(document).keydown(function(e) {
   // text-to-speech on ctrl press
   if (!e.originalEvent.repeat && TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
     debug('tts')
-    chrome.extension.sendRequest({handler: 'tts'})
+    chrome.runtime.sendMessage({handler: 'tts'})
   }
 
   // Hide tat popup on escape
@@ -477,7 +456,7 @@ chrome.runtime.onMessage.addListener(
 
     if (request == 'open_type_and_translate') {
       if ($('transover-type-and-translate-popup').length == 0) {
-        chrome.extension.sendRequest({handler: 'get_last_tat_sl_tl'}, function(response) {
+        chrome.runtime.sendMessage({handler: 'get_last_tat_sl_tl'}, function(response) {
           const $popup = createPopup('transover-type-and-translate-popup')
           const languages = $.extend({}, TransOverLanguages)
 
@@ -520,6 +499,8 @@ chrome.runtime.onMessage.addListener(
 )
 
 $(function() {
+  $(popupTemplate).appendTo(document.documentElement)
+  $(tatPopupTemplate).appendTo(document.documentElement)
   registerTransoverComponent('popup')
   registerTransoverComponent('tat_popup')
 })
@@ -530,7 +511,7 @@ window.addEventListener('message', function(e) {
     return
 
   if (e.data.type == 'transoverTranslate') {
-    chrome.extension.sendRequest({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
+    chrome.runtime.sendMessage({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
       debug('tat response: ', response)
 
       const translation = TransOver.deserialize(response.translation)
@@ -546,12 +527,12 @@ window.addEventListener('message', function(e) {
     })
   } else if (e.data.type === 'toggle_disable_on_this_page') {
     disable_on_this_page = e.data.disable_on_this_page
-    chrome.extension.sendRequest({
+    chrome.runtime.sendMessage({
       handler: 'toggle_disable_on_this_page',
       disable_on_this_page,
       current_url: window.location.origin
     })
-    chrome.extension.sendRequest({handler: 'setIcon', disabled: disable_on_this_page})
+    chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
     removePopup('transover-type-and-translate-popup')
   } else if (e.data.type === 'tat_close') {
     removePopup('transover-type-and-translate-popup')

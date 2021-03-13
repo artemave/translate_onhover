@@ -119,7 +119,7 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
 
 const last_translation = {}
 
-chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   const except_urls = Options.except_urls()
 
   switch (request.handler) {
@@ -202,7 +202,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
 chrome.runtime.onInstalled.addListener(function(details) {
   if (details.reason == 'install') {
-    chrome.tabs.create({url: chrome.extension.getURL('options.html')})
+    chrome.tabs.create({url: chrome.runtime.getURL('options.html')})
   }
 })
 

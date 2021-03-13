@@ -1,6 +1,6 @@
 const path = require('path')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 
@@ -18,31 +18,40 @@ const config = {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   },
+  experiments: {
+    asset: true
+  },
   module: {
     rules: [
+      // {
+      //   test: /\.js$/,
+      //   exclude: /node_modules/,
+      //   use: {
+      //     loader: 'babel-loader',
+      //     options: {
+      //       plugins: ['@babel/plugin-transform-classes']
+      //     }
+      //   }
+      // },
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            plugins: ['@babel/plugin-transform-classes']
-          }
-        }
+        test: /\.html$/,
+        type: 'asset/source'
       }
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(['dist']),
-    new CopyWebpackPlugin([
-      'manifest.json',
-      '*.png',
-      'options.html',
-      'lib/popup.html',
-      'lib/tat_popup.html',
-      'node_modules/jquery/dist/jquery.min.js',
-      'node_modules/xregexp/xregexp-all.js'
-    ], {to: 'dist'})
+    new CleanWebpackPlugin(),
+    new CopyPlugin({
+      patterns: [
+        'manifest.json',
+        '*.png',
+        'options.html',
+        'lib/popup.html',
+        'lib/tat_popup.html',
+        'node_modules/jquery/dist/jquery.min.js',
+        'node_modules/xregexp/xregexp-all.js'
+      ]
+    })
   ]
 }
 

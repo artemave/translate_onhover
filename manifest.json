@@ -10,7 +10,9 @@
       "background.js"
     ]
   },
-  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html"
+  },
   "content_scripts": [{
     "matches": [ "<all_urls>" ],
     "all_frames": true,
