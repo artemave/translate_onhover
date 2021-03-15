@@ -5,12 +5,14 @@ const _gaq = []
 _gaq.push(['_setAccount', 'UA-46863240-1'])
 _gaq.push(['_trackPageview'])
 
-const ga = document.createElement('script')
-ga.type = 'text/javascript'
-ga.async = true
-ga.src = 'https://ssl.google-analytics.com/ga.js'
-const s = document.getElementsByTagName('script')[0]
-s.parentNode.insertBefore(ga, s)
+if (process.env.USE_GA === 'true') {
+  const ga = document.createElement('script')
+  ga.type = 'text/javascript'
+  ga.async = true
+  ga.src = 'https://ssl.google-analytics.com/ga.js'
+  const s = document.getElementsByTagName('script')[0]
+  s.parentNode.insertBefore(ga, s)
+}
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   const options = {

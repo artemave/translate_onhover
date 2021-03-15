@@ -1,6 +1,7 @@
 const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const { EnvironmentPlugin } = require('webpack')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 
@@ -40,6 +41,9 @@ const config = {
     ]
   },
   plugins: [
+    new EnvironmentPlugin({
+      USE_GA: 'true'
+    }),
     new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
