@@ -1,7 +1,7 @@
 {
   "name": "TransOver",
   "manifest_version": 2,
-  "version": "1.51",
+  "version": "1.52",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate (with text-to-speech). Translator.",
   "background": { "scripts": [
@@ -32,10 +32,7 @@
   },
   "permissions": [ "https://clients5.google.com/*", "tabs" ],
   "web_accessible_resources": [
-    "options.html",
-    "popup.html",
     "popup.js",
-    "tat_popup.html",
     "tat_popup.js"
   ],
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"

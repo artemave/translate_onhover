@@ -19,6 +19,12 @@ Then build:
 yarn build
 ```
 
+For Firefox build:
+
+```
+yarn build-ff
+```
+
 Now you can "Load unpacked" the `./dist` folder.
 
 ### Development

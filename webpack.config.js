@@ -2,6 +2,7 @@ const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { EnvironmentPlugin } = require('webpack')
+const buildManifest = require('./buildManifest')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 
@@ -24,16 +25,17 @@ const config = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.js$/,
-      //   exclude: /node_modules/,
-      //   use: {
-      //     loader: 'babel-loader',
-      //     options: {
-      //       plugins: ['@babel/plugin-transform-classes']
-      //     }
-      //   }
-      // },
+      // Without this custom elements don't work on youtube... wtf
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            plugins: ['@babel/plugin-transform-classes']
+          }
+        }
+      },
       {
         test: /\.html$/,
         type: 'asset/source'
@@ -47,11 +49,12 @@ const config = {
     new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
-        'manifest.json',
+        {
+          from: 'manifest.json',
+          transform: buildManifest
+        },
         '*.png',
         'options.html',
-        'lib/popup.html',
-        'lib/tat_popup.html',
         'node_modules/jquery/dist/jquery.min.js',
         'node_modules/xregexp/xregexp-all.js'
       ]
