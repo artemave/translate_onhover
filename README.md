@@ -2,6 +2,8 @@
 
 Simply the best Google Chrome translation extension - https://chrome.google.com/webstore/detail/aggiiclaiamajehmlfpkjmlbadmkledi
 
+Now on Firefox too: https://addons.mozilla.org/en-US/firefox/addon/transover-ff/
+
 ### Run local version
 
 You'll need a terminal and NodeJs. Then clone/download this repository.
