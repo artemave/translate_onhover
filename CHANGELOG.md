@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+1.54
+  - Fix API url
+1.52
+  - Works on Firefox (involved numerous cleanups)
 1.48
   - Fix hover menus closing unintentionally (thanks https://github.com/WofWca)
 1.47

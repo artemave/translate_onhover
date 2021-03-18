@@ -15,8 +15,12 @@ if (process.env.USE_GA === 'true') {
 }
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
+  // Next time url fails:
+  // - install Google Translate extension: https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb
+  // - click on extension button to show popup
+  // - inspect popup to see the requests
   const options = {
-    url: 'https://clients5.google.com/translate_a/t?client=dict-chrome-ex',
+    url: 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input',
     data: {
       q: word,
       sl: sl,
