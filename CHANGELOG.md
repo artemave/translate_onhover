@@ -1,5 +1,7 @@
 # CHANGE LOG
 
+1.55
+  - Fix chrome build (production webpack generates invalid UTF-8 build)
 1.54
   - Fix API url
 1.52

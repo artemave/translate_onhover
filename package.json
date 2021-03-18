@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "NODE_ENV=production webpack && zip -FS -r -j translate_onhover dist",
+    "build": "webpack && zip -FS -r -j translate_onhover dist",
     "build-ff": "USE_GA=false yarn build",
     "dev": "webpack --watch",
     "lint": "eslint --ignore-pattern dist ."
