@@ -265,7 +265,10 @@ function processEvent(e) {
   }
 
   let word = ''
+  let trackedAction = options.translate_by
+
   if (selection.toString()) {
+    trackedAction = 'select'
 
     if (options.selection_key_only) {
       debug('Skip because "selection_key_only"')
@@ -299,6 +302,16 @@ function processEvent(e) {
     word = getHitWord(e)
   }
   if (word != '') {
+    chrome.runtime.sendMessage({
+      handler: 'trackEvent',
+      event: {
+        ec: 'translate',
+        ea: trackedAction,
+        el: 'characters',
+        ev: word.length
+      }
+    })
+
     chrome.runtime.sendMessage({handler: 'translate', word: word}, function(response) {
       debug('response: ', response)
 
@@ -539,5 +552,7 @@ window.addEventListener('message', function(e) {
     removePopup('transover-type-and-translate-popup')
   } else if (e.data.type === 'tat_close') {
     removePopup('transover-type-and-translate-popup')
+  } else if (e.data.type === 'transoverTrackEvent') {
+    chrome.runtime.sendMessage({ handler: 'trackEvent', event: e.data.event })
   }
 })

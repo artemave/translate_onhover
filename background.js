@@ -1,18 +1,6 @@
 import Options from './lib/options'
 import TransOver from './lib/transover_utils'
-
-const _gaq = []
-_gaq.push(['_setAccount', 'UA-46863240-1'])
-_gaq.push(['_trackPageview'])
-
-if (process.env.USE_GA === 'true') {
-  const ga = document.createElement('script')
-  ga.type = 'text/javascript'
-  ga.async = true
-  ga.src = 'https://ssl.google-analytics.com/ga.js'
-  const s = document.getElementsByTagName('script')[0]
-  s.parentNode.insertBefore(ga, s)
-}
+import trackEvent from './lib/tracking'
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   // Next time url fails:
@@ -31,6 +19,12 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
       onresponse(data, word, tl, last_translation, sendResponse, ga_event_name)
     },
     error: function(xhr, status, e) {
+      trackEvent({
+        ec: 'error',
+        ea: 'translate',
+        el: status,
+        ev: 1
+      })
       console.log({e: e, xhr: xhr})
     }
   }
@@ -60,7 +54,7 @@ function translationIsTheSameAsInput(sentences, input) {
   return sentences[0].trans.match(new RegExp(TransOver.regexp_escape(input), 'i'))
 }
 
-function on_translation_response(data, word, tl, last_translation, sendResponse, ga_event_name) {
+function on_translation_response(data, word, tl, last_translation, sendResponse) {
   let output
   const translation = {tl: tl}
 
@@ -117,8 +111,6 @@ function on_translation_response(data, word, tl, last_translation, sendResponse,
 
   $.extend(last_translation, translation)
 
-  _gaq.push(['_trackEvent', ga_event_name, translation.sl, translation.tl])
-
   console.log('response: ', translation)
   sendResponse(translation)
 }
@@ -168,7 +160,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   case 'tts':
     if (last_translation.succeeded) {
       console.log('tts: ' + last_translation.word + ', sl: ' + last_translation.sl)
-      _gaq.push(['_trackEvent', 'tts', last_translation.sl, last_translation.tl])
+      trackEvent({ec: 'tts', ea: 'play'})
 
       const msg = new SpeechSynthesisUtterance()
       msg.lang = last_translation.sl
@@ -176,6 +168,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       msg.rate = 0.7
       speechSynthesis.speak(msg)
     }
+    sendResponse({})
+    break
+  case 'trackEvent':
+    trackEvent(request.event)
     sendResponse({})
     break
   case 'setIcon':
@@ -197,7 +193,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     break
   default:
-    console.error('Unknown handler')
+    console.error('Unknown request', JSON.stringify(request, null, 2))
     sendResponse({})
   }
   // Without this, firefox sends empty async response

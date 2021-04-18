@@ -2,7 +2,6 @@ const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { EnvironmentPlugin } = require('webpack')
-const buildManifest = require('./buildManifest')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 
@@ -43,16 +42,13 @@ const config = {
     ]
   },
   plugins: [
-    new EnvironmentPlugin({
-      USE_GA: 'true'
-    }),
+    new EnvironmentPlugin(
+      mode === 'production' ? ['TRACKING_ID'] : { 'TRACKING_ID': '123456' }
+    ),
     new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
-        {
-          from: 'manifest.json',
-          transform: buildManifest
-        },
+        'manifest.json',
         '*.png',
         'options.html',
         'node_modules/jquery/dist/jquery.min.js',
