@@ -1,5 +1,8 @@
 # CHANGE LOG
 
+1.56
+  - Better usage tracking
+  - Fix chrome build (production webpack generates invalid UTF-8 build) - this time for real
 1.55
   - Fix chrome build (production webpack generates invalid UTF-8 build)
 1.54
