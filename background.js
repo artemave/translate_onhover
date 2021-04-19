@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+import $ from 'jquery'
 import Options from './lib/options'
 import TransOver from './lib/transover_utils'
 import trackEvent from './lib/tracking'

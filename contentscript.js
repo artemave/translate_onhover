@@ -1,14 +1,9 @@
+import $ from 'jquery'
 import TransOver from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
+const debug = require('debug')('transover')
 const popupTemplate = require('./lib/popup.html')
 const tatPopupTemplate = require('./lib/tat_popup.html')
-
-let debug
-if (process.env.NODE_ENV !== 'production') {
-  debug = require('debug')('transover')
-} else {
-  debug = () => {}
-}
 
 let options
 let disable_on_this_page
@@ -170,7 +165,7 @@ function processEvent(e) {
     }
 
     const text_nodes = hit_elem.contents().filter(function(){
-      return this.nodeType == Node.TEXT_NODE && XRegExp(word_re).test( this.nodeValue )
+      return this.nodeType == Node.TEXT_NODE && new RegExp(word_re, 'u').test( this.nodeValue )
     })
 
     if (text_nodes.length == 0) {
@@ -190,9 +185,9 @@ function processEvent(e) {
       function getHitText(node, parent_font_style) {
         debug('getHitText: \'' + node.textContent + '\'')
 
-        if (XRegExp(word_re).test( node.textContent )) {
+        if (new RegExp(word_re, 'u').test( node.textContent )) {
           $(node).replaceWith(function() {
-            return this.textContent.replace(XRegExp('^(.{'+Math.round( node.textContent.length/2 )+'}(?:\\p{L}|[\'’](?=\\p{L}))*)(.*)', 's'), function($0, $1, $2) {
+            return this.textContent.replace(new RegExp('^(.{'+Math.round( node.textContent.length/2 )+'}(?:\\p{L}|[\'’](?=\\p{L}))*)(.*)', 'us'), function($0, $1, $2) {
               return '<transblock>'+TransOver.escape_html($1)+'</transblock><transblock>'+TransOver.escape_html($2)+'</transblock>'
             })
           })
@@ -218,7 +213,7 @@ function processEvent(e) {
       if (minimal_text_node) {
         //wrap words inside text node into <transover> element
         $(minimal_text_node).replaceWith(function() {
-          return this.textContent.replace(XRegExp('(<|>|&|'+word_re+')', 'gs'), function ($0, $1) {
+          return this.textContent.replace(new RegExp('(<|>|&|'+word_re+')', 'ugs'), function ($0, $1) {
             switch ($1) {
             case '<': return '&lt;'
             case '>': return '&gt;'

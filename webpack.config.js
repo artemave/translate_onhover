@@ -2,6 +2,7 @@ const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { EnvironmentPlugin } = require('webpack')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 
@@ -51,11 +52,15 @@ const config = {
         'manifest.json',
         '*.png',
         'options.html',
-        'node_modules/jquery/dist/jquery.min.js',
-        'node_modules/xregexp/xregexp-all.js'
       ]
     })
   ]
+}
+
+if (mode === 'production') {
+  config.optimization = {
+    minimizer: [new UglifyJsPlugin({test: /\.js(\?.*)?$/i})]
+  }
 }
 
 module.exports = config
