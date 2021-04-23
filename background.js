@@ -8,14 +8,20 @@ import trackEvent from './lib/tracking'
 
 const blockTimeoutMs = 30000 * 60
 let blockExpiresAt = new Date()
+let blockedErrorCount = 0
 
 function blockedErrorMessage() {
-  return `Too many requests - translation is temporary disabled. Please retry in ${formatDistanceToNow(blockExpiresAt)}.`
+  return `Too many requests - translation is temporary disabled. Will retry in ${formatDistanceToNow(blockExpiresAt)}.`
 }
 
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   if (new Date() < blockExpiresAt) {
-    sendResponse({message: blockedErrorMessage(), error: true})
+    if (blockedErrorCount % 3 === 0) {
+      sendResponse({message: blockedErrorMessage(), error: true})
+    } else {
+      sendResponse()
+    }
+    blockedErrorCount++
     return
   }
   // Next time url fails:
@@ -43,6 +49,7 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
       console.error({e, xhr})
 
       if (xhr.status === 429) {
+        blockedErrorCount = 1
         blockExpiresAt = addMilliseconds(new Date(), blockTimeoutMs)
         sendResponse({message: blockedErrorMessage(), error: true})
       }
