@@ -1,5 +1,11 @@
 import $ from 'jquery'
-import TransOver from './lib/transover_utils'
+import {
+  renderError,
+  deserialize,
+  modifierKeys,
+  escape_html,
+  formatTranslation
+} from './lib/transover_utils'
 import TransOverLanguages from './lib/languages'
 const debug = require('debug')('transover')
 const popupTemplate = require('./lib/popup.html')
@@ -135,7 +141,7 @@ function processEvent(e) {
     function restorable(node, do_stuff) {
       $(node).wrap('<transwrapper />')
       const res = do_stuff(node)
-      $('transwrapper').replaceWith(TransOver.escape_html( $('transwrapper').text() ))
+      $('transwrapper').replaceWith(escape_html( $('transwrapper').text() ))
       return res
     }
 
@@ -188,7 +194,7 @@ function processEvent(e) {
         if (new RegExp(word_re, 'u').test( node.textContent )) {
           $(node).replaceWith(function() {
             return this.textContent.replace(new RegExp('^(.{'+Math.round( node.textContent.length/2 )+'}(?:\\p{L}|[\'’](?=\\p{L}))*)(.*)', 'us'), function($0, $1, $2) {
-              return '<transblock>'+TransOver.escape_html($1)+'</transblock><transblock>'+TransOver.escape_html($2)+'</transblock>'
+              return '<transblock>'+escape_html($1)+'</transblock><transblock>'+escape_html($2)+'</transblock>'
             })
           })
 
@@ -310,7 +316,12 @@ function processEvent(e) {
     chrome.runtime.sendMessage({handler: 'translate', word: word}, function(response) {
       debug('response: ', response)
 
-      const translation = TransOver.deserialize(response.translation)
+      if (response.error) {
+        showPopup(e, renderError(response.message))
+        return
+      }
+
+      const translation = deserialize(response.translation)
 
       if (!translation) {
         debug('skipping empty translation')
@@ -318,7 +329,7 @@ function processEvent(e) {
       }
 
       last_translation = translation
-      showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
+      showPopup(e, formatTranslation(translation, response, options))
     })
   }
 }
@@ -364,7 +375,7 @@ $(document).click(function(e) {
 
 let show_popup_key_pressed = false
 $(document).keydown(function(e) {
-  if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
+  if (modifierKeys[e.keyCode] == options.popup_show_trigger) {
     show_popup_key_pressed = true
 
     const selection = window.getSelection().toString()
@@ -375,7 +386,7 @@ $(document).keydown(function(e) {
       chrome.runtime.sendMessage({handler: 'translate', word: selection}, function(response) {
         debug('response: ', response)
 
-        const translation = TransOver.deserialize(response.translation)
+        const translation = deserialize(response.translation)
 
         if (!translation) {
           debug('skipping empty translation')
@@ -384,13 +395,13 @@ $(document).keydown(function(e) {
 
         const xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y }
         last_translation = translation
-        showPopup(xy, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
+        showPopup(xy, formatTranslation(translation, response, options))
       })
     }
   }
 
   // text-to-speech on ctrl press
-  if (!e.originalEvent.repeat && TransOver.modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
+  if (!e.originalEvent.repeat && modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
     debug('tts')
     chrome.runtime.sendMessage({handler: 'tts'})
   }
@@ -400,7 +411,7 @@ $(document).keydown(function(e) {
     removePopup('transover-type-and-translate-popup')
   }
 }).keyup(function(e) {
-  if (TransOver.modifierKeys[e.keyCode] == options.popup_show_trigger) {
+  if (modifierKeys[e.keyCode] == options.popup_show_trigger) {
     show_popup_key_pressed = false
   }
 })
@@ -525,7 +536,7 @@ window.addEventListener('message', function(e) {
     chrome.runtime.sendMessage({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
       debug('tat response: ', response)
 
-      const translation = TransOver.deserialize(response.translation)
+      const translation = deserialize(response.translation)
 
       if (!translation) {
         debug('tat skipping empty translation')
@@ -534,7 +545,7 @@ window.addEventListener('message', function(e) {
 
       const e = { clientX: $(window).width(), clientY: 0 }
       last_translation = translation
-      showPopup(e, TransOver.formatTranslation(translation, TransOverLanguages[response.tl].direction, response.sl, options))
+      showPopup(e, formatTranslation(translation, response, options))
     })
   } else if (e.data.type === 'toggle_disable_on_this_page') {
     disable_on_this_page = e.data.disable_on_this_page

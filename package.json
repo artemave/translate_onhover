@@ -18,6 +18,7 @@
     "webpack-encoding-plugin": "^0.3.1"
   },
   "dependencies": {
+    "date-fns": "^2.21.1",
     "jquery": "^3.6.0"
   }
 }

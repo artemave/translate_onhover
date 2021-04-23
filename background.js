@@ -1,10 +1,23 @@
 /* eslint-disable no-console */
 import $ from 'jquery'
+import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+import addMilliseconds from 'date-fns/addMilliseconds'
 import Options from './lib/options'
-import TransOver from './lib/transover_utils'
+import {regexp_escape} from './lib/transover_utils'
 import trackEvent from './lib/tracking'
 
+const blockTimeoutMs = 30000 * 60
+let blockExpiresAt = new Date()
+
+function blockedErrorMessage() {
+  return `Too many requests - translation is temporary disabled. Please retry in ${formatDistanceToNow(blockExpiresAt)}.`
+}
+
 function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
+  if (new Date() < blockExpiresAt) {
+    sendResponse({message: blockedErrorMessage(), error: true})
+    return
+  }
   // Next time url fails:
   // - install Google Translate extension: https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb
   // - click on extension button to show popup
@@ -13,8 +26,8 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
     url: 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input',
     data: {
       q: word,
-      sl: sl,
-      tl: tl,
+      sl,
+      tl,
     },
     dataType: 'json',
     success: function on_success(data) {
@@ -27,7 +40,12 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
         el: status,
         ev: 1
       })
-      console.log({e: e, xhr: xhr})
+      console.error({e, xhr})
+
+      if (xhr.status === 429) {
+        blockExpiresAt = addMilliseconds(new Date(), blockTimeoutMs)
+        sendResponse({message: blockedErrorMessage(), error: true})
+      }
     }
   }
 
@@ -53,7 +71,7 @@ function figureOutSlTl(tab_lang) {
 
 function translationIsTheSameAsInput(sentences, input) {
   input = input.replace(/^ *| *$/g, '')
-  return sentences[0].trans.match(new RegExp(TransOver.regexp_escape(input), 'i'))
+  return sentences[0].trans.match(new RegExp(regexp_escape(input), 'i'))
 }
 
 function on_translation_response(data, word, tl, last_translation, sendResponse) {
