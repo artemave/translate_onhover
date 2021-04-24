@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.58
+  * Fix "not working on youtube"
 1.57
   * Fix usage tracking
   * Show error in the popup when google translate API rate limit is hit
