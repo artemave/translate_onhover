@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.59
+  * Re-enable clients5 API (it magically started working again). But keep the fallback to rate limited API in case it breaks again.
 1.58
   * Fix "not working on youtube"
 1.57

@@ -524,8 +524,8 @@ $(function() {
   $(tatPopupTemplate).appendTo(document.documentElement)
   registerTransoverComponent('popup')
   registerTransoverComponent('tat_popup')
-  loadOptions()
 })
+loadOptions()
 
 window.addEventListener('message', function(e) {
   // We only accept messages from ourselves

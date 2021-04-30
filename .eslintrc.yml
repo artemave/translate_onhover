@@ -5,7 +5,7 @@ env:
   webextensions: true
 extends: 'eslint:recommended'
 parserOptions:
-  ecmaVersion: 2016
+  ecmaVersion: 2020
   sourceType: module
 rules:
   indent:

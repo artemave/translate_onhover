@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import $ from 'jquery'
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import addMilliseconds from 'date-fns/addMilliseconds'
 import Options from './lib/options'
@@ -14,7 +13,11 @@ function blockedErrorMessage() {
   return `Too many requests - translation is temporary disabled. Will retry in ${formatDistanceToNow(blockExpiresAt)}.`
 }
 
-function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
+// Next time url fails:
+// - install Google Translate extension: https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb
+// - click on extension button to show popup
+// - inspect popup to see the requests
+async function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
   if (new Date() < blockExpiresAt) {
     if (blockedErrorCount % 3 === 0) {
       sendResponse({message: blockedErrorMessage(), error: true})
@@ -24,31 +27,28 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
     blockedErrorCount++
     return
   }
-  // Next time url fails:
-  // - install Google Translate extension: https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb
-  // - click on extension button to show popup
-  // - inspect popup to see the requests
-  const options = {
-    url: 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input',
-    data: {
-      q: word,
-      sl,
-      tl,
-    },
-    dataType: 'json',
-    success: function on_success(data) {
+
+  const encoded = `sl=${sl}&tl=${tl}&q=${encodeURIComponent(word)}`
+  const urls = [
+    `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&tbb=1&ie=UTF-8&oe=UTF-8&${encoded}`,
+    `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&${encoded}`,
+  ]
+  const rateLimitedApi = async () => {
+    const response = await window.fetch(urls[1])
+
+    if (response.ok) {
+      const data = await response.json()
       onresponse(data, word, tl, last_translation, sendResponse, ga_event_name)
-    },
-    error: function(xhr, status, e) {
+    } else {
       trackEvent({
         ec: 'error',
         ea: 'translate',
-        el: status,
+        el: `dict-chrome-ex API: ${response.statusText}`,
         ev: 1
       })
-      console.error({e, xhr})
+      console.error(response)
 
-      if (xhr.status === 429) {
+      if (response.status == 429) {
         blockedErrorCount = 1
         blockExpiresAt = addMilliseconds(new Date(), blockTimeoutMs)
         sendResponse({message: blockedErrorMessage(), error: true})
@@ -56,7 +56,28 @@ function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_
     }
   }
 
-  $.ajax(options)
+  const response = await window.fetch(urls[0])
+
+  if (response.ok) {
+    let data = await response.json()
+    // Is this API still returns expected json structure?
+    if (data.sentences) {
+      onresponse(data, word, tl, last_translation, sendResponse, ga_event_name)
+    } else {
+      // Fallback to rate limited API
+      rateLimitedApi()
+    }
+  } else {
+    trackEvent({
+      ec: 'error',
+      ea: 'translate',
+      el: `gtx API: ${response.statusText}`,
+      ev: 1
+    })
+    console.error(response)
+
+    rateLimitedApi()
+  }
 }
 
 function figureOutSlTl(tab_lang) {
@@ -130,13 +151,13 @@ function on_translation_response(data, word, tl, last_translation, sendResponse)
     translation.sl = data.src
   }
 
-  if (!( output instanceof String)) {
+  if (!(output instanceof String)) {
     output = JSON.stringify(output)
   }
 
   translation.translation = output
 
-  $.extend(last_translation, translation)
+  Object.assign(last_translation, translation)
 
   console.log('response: ', translation)
   sendResponse(translation)
