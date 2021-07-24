@@ -57,10 +57,9 @@
         margin-top: 30px;
       }
 
-      #status {
+      .flash {
         display: none;
         color: green;
-        float: left;
         margin-top: 4px;
         margin-left: 8px;
       }
@@ -108,7 +107,10 @@
   </head>
   <body>
     <div class="content">
-      <h1>Configuration</h1>
+      <div style="display: flex; align-items: center">
+        <h1>Configuration</h1>
+        <div class="flash">Saved!</div>
+      </div>
       <div class="option">
         <label for="target_lang">Translate into</label>
         <select id="target_lang"></select>
@@ -196,11 +198,12 @@
         <table id='only_urls_table'></table>
       </div>
       <div class="button_group">
-        <div class="button">
-          <button id="save_button">Save</button>
+        <div style="display: flex">
+          <div class="button">
+            <button id="save_button">Save</button>
+          </div>
+          <div class="flash">Saved!</div>
         </div>
-        <div id="status">Saved!</div>
-        <div style="clear: both"></div>
       </div>
     </div>
   </body>
