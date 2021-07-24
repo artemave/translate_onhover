@@ -28,7 +28,7 @@ async function translate(word, sl, tl, last_translation, onresponse, sendRespons
     return
   }
 
-  const encoded = `sl=${sl}&tl=${tl}&q=${encodeURIComponent(word)}`
+  const encoded = `sl=${sl}&tl=${tl}&q=${encodeURIComponent(word.trim())}`
   const urls = [
     `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&tbb=1&ie=UTF-8&oe=UTF-8&${encoded}`,
     `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&${encoded}`,
