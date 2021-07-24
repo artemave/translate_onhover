@@ -1,7 +1,7 @@
 {
   "name": "TransOver",
   "manifest_version": 2,
-  "version": "1.59",
+  "version": "1.60",
   "icons": { "16": "to_16.png", "48": "to_48.png", "128": "to_128.png" },
   "description": "Hover, click or select to translate (with text-to-speech). Translator.",
   "background": {
@@ -30,8 +30,7 @@
   "permissions": [
     "https://translate.googleapis.com/*",
     "https://clients5.google.com/*",
-    "https://www.google-analytics.com/*",
-    "tabs"
+    "https://www.google-analytics.com/*"
   ],
   "web_accessible_resources": [
     "popup.js",
