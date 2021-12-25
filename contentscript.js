@@ -39,7 +39,15 @@ function createPopup(nodeType) {
 
 function removePopup(nodeType) {
   $(nodeType).each(function() {
-    $(this.shadowRoot.querySelector('main')).fadeOut('fast', () => this.remove())
+    const popup = $(this.shadowRoot.querySelector('main'))
+    debug(`removePopup: ${popup}`)
+    popup.fadeOut('fast', () => this.remove())
+  })
+}
+
+function removeAllPopups() {
+  ['transover-popup', 'transover-type-and-translate-popup'].forEach(nodeType => {
+    removePopup(nodeType)
   })
 }
 
@@ -56,7 +64,7 @@ function registerTransoverComponent(component) {
 let last_translation
 
 function showPopup(e, content) {
-  removePopup('transover-type-and-translate-popup')
+  removeAllPopups()
 
   const $popup = createPopup('transover-popup')
   $('body').append($popup)
