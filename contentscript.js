@@ -10,6 +10,7 @@ import TransOverLanguages from './lib/languages'
 const debug = require('debug')('transover')
 const popupTemplate = require('./lib/popup.html')
 const tatPopupTemplate = require('./lib/tat_popup.html')
+import Options from './lib/options'
 
 let options
 let disable_on_this_page
@@ -128,17 +129,25 @@ function calculatePosition(x, y, $popup) {
   return pos
 }
 
-function loadOptions() {
-  chrome.runtime.sendMessage({handler: 'get_options'}, function(response) {
-    options = JSON.parse( response.options )
-    disable_on_this_page = ignoreThisPage(options)
-    chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
+async function loadOptions() {
+  let storageOptions = {}
+
+  const promises = Object.keys(Options).map(async key => {
+    storageOptions[key] = await Options[key]()
   })
+  await Promise.all(promises)
+
+  options = storageOptions
+
+  disable_on_this_page = ignoreThisPage(options)
+  chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
 }
 
 document.addEventListener('visibilitychange', function () {
   if (!document.hidden) {
-    loadOptions()
+    loadOptions().catch(e => {
+      throw e
+    })
   }
 }, false)
 
@@ -343,15 +352,15 @@ function processEvent(e) {
 }
 
 function withOptionsSatisfied(e, do_stuff) {
-  if (options.target_lang) {
-    //respect 'translate only when alt pressed' option
-    if (options.word_key_only && !show_popup_key_pressed) return
+  if (!options) return
 
-    //respect "don't translate these sites"
-    if (disable_on_this_page) return
+  //respect 'translate only when alt pressed' option
+  if (options.word_key_only && !show_popup_key_pressed) return
 
-    do_stuff()
-  }
+  //respect "don't translate these sites"
+  if (disable_on_this_page) return
+
+  do_stuff()
 }
 
 $(document).on('mousestop', function(e) {
@@ -533,7 +542,9 @@ $(function() {
   registerTransoverComponent('popup')
   registerTransoverComponent('tat_popup')
 })
-loadOptions()
+loadOptions().catch(e => {
+  throw e
+})
 
 window.addEventListener('message', function(e) {
   // We only accept messages from ourselves

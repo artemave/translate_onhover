@@ -4,12 +4,12 @@ import addMilliseconds from 'date-fns/addMilliseconds'
 import Options from './lib/options'
 import {regexp_escape} from './lib/transover_utils'
 import trackEvent from './lib/tracking'
+import { localStorage } from './lib/storage'
 
 const blockTimeoutMs = 30000 * 60
-let blockExpiresAt = new Date()
-let blockedErrorCount = 0
+const browserAction = chrome[process.env.MANIFEST_V3 === 'true' ? 'action' : 'browserAction']
 
-function blockedErrorMessage() {
+function blockedErrorMessage(blockExpiresAt) {
   return `Too many requests - translation is temporary disabled. Will retry in ${formatDistanceToNow(blockExpiresAt)}.`
 }
 
@@ -17,15 +17,18 @@ function blockedErrorMessage() {
 // - install Google Translate extension: https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb
 // - click on extension button to show popup
 // - inspect popup to see the requests
-async function translate(word, sl, tl, last_translation, onresponse, sendResponse, ga_event_name) {
+async function translate(word, sl, tl, last_translation, onresponse, ga_event_name) {
+  const blockExpiresAt = await localStorage.get('blockExpiresAt') || new Date()
+  const blockedErrorCount = await localStorage.get('blockedErrorCount') || 0
+
   if (new Date() < blockExpiresAt) {
+    await localStorage.set('blockedErrorCount', blockedErrorCount + 1)
+
     if (blockedErrorCount % 3 === 0) {
-      sendResponse({message: blockedErrorMessage(), error: true})
+      return {message: blockedErrorMessage(blockExpiresAt), error: true}
     } else {
-      sendResponse()
+      return {}
     }
-    blockedErrorCount++
-    return
   }
 
   const encoded = `sl=${sl}&tl=${tl}&q=${encodeURIComponent(word.trim())}`
@@ -38,7 +41,7 @@ async function translate(word, sl, tl, last_translation, onresponse, sendRespons
 
     if (response.ok) {
       const data = await response.json()
-      onresponse(data, word, tl, last_translation, sendResponse, ga_event_name)
+      return await onresponse(data, word, tl, last_translation, ga_event_name)
     } else {
       trackEvent({
         ec: 'error',
@@ -49,9 +52,8 @@ async function translate(word, sl, tl, last_translation, onresponse, sendRespons
       console.error(response)
 
       if (response.status == 429) {
-        blockedErrorCount = 1
-        blockExpiresAt = addMilliseconds(new Date(), blockTimeoutMs)
-        sendResponse({message: blockedErrorMessage(), error: true})
+        await chrome.storeage.sync.set({blockExpiresAt: addMilliseconds(new Date(), blockTimeoutMs), blockedErrorCount: 1})
+        return {message: blockedErrorMessage(blockExpiresAt), error: true}
       }
     }
   }
@@ -62,7 +64,7 @@ async function translate(word, sl, tl, last_translation, onresponse, sendRespons
     let data = await response.json()
     // Is this API still returns expected json structure?
     if (data.sentences) {
-      onresponse(data, word, tl, last_translation, sendResponse, ga_event_name)
+      return await onresponse(data, word, tl, last_translation, ga_event_name)
     } else {
       // Fallback to rate limited API
       rateLimitedApi()
@@ -80,17 +82,17 @@ async function translate(word, sl, tl, last_translation, onresponse, sendRespons
   }
 }
 
-function figureOutSlTl(tab_lang) {
+async function figureOutSlTl(tab_lang) {
   const res = {}
 
-  if (Options.target_lang() == tab_lang && Options.reverse_lang()) {
-    res.tl = Options.reverse_lang()
-    res.sl = Options.target_lang()
+  if (await Options.target_lang() == tab_lang && await Options.reverse_lang()) {
+    res.tl = await Options.reverse_lang()
+    res.sl = await Options.target_lang()
     console.log('reverse translate into: ', {tl: res.tl, sl: res.sl})
   }
   else {
-    res.tl = Options.target_lang()
-    res.sl = Options.from_lang()
+    res.tl = await Options.target_lang()
+    res.sl = await Options.from_lang()
     console.log('normal translate into:', {tl: res.tl, sl: res.sl})
   }
 
@@ -102,7 +104,7 @@ function translationIsTheSameAsInput(sentences, input) {
   return sentences[0].trans.match(new RegExp(regexp_escape(input), 'i'))
 }
 
-function on_translation_response(data, word, tl, last_translation, sendResponse) {
+async function on_translation_response(data, word, tl, last_translation) {
   let output
   const translation = {tl: tl}
 
@@ -111,7 +113,7 @@ function on_translation_response(data, word, tl, last_translation, sendResponse)
   if ((!data.dict && !data.sentences) || (!data.dict && translationIsTheSameAsInput(data.sentences, word))) {
     translation.succeeded = false
 
-    if (Options.do_not_show_oops()) {
+    if (await Options.do_not_show_oops()) {
       output = ''
     } else {
       output = 'Oops.. No translation found.'
@@ -158,53 +160,47 @@ function on_translation_response(data, word, tl, last_translation, sendResponse)
   translation.translation = output
 
   Object.assign(last_translation, translation)
+  await localStorage.set('last_translation', last_translation)
 
   console.log('response: ', translation)
-  sendResponse(translation)
+  return translation
 }
 
-const last_translation = {}
+async function detectLanguage(request) {
+  return new Promise(resolve => {
+    chrome.tabs.detectLanguage(null, async function(tab_lang) {
+      // hack: presence of request.tl/sl means this came from popup translate
+      if (request.tl && request.sl) {
+        await localStorage.set('last_tat_tl', request.tl)
+        await localStorage.set('last_tat_sl', request.sl)
+        resolve({tl: request.tl, sl: request.sl})
+      } else {
+        const sltl = await figureOutSlTl(tab_lang)
+        resolve(sltl)
+      }
+    })
+  })
+}
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  const except_urls = Options.except_urls()
+async function contentScriptListener(request) {
+
+  const except_urls = await Options.except_urls()
+  const last_translation = await localStorage.get('last_translation') || {}
 
   switch (request.handler) {
   case 'get_last_tat_sl_tl':
     console.log('get_last_tat_sl_tl')
-    sendResponse({
-      last_tl: localStorage['last_tat_tl'],
-      last_sl: localStorage['last_tat_sl']
-    })
-    break
-  case 'get_options':
-    sendResponse({
-      options: JSON.stringify(
-        Object.keys(Options).reduce((result, key) => {
-          result[key] = Options[key]()
-          return result
-        }, {})
-      )
-    })
-    break
-  case 'translate':
+    return {
+      last_tl: await localStorage.get('last_tat_tl'),
+      last_sl: await localStorage.get('last_tat_sl')
+    }
+  case 'translate': {
     console.log('received to translate: ' + request.word)
 
-    chrome.tabs.detectLanguage(null, function(tab_lang) {
-      let sl, tl
-      // hack: presence of request.tl/sl means this came from popup translate
-      if (request.tl && request.sl) {
-        localStorage['last_tat_tl'] = request.tl
-        localStorage['last_tat_sl'] = request.sl
-        sl = request.sl
-        tl = request.tl
-      } else {
-        const sltl = figureOutSlTl(tab_lang)
-        sl = sltl.sl
-        tl = sltl.tl
-      }
-      translate(request.word, sl, tl, last_translation, on_translation_response, sendResponse, Options.translate_by())
-    })
-    break
+    const {sl, tl} = await detectLanguage(request)
+
+    return await translate(request.word, sl, tl, last_translation, on_translation_response, await Options.translate_by())
+  }
   case 'tts':
     if (last_translation.succeeded) {
       console.log('tts: ' + last_translation.word + ', sl: ' + last_translation.sl)
@@ -216,25 +212,23 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       msg.rate = 0.7
       speechSynthesis.speak(msg)
     }
-    sendResponse({})
-    break
+    return {}
   case 'trackEvent':
     trackEvent(request.event)
-    sendResponse({})
-    break
+    return {}
   case 'setIcon':
-    chrome.browserAction.setIcon({path: request.disabled ? 'to_bw_38.png' : 'to_38.png'})
-    break
+    browserAction.setIcon({path: request.disabled ? 'to_bw_38.png' : 'to_38.png'})
+    return {}
   case 'toggle_disable_on_this_page':
     if (request.disable_on_this_page) {
       if (!except_urls.find(u => u.match(request.current_url))) {
-        Options.except_urls(
+        await Options.except_urls(
           [request.current_url, ...except_urls]
         )
       }
     } else {
       if (except_urls.find(u => u.match(request.current_url))) {
-        Options.except_urls(
+        await Options.except_urls(
           except_urls.filter(u => !u.match(request.current_url))
         )
       }
@@ -242,14 +236,18 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     break
   default:
     console.error('Unknown request', JSON.stringify(request, null, 2))
-    sendResponse({})
+    return {}
   }
+}
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  contentScriptListener(request).then(sendResponse)
   // Without this, firefox sends empty async response
   // Details: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage
   return true
 })
 
-chrome.browserAction.onClicked.addListener(function(tab) {
+browserAction.onClicked.addListener(function(tab) {
   chrome.tabs.sendMessage(tab.id, 'open_type_and_translate')
 })
 

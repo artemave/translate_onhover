@@ -28,6 +28,7 @@
     }
   },
   "permissions": [
+    "storage",
     "https://translate.googleapis.com/*",
     "https://clients5.google.com/*",
     "https://www.google-analytics.com/*"

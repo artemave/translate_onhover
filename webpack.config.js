@@ -44,12 +44,21 @@ const config = {
   },
   plugins: [
     new EnvironmentPlugin(
-      mode === 'production' ? ['TRACKING_ID'] : { 'TRACKING_ID': '123456' }
+      mode === 'production' ? [
+        'TRACKING_ID',
+        'MANIFEST_V3'
+      ] : {
+        'TRACKING_ID': '123456',
+        'MANIFEST_V3': 'false'
+      }
     ),
     new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
-        'manifest.json',
+        {
+          from: process.env.MANIFEST_V3 === 'true' ? 'manifest_v3.json' : 'manifest_v2.json',
+          to: 'manifest.json'
+        },
         '*.png',
         'options.html',
       ]
