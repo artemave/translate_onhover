@@ -1,5 +1,10 @@
 # CHANGELOG
 
+1.61
+  * Remember language options in "type and trasnlate" popup
+  * Fix double translation popup showing in certain scenarious
+1.60
+  * Remove unnecessary required "tabs" permission.
 1.59
   * Re-enable clients5 API (it magically started working again). But keep the fallback to rate limited API in case it breaks again.
 1.58
