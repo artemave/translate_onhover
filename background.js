@@ -183,7 +183,6 @@ async function detectLanguage(request) {
 }
 
 async function contentScriptListener(request) {
-
   const except_urls = await Options.except_urls()
   const last_translation = await localStorage.get('last_translation') || {}
 
@@ -194,6 +193,15 @@ async function contentScriptListener(request) {
       last_tl: await localStorage.get('last_tat_tl'),
       last_sl: await localStorage.get('last_tat_sl')
     }
+  case 'get_options': { // Only used by Manifest V2 version
+    let options = {}
+    const promises = Object.keys(Options).map(async key => {
+      options[key] = await Options[key]()
+    })
+    await Promise.all(promises)
+
+    return JSON.stringify(options)
+  }
   case 'translate': {
     console.log('received to translate: ' + request.word)
 

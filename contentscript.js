@@ -10,7 +10,10 @@ import TransOverLanguages from './lib/languages'
 const debug = require('debug')('transover')
 const popupTemplate = require('./lib/popup.html')
 const tatPopupTemplate = require('./lib/tat_popup.html')
-import Options from './lib/options'
+let Options
+if (process.env.MANIFEST_V3 === 'true') {
+  Options = require('./lib/options').default
+}
 
 let options
 let disable_on_this_page
@@ -130,14 +133,20 @@ function calculatePosition(x, y, $popup) {
 }
 
 async function loadOptions() {
-  let storageOptions = {}
-
-  const promises = Object.keys(Options).map(async key => {
-    storageOptions[key] = await Options[key]()
-  })
-  await Promise.all(promises)
-
-  options = storageOptions
+  if (process.env.MANIFEST_V3 === 'true') {
+    let storageOptions = {}
+    const promises = Object.keys(Options).map(async key => {
+      storageOptions[key] = await Options[key]()
+    })
+    await Promise.all(promises)
+    options = storageOptions
+  } else {
+    options = await new Promise((resolve) => {
+      chrome.runtime.sendMessage({handler: 'get_options'}, function(response) {
+        resolve(JSON.parse(response))
+      })
+    })
+  }
 
   disable_on_this_page = ignoreThisPage(options)
   chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
