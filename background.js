@@ -37,7 +37,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
     `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&${encoded}`,
   ]
   const rateLimitedApi = async () => {
-    const response = await window.fetch(urls[1])
+    const response = await fetch(urls[1])
 
     if (response.ok) {
       const data = await response.json()
@@ -58,7 +58,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
     }
   }
 
-  const response = await window.fetch(urls[0])
+  const response = await fetch(urls[0])
 
   if (response.ok) {
     let data = await response.json()

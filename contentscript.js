@@ -392,6 +392,8 @@ $(document).click(function(e) {
 
 let show_popup_key_pressed = false
 $(document).keydown(function(e) {
+  if (!options) return
+
   if (modifierKeys[e.keyCode] == options.popup_show_trigger) {
     show_popup_key_pressed = true
 
@@ -428,7 +430,7 @@ $(document).keydown(function(e) {
     removePopup('transover-type-and-translate-popup')
   }
 }).keyup(function(e) {
-  if (modifierKeys[e.keyCode] == options.popup_show_trigger) {
+  if (options && modifierKeys[e.keyCode] == options.popup_show_trigger) {
     show_popup_key_pressed = false
   }
 })
