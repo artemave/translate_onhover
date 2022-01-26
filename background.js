@@ -67,7 +67,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
       return await onresponse(data, word, tl, last_translation, ga_event_name)
     } else {
       // Fallback to rate limited API
-      rateLimitedApi()
+      return await rateLimitedApi()
     }
   } else {
     trackEvent({
@@ -78,7 +78,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
     })
     console.error(response)
 
-    rateLimitedApi()
+    return await rateLimitedApi()
   }
 }
 
