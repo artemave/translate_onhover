@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.62
+  * Fix translation popup sometimes not appearing
 1.61
   * Remember language options in "type and trasnlate" popup
   * Fix double translation popup showing in certain scenarious
