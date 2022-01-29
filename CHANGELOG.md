@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.63
+  * Fix remember language in "type and trasnlate" popup being scoped to a particular site
 1.62
   * Fix translation popup sometimes not appearing
 1.61

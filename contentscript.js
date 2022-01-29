@@ -509,10 +509,10 @@ chrome.runtime.onMessage.addListener(
           const $popup = createPopup('transover-type-and-translate-popup')
           const languages = $.extend({}, TransOverLanguages)
 
-          if (response.sl) {
-            languages[response.sl].selected_sl = true
+          if (response.last_sl) {
+            languages[response.last_sl].selected_sl = true
           }
-          languages[response.tast_tl || options.target_lang].selected_tl = true
+          languages[response.last_tl || options.target_lang].selected_tl = true
 
           $popup.attr('data-languages', JSON.stringify(languages))
           $popup.attr('data-disable_on_this_page', disable_on_this_page)
