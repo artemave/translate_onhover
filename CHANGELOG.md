@@ -1,5 +1,8 @@
 # CHANGELOG
 
+1.64
+  * Switch to manifest v3 on Chrome
+  * Prevent Chrome page translation tool from translating popup (thanks https://github.com/dotdioscorea)
 1.63
   * Fix remember language in "type and trasnlate" popup being scoped to a particular site
 1.62
