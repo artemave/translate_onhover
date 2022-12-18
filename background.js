@@ -52,7 +52,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
       console.error(response)
 
       if (response.status == 429) {
-        await chrome.storeage.sync.set({blockExpiresAt: addMilliseconds(new Date(), blockTimeoutMs), blockedErrorCount: 1})
+        await chrome.storage.sync.set({blockExpiresAt: addMilliseconds(new Date(), blockTimeoutMs), blockedErrorCount: 1})
         return {message: blockedErrorMessage(blockExpiresAt), error: true}
       }
     }
