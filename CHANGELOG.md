@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.65
+  * Fix typo in the api fallback
 1.64
   * Switch to manifest v3 on Chrome
   * Prevent Chrome page translation tool from translating popup (thanks https://github.com/dotdioscorea)
