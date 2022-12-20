@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.66
+  * Fix not working on youtube.com
 1.65
   * Fix typo in the api fallback
 1.64
