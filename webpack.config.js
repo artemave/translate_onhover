@@ -20,9 +20,6 @@ const config = {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   },
-  experiments: {
-    asset: true
-  },
   module: {
     rules: [
       // Without this custom elements don't work on youtube... wtf

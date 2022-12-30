@@ -9,21 +9,21 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@babel/core": "7.4.4",
-    "@babel/plugin-transform-classes": "7.4.4",
-    "babel-loader": "^8.2.2",
-    "clean-webpack-plugin": "^4.0.0-alpha.0",
-    "copy-webpack-plugin": "^8.1.1",
-    "debug": "^4.3.1",
-    "eslint": "^7.24.0",
+    "@babel/core": "7.20.7",
+    "@babel/plugin-transform-classes": "7.8.6",
+    "babel-loader": "^9.1.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "debug": "^4.3.4",
+    "eslint": "^8.30.0",
+    "husky": "^8.0.2",
     "uglifyjs-webpack-plugin": "^2.2.0",
-    "webpack": "^5.33.2",
-    "webpack-cli": "^4.6.0",
-    "webpack-encoding-plugin": "^0.3.1",
-    "husky": "^6.0.0"
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-encoding-plugin": "^0.3.1"
   },
   "dependencies": {
-    "date-fns": "^2.21.1",
-    "jquery": "^3.6.0"
+    "date-fns": "^2.29.3",
+    "jquery": "^3.6.3"
   }
 }
