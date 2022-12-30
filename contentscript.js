@@ -153,6 +153,7 @@ async function loadOptions() {
 }
 
 document.addEventListener('visibilitychange', function () {
+  show_popup_key_pressed = false
   if (!document.hidden) {
     loadOptions().catch(e => {
       throw e

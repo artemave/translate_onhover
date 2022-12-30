@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.67
+  * Fix "only show when key pressed" having no effect in some cases
 1.66
   * Fix not working on youtube.com
 1.65
