@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.68
+  * Upgrade Google Analytics from UA to GA4
 1.67
   * Fix "only show when key pressed" having no effect in some cases
 1.66
