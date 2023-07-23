@@ -333,10 +333,11 @@ function processEvent(e) {
     chrome.runtime.sendMessage({
       handler: 'trackEvent',
       event: {
-        ec: 'translate',
-        ea: trackedAction,
-        el: 'characters',
-        ev: word.length
+        name: 'translate',
+        params: {
+          action: trackedAction,
+          characters: word.length
+        }
       }
     })
 
@@ -510,7 +511,7 @@ chrome.runtime.onMessage.addListener(
           const $popup = createPopup('transover-type-and-translate-popup')
           const languages = $.extend({}, TransOverLanguages)
 
-          if (response.last_sl) {
+          if (response.last_sl && languages[response.last_sl]) {
             languages[response.last_sl].selected_sl = true
           }
           languages[response.last_tl || options.target_lang].selected_tl = true

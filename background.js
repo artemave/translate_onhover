@@ -44,10 +44,12 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
       return await onresponse(data, word, tl, last_translation, ga_event_name)
     } else {
       trackEvent({
-        ec: 'error',
-        ea: 'translate',
-        el: `dict-chrome-ex API: ${response.statusText}`,
-        ev: 1
+        name: 'error',
+        params: {
+          operation: 'translate',
+          api: 'dict-chrome-ex',
+          message: response.statusText,
+        }
       })
       console.error(response)
 
@@ -71,10 +73,12 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
     }
   } else {
     trackEvent({
-      ec: 'error',
-      ea: 'translate',
-      el: `gtx API: ${response.statusText}`,
-      ev: 1
+      name: 'error',
+      params: {
+        operation: 'translate',
+        api: 'gtx',
+        message: response.statusText,
+      }
     })
     console.error(response)
 
@@ -212,7 +216,12 @@ async function contentScriptListener(request) {
   case 'tts':
     if (last_translation.succeeded) {
       console.log('tts: ' + last_translation.word + ', sl: ' + last_translation.sl)
-      trackEvent({ec: 'tts', ea: 'play'})
+      trackEvent({
+        name: 'tts',
+        params: {
+          operation: 'play'
+        }
+      })
 
       const msg = new SpeechSynthesisUtterance()
       msg.lang = last_translation.sl

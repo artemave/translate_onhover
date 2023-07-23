@@ -42,10 +42,12 @@ const config = {
   plugins: [
     new EnvironmentPlugin(
       mode === 'production' ? [
-        'TRACKING_ID',
+        'API_SECRET',
+        'MEASUREMENT_ID',
         'MANIFEST_V3'
       ] : {
-        'TRACKING_ID': '123456',
+        'API_SECRET': '123456',
+        'MEASUREMENT_ID': '343434',
         'MANIFEST_V3': 'false'
       }
     ),
