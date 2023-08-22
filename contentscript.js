@@ -153,7 +153,7 @@ async function loadOptions() {
   disable_everywhere = options.disable_everywhere
   chrome.runtime.sendMessage({
     handler: 'setIcon',
-    disabled: disable_on_this_page | disable_everywhere
+    disabled: disable_on_this_page || disable_everywhere
   })
 }
 
@@ -592,16 +592,19 @@ window.addEventListener('message', function(e) {
       disable_on_this_page,
       current_url: window.location.origin
     })
-    chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
+
+    const disabled = disable_everywhere || disable_on_this_page
+    chrome.runtime.sendMessage({handler: 'setIcon', disabled})
     removePopup('transover-type-and-translate-popup')
   } else if (e.data.type === 'toggle_disable_everywhere') {
     disable_everywhere = e.data.disable_everywhere
     chrome.runtime.sendMessage({
       handler: 'toggle_disable_everywhere',
       disable_everywhere,
-      current_url: window.location.origin
     })
-    chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_everywhere})
+
+    const disabled = disable_everywhere || disable_on_this_page
+    chrome.runtime.sendMessage({handler: 'setIcon', disabled})
     removePopup('transover-type-and-translate-popup')
   } else if (e.data.type === 'tat_close') {
     removePopup('transover-type-and-translate-popup')

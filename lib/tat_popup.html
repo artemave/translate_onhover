@@ -83,11 +83,16 @@
       color: blue;
     }
 
-    #disable_on_this_page {
+    #disable_on_this_page_container label {
+      margin-right: 10px;
+    }
+
+    #disable_on_this_page, #disable_everywhere {
       position: relative;
       vertical-align: middle;
       bottom: 1px;
       margin-right: 5px;
+      margin-left: 0px;
     }
 
     #top_row_container {
@@ -104,11 +109,9 @@
 
   <main translate="no">
     <div id="top_row_container">
-      <div id="disable_everywhere_container">
-        <label><input id="disable_everywhere" type="checkbox"/>Disable everywhere</label>
-      </div>
       <div id="disable_on_this_page_container">
         <label><input id="disable_on_this_page" type="checkbox"/>Disable on this site</label>
+        <label><input id="disable_everywhere" type="checkbox"/>Disable everywhere</label>
       </div>
       <a href="#" id="tat_close"></a>
     </div>
