@@ -17,6 +17,7 @@ if (process.env.MANIFEST_V3 === 'true') {
 
 let options
 let disable_on_this_page
+let disable_everywhere
 
 function copyToClipboard(text) {
   const input = document.createElement('input')
@@ -149,7 +150,11 @@ async function loadOptions() {
   }
 
   disable_on_this_page = ignoreThisPage(options)
-  chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
+  disable_everywhere = options.disable_everywhere
+  chrome.runtime.sendMessage({
+    handler: 'setIcon',
+    disabled: disable_on_this_page | disable_everywhere
+  })
 }
 
 document.addEventListener('visibilitychange', function () {
@@ -369,7 +374,7 @@ function withOptionsSatisfied(e, do_stuff) {
   if (options.word_key_only && !show_popup_key_pressed) return
 
   //respect "don't translate these sites"
-  if (disable_on_this_page) return
+  if (disable_on_this_page || disable_everywhere) return
 
   do_stuff()
 }
@@ -518,6 +523,7 @@ chrome.runtime.onMessage.addListener(
 
           $popup.attr('data-languages', JSON.stringify(languages))
           $popup.attr('data-disable_on_this_page', disable_on_this_page)
+          $popup.attr('data-disable_everywhere', disable_everywhere)
           $('body').append($popup)
           $popup.each(function() {
             $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast')
@@ -587,6 +593,15 @@ window.addEventListener('message', function(e) {
       current_url: window.location.origin
     })
     chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_on_this_page})
+    removePopup('transover-type-and-translate-popup')
+  } else if (e.data.type === 'toggle_disable_everywhere') {
+    disable_everywhere = e.data.disable_everywhere
+    chrome.runtime.sendMessage({
+      handler: 'toggle_disable_everywhere',
+      disable_everywhere,
+      current_url: window.location.origin
+    })
+    chrome.runtime.sendMessage({handler: 'setIcon', disabled: disable_everywhere})
     removePopup('transover-type-and-translate-popup')
   } else if (e.data.type === 'tat_close') {
     removePopup('transover-type-and-translate-popup')

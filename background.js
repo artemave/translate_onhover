@@ -251,6 +251,13 @@ async function contentScriptListener(request) {
       }
     }
     break
+  case 'toggle_disable_everywhere':
+    if (request.disable_everywhere) {
+      await Options.disable_everywhere(1)
+    } else {
+      await Options.disable_everywhere(0)
+    }
+    break
   default:
     console.error('Unknown request', JSON.stringify(request, null, 2))
     return {}
