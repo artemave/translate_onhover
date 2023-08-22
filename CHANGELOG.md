@@ -1,5 +1,7 @@
 # CHANGELOG
 
+1.69
+  * Add 'Disable everywhere' option (credit https://github.com/santosoj)
 1.68
   * Upgrade Google Analytics from UA to GA4
 1.67
