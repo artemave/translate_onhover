@@ -4,7 +4,7 @@
     "build-v3": "MANIFEST_V3=true NODE_ENV=production webpack && zip -FS -r -j translate_onhover_v3 dist",
     "build-v2": "MANIFEST_V3=false NODE_ENV=production webpack && zip -FS -r -j translate_onhover_v2 dist",
     "dev": "webpack --watch",
-    "test": "yarn lint",
+    "test": "node --test",
     "lint": "eslint --ignore-pattern dist .",
     "prepare": "husky install"
   },

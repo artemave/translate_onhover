@@ -1,1 +1,17 @@
-
+name: Test endpoints
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    cron:
+      - "0 */6 * * *"
+jobs:
+  test-endpoints:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: ./test/test_endpoints.js

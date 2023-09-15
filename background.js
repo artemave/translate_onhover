@@ -2,9 +2,9 @@
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import addMilliseconds from 'date-fns/addMilliseconds'
 import Options from './lib/options'
-import {regexp_escape} from './lib/transover_utils'
 import trackEvent from './lib/tracking'
 import { localStorage } from './lib/storage'
+import { generateUrls, parseResponse } from './lib/apiClient.mjs'
 
 const blockTimeoutMs = 30000 * 60
 const browserAction = chrome[process.env.MANIFEST_V3 === 'true' ? 'action' : 'browserAction']
@@ -31,11 +31,8 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
     }
   }
 
-  const encoded = `sl=${sl}&tl=${tl}&q=${encodeURIComponent(word.trim())}`
-  const urls = [
-    `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&tbb=1&ie=UTF-8&oe=UTF-8&${encoded}`,
-    `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&${encoded}`,
-  ]
+  const urls = generateUrls(word, { sl, tl })
+
   const rateLimitedApi = async () => {
     const response = await fetch(urls[1])
 
@@ -103,58 +100,22 @@ async function figureOutSlTl(tab_lang) {
   return res
 }
 
-function translationIsTheSameAsInput(sentences, input) {
-  input = input.replace(/^ *| *$/g, '')
-  return sentences[0].trans.match(new RegExp(regexp_escape(input), 'i'))
-}
-
 async function on_translation_response(data, word, tl, last_translation) {
   let output
-  const translation = {tl: tl}
 
   console.log('raw_translation: ', data)
 
-  if ((!data.dict && !data.sentences) || (!data.dict && translationIsTheSameAsInput(data.sentences, word))) {
-    translation.succeeded = false
+  const { succeeded, sl, parsed } = parseResponse(data, word)
+  const translation = { tl, succeeded, sl, word }
 
+  if (succeeded) {
+    output = parsed
+  } else {
     if (await Options.do_not_show_oops()) {
       output = ''
     } else {
       output = 'Oops.. No translation found.'
     }
-  } else {
-    translation.succeeded = true
-    translation.word = word
-
-    output = []
-    if (data.dict) { // full translation
-      data.dict.forEach(function(t) {
-        const translationItem = {pos: t.pos, meanings: t.terms}
-
-        output.push(translationItem)
-
-        if (t.pos === 'noun' && data.query_inflections) {
-          for (let i of data.query_inflections) {
-            if (i.written_form === word && i.features.gender) {
-              if (i.features.gender === 1)
-                translationItem.gender = 'm'
-              if (i.features.gender === 2)
-                translationItem.gender = 'f'
-              if (i.features.gender === 3)
-                translationItem.gender = 'n'
-              break
-            }
-          }
-        }
-      })
-    } else { // single word or sentence(s)
-      data.sentences.forEach(function(s) {
-        output.push(s.trans)
-      })
-      output = output.join(' ')
-    }
-
-    translation.sl = data.src
   }
 
   if (!(output instanceof String)) {
