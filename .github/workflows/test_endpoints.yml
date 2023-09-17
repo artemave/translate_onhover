@@ -13,4 +13,4 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: ./test/test_endpoints.js
+      - run: npm test
