@@ -1,4 +1,4 @@
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/aggiiclaiamajehmlfpkjmlbadmkledi.svg)]() [![License](http://img.shields.io/:license-mit-blue.svg)](http://artemave.mit-license.org)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/aggiiclaiamajehmlfpkjmlbadmkledi.svg)]() [![License](http://img.shields.io/:license-mit-blue.svg)](http://artemave.mit-license.org) [![Test endpoints](https://github.com/artemave/translate_onhover/actions/workflows/test_endpoints.yml/badge.svg)](https://github.com/artemave/translate_onhover/actions/workflows/test_endpoints.yml)
 
 Simply the best Google Chrome translation extension - https://chrome.google.com/webstore/detail/aggiiclaiamajehmlfpkjmlbadmkledi
 
