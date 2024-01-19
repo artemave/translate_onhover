@@ -6,10 +6,11 @@ import {
   escape_html,
   formatTranslation
 } from './lib/transover_utils'
-import TransOverLanguages from './lib/languages'
+import { languages } from './lib/languages'
 const debug = require('debug')('transover')
 const popupTemplate = require('./lib/popup.html')
 const tatPopupTemplate = require('./lib/tat_popup.html')
+
 let Options
 if (process.env.MANIFEST_V3 === 'true') {
   Options = require('./lib/options').default
@@ -407,6 +408,45 @@ $(document).click(function(e) {
 })
 
 let show_popup_key_pressed = false
+
+function speak({ word, sl }) {
+  // It seems that (at least at the moment) translate_tts blocks requests with Referer
+  // This code below stops fetch from sending Referer header
+  const meta = document.createElement('meta')
+  meta.name = 'referrer'
+  meta.content = 'never'
+  document.getElementsByTagName('head')[0].appendChild(meta)
+
+  const url = `https://translate.google.com/translate_tts?client=tw-ob&q=${encodeURI(word)}&tl=${sl}`
+
+  // If this ever gets blocked, try iframe?
+  // const iframe = document.createElement('iframe')
+  // iframe.src = url
+  // iframe.style.display = 'none'
+  // document.body.appendChild(iframe)
+
+  const audio = new Audio(url)
+  audio.play()
+
+  audio.oncanplay = () => {
+    meta.remove()
+  }
+
+  $(document).keydown(e => {
+    if (e.keyCode === 27) {
+      audio.pause()
+      audio.removeAttribute('src')
+      audio.load()
+    }
+  })
+
+  audio.onended = () => {
+    audio.pause()
+    audio.removeAttribute('src')
+    audio.load()
+  }
+}
+
 $(document).keydown(function(e) {
   if (!options) return
 
@@ -437,8 +477,20 @@ $(document).keydown(function(e) {
 
   // text-to-speech on ctrl press
   if (!e.originalEvent.repeat && modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
-    debug('tts')
-    chrome.runtime.sendMessage({handler: 'tts'})
+    chrome.runtime.sendMessage({
+      handler: 'trackEvent',
+      event: {
+        name: 'tts',
+        params: {
+          operation: 'play'
+        }
+      }
+    })
+
+    chrome.runtime.sendMessage({ handler: 'getLastTranslationDetails' }, ({ word, sl }) => {
+      debug('tts: ' + word + ', sl: ' + sl)
+      speak({ word, sl })
+    })
   }
 
   // Hide tat popup on escape
@@ -514,14 +566,14 @@ chrome.runtime.onMessage.addListener(
       if ($('transover-type-and-translate-popup').length == 0) {
         chrome.runtime.sendMessage({handler: 'get_last_tat_sl_tl'}, function(response) {
           const $popup = createPopup('transover-type-and-translate-popup')
-          const languages = $.extend({}, TransOverLanguages)
+          const popupLanguages = $.extend({}, languages)
 
-          if (response.last_sl && languages[response.last_sl]) {
-            languages[response.last_sl].selected_sl = true
+          if (response.last_sl && popupLanguages[response.last_sl]) {
+            popupLanguages[response.last_sl].selected_sl = true
           }
-          languages[response.last_tl || options.target_lang].selected_tl = true
+          popupLanguages[response.last_tl || options.target_lang].selected_tl = true
 
-          $popup.attr('data-languages', JSON.stringify(languages))
+          $popup.attr('data-languages', JSON.stringify(popupLanguages))
           $popup.attr('data-disable_on_this_page', disable_on_this_page)
           $popup.attr('data-disable_everywhere', disable_everywhere)
           $('body').append($popup)

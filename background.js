@@ -174,21 +174,9 @@ async function contentScriptListener(request) {
 
     return await translate(request.word, sl, tl, last_translation, on_translation_response, await Options.translate_by())
   }
-  case 'tts':
+  case 'getLastTranslationDetails':
     if (last_translation.succeeded) {
-      console.log('tts: ' + last_translation.word + ', sl: ' + last_translation.sl)
-      trackEvent({
-        name: 'tts',
-        params: {
-          operation: 'play'
-        }
-      })
-
-      const msg = new SpeechSynthesisUtterance()
-      msg.lang = last_translation.sl
-      msg.text = last_translation.word
-      msg.rate = 0.7
-      speechSynthesis.speak(msg)
+      return last_translation
     }
     return {}
   case 'trackEvent':

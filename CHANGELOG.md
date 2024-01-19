@@ -1,5 +1,9 @@
 # CHANGELOG
 
+1.71
+  * Fix TTS
+  * Add more languages
+
 1.70
   * Fix for google translate api changes
 
