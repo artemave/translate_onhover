@@ -36,7 +36,7 @@
   "web_accessible_resources": [
     {
       "resources": ["popup.js", "tat_popup.js"],
-      "matches": ["https://*/*"]
+      "matches": ["https://*/*", "file://*/*"]
     }
   ],
   "content_security_policy": {
