@@ -1,5 +1,8 @@
 # CHANGELOG
 
+1.72
+  * Fix double translation (flicker) when translating selection
+
 1.71
   * Fix TTS
   * Add more languages

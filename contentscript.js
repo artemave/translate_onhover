@@ -46,7 +46,7 @@ function createPopup(nodeType) {
 function removePopup(nodeType) {
   $(nodeType).each(function() {
     const popup = $(this.shadowRoot.querySelector('main'))
-    debug(`removePopup: ${popup}`)
+    debug(`removePopup ${nodeType}`)
     popup.fadeOut('fast', () => this.remove())
   })
 }
@@ -331,10 +331,10 @@ function processEvent(e) {
     else if (options.translate_by == 'point') {
       word = getHitWord(e)
     }
-  }
-  else {
+  } else {
     word = getHitWord(e)
   }
+
   if (word != '') {
     chrome.runtime.sendMessage({
       handler: 'trackEvent',
@@ -381,6 +381,8 @@ function withOptionsSatisfied(e, do_stuff) {
 }
 
 $(document).on('mousestop', function(e) {
+  debug('processing mousestop')
+
   withOptionsSatisfied(e, function() {
     // translate selection unless 'translate selection on alt only' is set
     if (window.getSelection().toString()) {
@@ -396,11 +398,20 @@ $(document).on('mousestop', function(e) {
 })
 
 $(document).click(function(e) {
+  debug('processing click')
+
   withOptionsSatisfied(e, function() {
-    if (options.translate_by != 'click')
+    if (options.translate_by != 'click') {
       return
-    if ($(e.target).closest('a').length > 0)
+    }
+    if ($(e.target).closest('a').length > 0) {
       return
+    }
+    // If selection is present, the translation is already being taken care of by the 'mousestop' event.
+    // Hence skipping it here to avoid double translation and flicker.
+    if (window.getSelection().toString()) {
+      return
+    }
 
     processEvent(e)
   })
