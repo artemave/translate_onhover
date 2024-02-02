@@ -75,7 +75,25 @@ function showPopup(e, content) {
   $('body').append($popup)
 
   $popup.on('transover-popup_content_updated', function() {
-    const pos = calculatePosition(e.clientX, e.clientY, $popup)
+    let textRect = {
+      top: e.clientY,
+      bottom: e.clientY,
+      left: e.clientX,
+      right: e.clientX,
+    }
+
+    const selection = window.getSelection()
+    if (selection.toString()) {
+      const selectionRect = selection.getRangeAt(0).getBoundingClientRect()
+      textRect = {
+        top: selectionRect.top,
+        bottom: selectionRect.bottom,
+        left: selectionRect.left,
+        right: selectionRect.right,
+      }
+    }
+    const pos = calculatePopupPosition(textRect, $popup)
+
     $popup
       .each(function() {
         $(this.shadowRoot.querySelector('main')).hide()
@@ -88,23 +106,28 @@ function showPopup(e, content) {
   $popup.attr({content, options: JSON.stringify(options)})
 }
 
-function calculatePosition(x, y, $popup) {
+function calculatePopupPosition(textRect, $popup) {
   const pos = {}
   const margin = 5
   const anchor = 10
   const outerWidth = Number($popup.attr('outer-width'))
   const outerHeight = Number($popup.attr('outer-height'))
+  const windowWidth = $(window).width()
 
   // show popup to the right of the word if it fits into window this way
-  if (x + anchor + outerWidth + margin < $(window).width()) {
-    pos.x = x + anchor
+  if (textRect.right + anchor + outerWidth + margin < windowWidth) {
+    pos.x = textRect.right + anchor
   }
   // show popup to the left of the word if it fits into window this way
-  else if (x - anchor - outerWidth - margin > 0) {
-    pos.x = x - anchor - outerWidth
+  else if (textRect.left - anchor - outerWidth - margin > 0) {
+    pos.x = textRect.left - anchor - outerWidth
+  }
+  // align popup with selection start if it's too wide to be on the either sides
+  else if (textRect.left + anchor + outerWidth + margin < windowWidth) {
+    pos.x = textRect.left
   }
   // show popup at the very left if it is not wider than window
-  else if (outerWidth + margin*2 < $(window).width()) {
+  else if (outerWidth + margin*2 < windowWidth) {
     pos.x = margin
   }
   // resize popup width to fit into window and position it the very left of the window
@@ -118,12 +141,12 @@ function calculatePosition(x, y, $popup) {
   }
 
   // show popup above the word if it fits into window this way
-  if (y - anchor - outerHeight - margin > 0) {
-    pos.y = y - anchor - outerHeight
+  if (textRect.top - anchor - outerHeight - margin > 0) {
+    pos.y = textRect.top - anchor - outerHeight
   }
   // show popup below the word if it fits into window this way
-  else if (y + anchor + outerHeight + margin < $(window).height()) {
-    pos.y = y + anchor
+  else if (textRect.bottom + anchor + outerHeight + margin < $(window).height()) {
+    pos.y = textRect.bottom + anchor
   }
   // show popup at the very top of the window
   else {
