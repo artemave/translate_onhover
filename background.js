@@ -17,7 +17,7 @@ function blockedErrorMessage(blockExpiresAt) {
 // - install Google Translate extension: https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb
 // - click on extension button to show popup
 // - inspect popup to see the requests
-async function translate(word, sl, tl, last_translation, onresponse, ga_event_name) {
+async function translate(word, sl, tl, last_translation, onresponse, isReverseTranslate) {
   const blockExpiresAt = await localStorage.get('blockExpiresAt') || new Date()
   const blockedErrorCount = await localStorage.get('blockedErrorCount') || 0
 
@@ -38,7 +38,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
 
     if (response.ok) {
       const data = await response.json()
-      return await onresponse(data, word, tl, last_translation, ga_event_name)
+      return await onresponse(data, word, tl, last_translation, isReverseTranslate)
     } else {
       trackEvent({
         name: 'error',
@@ -63,7 +63,7 @@ async function translate(word, sl, tl, last_translation, onresponse, ga_event_na
     let data = await response.json()
     // Is this API still returns expected json structure?
     if (data.sentences) {
-      return await onresponse(data, word, tl, last_translation, ga_event_name)
+      return await onresponse(data, word, tl, last_translation, isReverseTranslate)
     } else {
       // Fallback to rate limited API
       return await rateLimitedApi()
@@ -89,24 +89,26 @@ async function figureOutSlTl(tab_lang) {
   if (await Options.target_lang() == tab_lang && await Options.reverse_lang()) {
     res.tl = await Options.reverse_lang()
     res.sl = await Options.target_lang()
+    res.isReverseTranslate = true
     console.log('reverse translate into: ', {tl: res.tl, sl: res.sl})
   }
   else {
     res.tl = await Options.target_lang()
     res.sl = await Options.from_lang()
+    res.isReverseTranslate = false
     console.log('normal translate into:', {tl: res.tl, sl: res.sl})
   }
 
   return res
 }
 
-async function on_translation_response(data, word, tl, last_translation) {
+async function on_translation_response(data, word, tl, last_translation, isReverseTranslate) {
   let output
 
   console.log('raw_translation: ', data)
 
   const { succeeded, sl, parsed } = parseResponse(data, word)
-  const translation = { tl, succeeded, sl, word }
+  const translation = { tl, succeeded, sl, word, isReverseTranslate }
 
   if (succeeded) {
     output = parsed
@@ -116,10 +118,6 @@ async function on_translation_response(data, word, tl, last_translation) {
     } else {
       output = 'Oops.. No translation found.'
     }
-  }
-
-  if (!(output instanceof String)) {
-    output = JSON.stringify(output)
   }
 
   translation.translation = output
@@ -165,14 +163,14 @@ async function contentScriptListener(request) {
     })
     await Promise.all(promises)
 
-    return JSON.stringify(options)
+    return options
   }
   case 'translate': {
     console.log('received to translate: ' + request.word)
 
-    const {sl, tl} = await detectLanguage(request)
+    const {sl, tl, isReverseTranslate} = await detectLanguage(request)
 
-    return await translate(request.word, sl, tl, last_translation, on_translation_response, await Options.translate_by())
+    return await translate(request.word, sl, tl, last_translation, on_translation_response, isReverseTranslate)
   }
   case 'getLastTranslationDetails':
     if (last_translation.succeeded) {

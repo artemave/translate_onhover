@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import {
   renderError,
-  deserialize,
   modifierKeys,
   escape_html,
   formatTranslation
@@ -145,7 +144,7 @@ async function loadOptions() {
   } else {
     options = await new Promise((resolve) => {
       chrome.runtime.sendMessage({handler: 'get_options'}, function(response) {
-        resolve(JSON.parse(response))
+        resolve(response)
       })
     })
   }
@@ -355,15 +354,13 @@ function processEvent(e) {
         return
       }
 
-      const translation = deserialize(response.translation)
-
-      if (!translation) {
+      if (!response.translation) {
         debug('skipping empty translation')
         return
       }
 
-      last_translation = translation
-      showPopup(e, formatTranslation(translation, response, options))
+      last_translation = response.translation
+      showPopup(e, formatTranslation(response.translation, response, options))
     })
   }
 }
@@ -420,7 +417,7 @@ $(document).click(function(e) {
 
 let show_popup_key_pressed = false
 
-function speak({ word, sl }) {
+function speak({ text, lang }) {
   // It seems that (at least at the moment) translate_tts blocks requests with Referer
   // This code below stops fetch from sending Referer header
   const meta = document.createElement('meta')
@@ -428,7 +425,7 @@ function speak({ word, sl }) {
   meta.content = 'never'
   document.getElementsByTagName('head')[0].appendChild(meta)
 
-  const url = `https://translate.google.com/translate_tts?client=tw-ob&q=${encodeURI(word)}&tl=${sl}`
+  const url = `https://translate.google.com/translate_tts?client=tw-ob&q=${encodeURI(text)}&tl=${lang}`
 
   // If this ever gets blocked, try iframe?
   // const iframe = document.createElement('iframe')
@@ -472,16 +469,14 @@ $(document).keydown(function(e) {
       chrome.runtime.sendMessage({handler: 'translate', word: selection}, function(response) {
         debug('response: ', response)
 
-        const translation = deserialize(response.translation)
-
-        if (!translation) {
+        if (!response.translation) {
           debug('skipping empty translation')
           return
         }
 
         const xy = { clientX: last_mouse_stop.x, clientY: last_mouse_stop.y }
-        last_translation = translation
-        showPopup(xy, formatTranslation(translation, response, options))
+        last_translation = response.translation
+        showPopup(xy, formatTranslation(response.translation, response, options))
       })
     }
   }
@@ -498,9 +493,24 @@ $(document).keydown(function(e) {
       }
     })
 
-    chrome.runtime.sendMessage({ handler: 'getLastTranslationDetails' }, ({ word, sl }) => {
-      debug('tts: ' + word + ', sl: ' + sl)
-      speak({ word, sl })
+    chrome.runtime.sendMessage({ handler: 'getLastTranslationDetails' }, ({ word, sl, tl, isReverseTranslate, translation }) => {
+      if (isReverseTranslate) {
+        if (Array.isArray(translation)) {
+          const toTts = translation.map(({ meanings }) => {
+            return meanings.slice(0,5).join(', ')
+          }).join('\n')
+
+          debug('tts: ' + toTts + ', lang: ' + tl)
+          speak({ text: toTts, lang: tl })
+
+        } else {
+          debug('tts: ' + translation + ', lang: ' + tl)
+          speak({ text: translation, lang: tl })
+        }
+      } else {
+        debug('tts: ' + word + ', lang: ' + sl)
+        speak({ text: word, lang: sl })
+      }
     })
   }
 
@@ -637,16 +647,14 @@ window.addEventListener('message', function(e) {
     chrome.runtime.sendMessage({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
       debug('tat response: ', response)
 
-      const translation = deserialize(response.translation)
-
-      if (!translation) {
+      if (!response.translation) {
         debug('tat skipping empty translation')
         return
       }
 
       const e = { clientX: $(window).width(), clientY: 0 }
-      last_translation = translation
-      showPopup(e, formatTranslation(translation, response, options))
+      last_translation = response.translation
+      showPopup(e, formatTranslation(response.translation, response, options))
     })
   } else if (e.data.type === 'toggle_disable_on_this_page') {
     disable_on_this_page = e.data.disable_on_this_page

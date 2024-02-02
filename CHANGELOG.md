@@ -1,5 +1,8 @@
 # CHANGELOG
 
+1.73
+  * when reverse translating, tts now speaks "target" language, as opposed to the "source" one
+
 1.72
   * Fix double translation (flicker) when translating selection
 
