@@ -2,7 +2,9 @@
 
 Simply the best Google Chrome translation extension - https://chrome.google.com/webstore/detail/aggiiclaiamajehmlfpkjmlbadmkledi
 
-Now on Firefox too: https://addons.mozilla.org/firefox/addon/transover-ff/
+Firefox version: https://addons.mozilla.org/firefox/addon/transover-ff/
+
+Edge version: https://microsoftedge.microsoft.com/addons/detail/transover/jocggnbbgpaaphngnlccmhgbjffgnjda
 
 ### Run local version
 
