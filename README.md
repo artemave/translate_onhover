@@ -23,6 +23,7 @@ Then build:
 TRACKING_ID=1234 yarn build
 ```
 
+
 Where TRACKING\_ID is some Google Analitycs tracking id.
 
 Now you can "Load unpacked" the `./dist` folder.
