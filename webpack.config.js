@@ -3,8 +3,11 @@ const CopyPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { EnvironmentPlugin } = require('webpack')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const WebExtPlugin = require('web-ext-plugin')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+
+let outputPath = path.resolve(__dirname, 'dist')
 
 const config = {
   devtool: 'inline-source-map',
@@ -18,7 +21,7 @@ const config = {
   },
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist')
+    path: outputPath
   },
   module: {
     rules: [
@@ -61,7 +64,8 @@ const config = {
         '*.png',
         'options.html',
       ]
-    })
+    }),
+    new WebExtPlugin.default({ sourceDir: outputPath })
   ]
 }
 
