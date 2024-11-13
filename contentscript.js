@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import {
   renderError,
-  modifierKeys,
   escape_html,
   formatTranslation
 } from './lib/transover_utils'
@@ -200,7 +199,7 @@ function processEvent(e) {
       return res
     }
 
-    function getExactTextNode(nodes, e) {
+    function getExactTextNode(_, e) {
       $(text_nodes).wrap('<transblock />')
       let hit_text_node = document.elementFromPoint(e.clientX, e.clientY)
 
@@ -388,7 +387,7 @@ function processEvent(e) {
   }
 }
 
-function withOptionsSatisfied(e, do_stuff) {
+function withOptionsSatisfied(_, do_stuff) {
   if (!options) return
 
   //respect 'translate only when alt pressed' option
@@ -464,7 +463,7 @@ function speak({ text, lang }) {
   }
 
   $(document).keydown(e => {
-    if (e.keyCode === 27) {
+    if (e.key === 'Escape') {
       audio.pause()
       audio.removeAttribute('src')
       audio.load()
@@ -481,7 +480,7 @@ function speak({ text, lang }) {
 $(document).keydown(function(e) {
   if (!options) return
 
-  if (modifierKeys[e.keyCode] == options.popup_show_trigger) {
+  if (e.key == options.popup_show_trigger) {
     show_popup_key_pressed = true
 
     const selection = window.getSelection().toString()
@@ -505,7 +504,7 @@ $(document).keydown(function(e) {
   }
 
   // text-to-speech on ctrl press
-  if (!e.originalEvent.repeat && modifierKeys[e.keyCode] == options.tts_key && options.tts && $('transover-popup').length > 0) {
+  if (!e.originalEvent.repeat && e.key == options.tts_key && options.tts && $('transover-popup').length > 0) {
     chrome.runtime.sendMessage({
       handler: 'trackEvent',
       event: {
@@ -538,11 +537,11 @@ $(document).keydown(function(e) {
   }
 
   // Hide tat popup on escape
-  if (e.keyCode == 27) {
+  if (e.key == 'Escape') {
     removePopup('transover-type-and-translate-popup')
   }
 }).keyup(function(e) {
-  if (options && modifierKeys[e.keyCode] == options.popup_show_trigger) {
+  if (options && e.key == options.popup_show_trigger) {
     show_popup_key_pressed = false
   }
 })
