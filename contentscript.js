@@ -17,6 +17,7 @@ if (process.env.MANIFEST_V3 === 'true') {
 let options
 let disable_on_this_page
 let disable_everywhere
+let store_translations
 
 function copyToClipboard(text) {
   const input = document.createElement('input')
@@ -173,9 +174,11 @@ async function loadOptions() {
 
   disable_on_this_page = ignoreThisPage(options)
   disable_everywhere = options.disable_everywhere
+  store_translations = options.store_translations
   chrome.runtime.sendMessage({
     handler: 'setIcon',
-    disabled: disable_on_this_page || disable_everywhere
+    disabled: disable_on_this_page || disable_everywhere,
+    store_translations: store_translations
   })
 }
 
