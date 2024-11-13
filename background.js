@@ -5,6 +5,8 @@ import Options from './lib/options'
 import trackEvent from './lib/tracking'
 import { localStorage } from './lib/storage'
 import { generateUrls, parseResponse } from './lib/apiClient.mjs'
+import { recordTranslation, getTranslationHistory } from './lib/history'
+import options from './lib/options'
 
 const blockTimeoutMs = 30000 * 60
 const browserAction = chrome[process.env.MANIFEST_V3 === 'true' ? 'action' : 'browserAction']
@@ -125,6 +127,10 @@ async function on_translation_response(data, word, tl, last_translation, isRever
   Object.assign(last_translation, translation)
   await localStorage.set('last_translation', last_translation)
 
+  if (await Options.store_translations()) {
+    recordTranslation(word, sl, tl, isReverseTranslate, data)
+  }
+
   console.log('response: ', translation)
   return translation
 }
@@ -148,7 +154,7 @@ async function detectLanguage(request) {
 async function contentScriptListener(request) {
   const except_urls = await Options.except_urls()
   const last_translation = await localStorage.get('last_translation') || {}
-
+  console.debug('contentScriptListener Invoked', request)
   switch (request.handler) {
   case 'get_last_tat_sl_tl':
     console.log('get_last_tat_sl_tl')
@@ -203,6 +209,22 @@ async function contentScriptListener(request) {
       await Options.disable_everywhere(1)
     } else {
       await Options.disable_everywhere(0)
+    }
+    break
+  case 'exportTranslationHistory':
+    if (await options.store_translations()) {
+      let records = await getTranslationHistory()
+      let jsonRecords = JSON.stringify(records)
+      const blob = new Blob([jsonRecords], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+
+      // Use the downloads API to save the file
+
+      browser.downloads.download({
+        url: url,
+        filename: 'translation_history.json',
+        saveAs: true // Prompts the user with the save dialog
+      })
     }
     break
   default:
