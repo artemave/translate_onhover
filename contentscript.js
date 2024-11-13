@@ -668,6 +668,12 @@ window.addEventListener('message', function(e) {
   if (e.source != window)
     return
 
+  if (e.data.type == 'exportTranslationHistory') {
+    chrome.runtime.sendMessage({
+      handler: 'exportTranslationHistory'
+    })
+  }
+
   if (e.data.type == 'transoverTranslate') {
     chrome.runtime.sendMessage({handler: 'translate', word: e.data.text, sl: e.data.sl, tl: e.data.tl}, function(response) {
       debug('tat response: ', response)
