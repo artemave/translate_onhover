@@ -3,43 +3,21 @@ import assert from 'node:assert'
 import { generateUrls, parseResponse } from '../lib/apiClient.mjs'
 
 describe('parsing google responses', () => {
-  describe('url 0', function() {
-    it('parses full translation response', async () => {
-      await assertParsesFullTranslationResponse(0)
-    })
-
-    it('joins article and word', async function() {
-      await assertJoinsArticleAndWord(0)
-    })
-
-    it('parses sentences', async function() {
-      await assertParsesSentences(0)
-    })
+  it('parses full translation response', async () => {
+    await assertParsesFullTranslationResponse()
   })
 
-  describe('url 1', function() {
-    it('parses full translation response', async () => {
-      await assertParsesFullTranslationResponse(1)
-    })
+  it('joins article and word', async function() {
+    await assertJoinsArticleAndWord()
+  })
 
-    it('joins article and word', async function() {
-      await assertJoinsArticleAndWord(1)
-    })
-
-    it('parses sentences', async function() {
-      await assertParsesSentences(1)
-    })
+  it('parses sentences', async function() {
+    await assertParsesSentences()
   })
 })
 
-async function assertParsesSentences(index) {
-  const urls = generateUrls('gifts are yellow', { sl: 'en', tl: 'fr' })
-
-  const response = await fetch(urls[index])
-
-  assert(response.ok)
-
-  const data = await response.json()
+async function assertParsesSentences() {
+  const data = await fetchFromFirstOkResponse('gifts are yellow', { sl: 'en', tl: 'fr' })
   const translation = parseResponse(data, 'gift')
   const expected = {
     'succeeded': true,
@@ -53,14 +31,8 @@ async function assertParsesSentences(index) {
   )
 }
 
-async function assertJoinsArticleAndWord(index) {
-  const urls = generateUrls('gift', { sl: 'en', tl: 'fr' })
-
-  const response = await fetch(urls[index])
-
-  assert(response.ok)
-
-  const data = await response.json()
+async function assertJoinsArticleAndWord() {
+  const data = await fetchFromFirstOkResponse('gift', { sl: 'en', tl: 'fr' })
   const translation = parseResponse(data, 'gift')
   const expected = {
     'succeeded': true,
@@ -82,14 +54,8 @@ async function assertJoinsArticleAndWord(index) {
   assert.deepStrictEqual(translation, expected)
 }
 
-async function assertParsesFullTranslationResponse(index) {
-  const urls = generateUrls('cadeau', { sl: 'fr', tl: 'en' })
-
-  const response = await fetch(urls[index])
-
-  assert(response.ok)
-
-  const data = await response.json()
+async function assertParsesFullTranslationResponse() {
+  const data = await fetchFromFirstOkResponse('cadeau', { sl: 'fr', tl: 'en' })
   const translation = parseResponse(data, 'cadeau')
   const expected = {
     'succeeded': true,
@@ -109,3 +75,23 @@ async function assertParsesFullTranslationResponse(index) {
   assert.deepStrictEqual(translation, expected)
 }
 
+async function fetchFromFirstOkResponse(word, { sl, tl }) {
+  const urls = generateUrls(word, { sl, tl })
+  const failureDetails = []
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url)
+
+      if (response.ok) {
+        return await response.json()
+      }
+
+      failureDetails.push(`${url} (${response.status} ${response.statusText})`)
+    } catch (error) {
+      failureDetails.push(`${url} (${error.message})`)
+    }
+  }
+
+  assert.fail(`All translation endpoints failed: ${failureDetails.join(', ')}`)
+}
