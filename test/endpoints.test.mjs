@@ -87,11 +87,21 @@ async function fetchFromFirstOkResponse(word, { sl, tl }) {
         return await response.json()
       }
 
-      failureDetails.push(`${url} (${response.status} ${response.statusText})`)
+      failureDetails.push(await describeHttpFailure(url, response))
     } catch (error) {
-      failureDetails.push(`${url} (${error.message})`)
+      const causeMessage = error.cause?.message ? `; cause: ${error.cause.message}` : ''
+      failureDetails.push(`${url} (network error: ${error.name}: ${error.message}${causeMessage})`)
     }
   }
 
   assert.fail(`All translation endpoints failed: ${failureDetails.join(', ')}`)
+}
+
+async function describeHttpFailure(url, response) {
+  const contentType = response.headers.get('content-type') || 'n/a'
+  const server = response.headers.get('server') || 'n/a'
+  const body = await response.text()
+  const compactBody = body.replace(/\s+/g, ' ').trim().slice(0, 240) || '<empty body>'
+
+  return `${url} (HTTP ${response.status} ${response.statusText}; content-type: ${contentType}; server: ${server}; body: ${compactBody})`
 }
