@@ -26,7 +26,8 @@
     }
   },
   "permissions": [
-    "storage"
+    "storage",
+    "downloads"
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
