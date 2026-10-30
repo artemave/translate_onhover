@@ -1,0 +1,18 @@
+include:
+  - ${HOME}/projects/dotfiles/devcontainer/docker-compose.yml
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command:
+      - bash
+      - -lc
+      - |
+        yarn install --frozen-lockfile
+        exec zsh
+    volumes:
+      - node_modules:/workspace/node_modules
+
+volumes:
+  node_modules:

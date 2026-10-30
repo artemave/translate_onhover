@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1.5
+FROM dev-base:latest
+
+USER root
+
+RUN --mount=type=cache,id=dev-base-dnf,target=/var/cache/libdnf5,sharing=locked \
+  dnf -y install yarnpkg
+
+USER dev
+
+WORKDIR /workspace
