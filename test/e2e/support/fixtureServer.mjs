@@ -32,9 +32,14 @@ export async function startFixtureServer() {
       return
     }
 
-    try {
-      const body = await readFile(filePath)
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+    const body = await readFile(filePath)
+      const headers = { 'Content-Type': 'text/html; charset=utf-8' }
+      // Pages like Gmail refuse plain strings for DOM sinks such as innerHTML
+      // and script.src. Fixtures with this name stand in for them.
+      if (path.basename(filePath).startsWith('trusted-types')) {
+        headers['Content-Security-Policy'] = "require-trusted-types-for 'script'"
+      }
+      res.writeHead(200, headers)
       res.end(body)
     } catch {
       res.writeHead(404)
