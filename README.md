@@ -31,3 +31,5 @@ Now you can "Load unpacked" the `./dist` folder.
 ### Development
 
 In addition to the above, there is `yarn dev`. For as long as it is running, `dist` will stay updated with code changes.
+
+`yarn browser` (Chromium) and `yarn browser:firefox` open a browser with the extension loaded, rebuild on code changes and reload the extension after each rebuild. Open tabs need a reload to pick up content script changes. They open example.com, or the URLs given as arguments, e.g. `yarn browser https://mail.google.com`. Each browser keeps its profile in `.browser-profile/` and builds into `.dev-build/`, so both can run at once, alongside `yarn dev` or the tests.

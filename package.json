@@ -4,6 +4,8 @@
     "build-v3": "MANIFEST_V3=true NODE_ENV=production webpack && zip -FS -r -j translate_onhover_v3 dist",
     "build-v2": "MANIFEST_V3=false NODE_ENV=production webpack && zip -FS -r -j translate_onhover_v2 dist",
     "dev": "webpack --watch",
+    "browser": "node scripts/browser.mjs chrome",
+    "browser:firefox": "node scripts/browser.mjs firefox",
     "test": "yarn test:unit && yarn test:e2e",
     "test:endpoints": "node --import ./test-support/register-hooks.mjs --test test/endpoints.test.mjs",
     "test:unit": "node --import ./test-support/register-hooks.mjs --test test/*.test.mjs",
@@ -30,6 +32,7 @@
     "playwright": "^1.62.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "v8-to-istanbul": "^9.3.0",
+    "web-ext": "^10.8.0",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-encoding-plugin": "^0.3.1"

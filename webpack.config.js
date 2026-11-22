@@ -69,12 +69,16 @@ const config = {
         'MANIFEST_V3': 'false'
       }
     ),
+    new EnvironmentPlugin({ DEV_OPTIONS: '{}' }),
     new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
         {
           from: process.env.MANIFEST_V3 === 'true' ? 'manifest_v3.json' : 'manifest_v2.json',
-          to: 'manifest.json'
+          to: 'manifest.json',
+          transform: content => process.env.GECKO_ID
+            ? JSON.stringify({ ...JSON.parse(content), browser_specific_settings: { gecko: { id: process.env.GECKO_ID } } }, null, 2)
+            : content
         },
         '*.png',
         'options.html',

@@ -4,3 +4,5 @@ node_modules
 .mise.toml
 coverage
 .coverage-e2e-raw
+.browser-profile
+.dev-build

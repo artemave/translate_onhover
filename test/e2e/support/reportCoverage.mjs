@@ -92,7 +92,10 @@ const THRESHOLDS = {
   //   not reachable through Playwright's page-level API (see
   //   typeAndTranslate's toolbar-icon workaround - there's no equivalent
   //   for a global keyboard shortcut).
-  '/background.js': { lines: 86.84, statements: 87.06, functions: 78.94, branches: 87.71 },
+  // - seedOptions' loop body: only runs in the dev-browser build
+  //   (scripts/browser.mjs), which passes DEV_OPTIONS - this harness builds
+  //   without it.
+  '/background.js': { lines: 85.59, statements: 85.83, functions: 80, branches: 84.74 },
   // contentscript.js's remaining gaps:
   // - line 13/159: same MV3/MV2 pattern as above.
   // - calculatePopupPosition's "align with selection start" and "pin to

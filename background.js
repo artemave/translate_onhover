@@ -233,8 +233,21 @@ browserAction.onClicked.addListener(function(tab) {
   chrome.tabs.sendMessage(tab.id, 'open_type_and_translate')
 })
 
+// Pre-fills options for the dev browsers (scripts/browser.mjs) without
+// overriding anything already set. Empty in every other build.
+const devOptions = JSON.parse(process.env.DEV_OPTIONS)
+
+async function seedOptions(options) {
+  for (const [key, value] of Object.entries(options)) {
+    if (await localStorage.get(key) === undefined) {
+      await localStorage.set(key, value)
+    }
+  }
+}
+seedOptions(devOptions)
+
 chrome.runtime.onInstalled.addListener(function(details) {
-  if (details.reason == 'install') {
+  if (details.reason == 'install' && Object.keys(devOptions).length === 0) {
     chrome.tabs.create({url: chrome.runtime.getURL('options.html')})
   }
 })
