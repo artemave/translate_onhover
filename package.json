@@ -10,7 +10,7 @@
     "test": "yarn test:unit && yarn test:e2e",
     "test:endpoints": "node --import ./test-support/register-hooks.mjs --test test/endpoints.test.mjs",
     "test:unit": "node --import ./test-support/register-hooks.mjs --test test/*.test.mjs",
-    "test:unit:coverage": "node --import ./test-support/register-hooks.mjs --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 test/*.test.mjs",
+    "test:unit:coverage": "node --import ./test-support/register-hooks.mjs --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 --test-coverage-exclude='test/**' test/*.test.mjs",
     "test:e2e": "MANIFEST_V3=true webpack && node --import ./test-support/register-hooks.mjs --test test/e2e/*.test.mjs",
     "test:e2e:coverage": "bash scripts/test-e2e-coverage.sh",
     "lint": "eslint --ignore-pattern dist .",
