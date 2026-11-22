@@ -1,0 +1,82 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+  # Running it by hand is a dry run: it builds and checks the store
+  # credentials, but uploads nothing.
+  workflow_dispatch:
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: yarn
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - run: npx playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+
+      - name: Check the tag matches the manifest versions
+        if: github.event_name == 'push'
+        run: |
+          for manifest in manifest_v2.json manifest_v3.json; do
+            version=$(node -p "require('./$manifest').version")
+            if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+              echo "$manifest has version $version, but the tag is $GITHUB_REF_NAME"
+              exit 1
+            fi
+          done
+
+      - run: yarn test:unit
+      - run: yarn test:e2e
+
+      - name: Build
+        env:
+          API_SECRET: ${{ secrets.API_SECRET }}
+          MEASUREMENT_ID: ${{ secrets.MEASUREMENT_ID }}
+        run: |
+          yarn build-v2
+          yarn build-v3
+          git archive --format zip --output translate_onhover_sources.zip HEAD
+
+      - name: Create the GitHub release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          awk -v version="${GITHUB_REF_NAME#v}" '$0 == version { found = 1; next } found && /^[0-9]/ { exit } found' CHANGELOG.md > release_notes.md
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release_notes.md \
+            translate_onhover_v3.zip translate_onhover_v2.zip
+
+      - name: Publish to the stores
+        env:
+          CHROME_API_VERSION: v2
+          CHROME_EXTENSION_ID: aggiiclaiamajehmlfpkjmlbadmkledi
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
+          FIREFOX_EXTENSION_ID: '{73f6509a-074f-457f-bc32-e521bde682f7}'
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' }}
+        run: >
+          npx publish-extension
+          --chrome-zip translate_onhover_v3.zip
+          --edge-zip translate_onhover_v3.zip
+          --firefox-zip translate_onhover_v2.zip
+          --firefox-sources-zip translate_onhover_sources.zip

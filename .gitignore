@@ -6,3 +6,5 @@ coverage
 .coverage-e2e-raw
 .browser-profile
 .dev-build
+translate_onhover_*.zip
+.env.submit

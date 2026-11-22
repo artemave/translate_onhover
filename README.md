@@ -20,11 +20,10 @@ yarn install
 Then build:
 
 ```
-TRACKING_ID=1234 yarn build
+API_SECRET=1234 MEASUREMENT_ID=1234 yarn build
 ```
 
-
-Where TRACKING\_ID is some Google Analitycs tracking id.
+`API_SECRET` and `MEASUREMENT_ID` are Google Analytics 4 Measurement Protocol credentials; any values work for a local build. This runs the tests and produces `translate_onhover_v3.zip` (Chrome, Edge) and `translate_onhover_v2.zip` (Firefox).
 
 Now you can "Load unpacked" the `./dist` folder.
 
@@ -33,3 +32,7 @@ Now you can "Load unpacked" the `./dist` folder.
 In addition to the above, there is `yarn dev`. For as long as it is running, `dist` will stay updated with code changes.
 
 `yarn browser` (Chromium) and `yarn browser:firefox` open a browser with the extension loaded, rebuild on code changes and reload the extension after each rebuild. Open tabs need a reload to pick up content script changes. They open example.com, or the URLs given as arguments, e.g. `yarn browser https://mail.google.com`. Each browser keeps its profile in `.browser-profile/` and builds into `.dev-build/`, so both can run at once, alongside `yarn dev` or the tests.
+
+### Releasing
+
+See [docs/releasing.md](docs/releasing.md).

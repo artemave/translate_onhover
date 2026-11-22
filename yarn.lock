@@ -732,6 +732,11 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
+"@topcli/prompts@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@topcli/prompts/-/prompts-4.0.0.tgz#c34144d04b7e6530610bcdb408b06422c695dda7"
+  integrity sha512-kkKYPb4k/6kRdnESt77B5vJrrYnYHIYczwv0P1c+tfN/IWEx3KZeKEHoUq7sImIyBEXWdA2uakIroD9pmRJziQ==
+
 "@types/eslint-scope@^3.7.3":
   version "3.7.4"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.4.tgz#37fc1223f0786c39627068a12e94d6e6fc61de16"
@@ -1676,6 +1681,11 @@ bundle-name@^4.1.0:
   integrity sha512-DdH81/zPLVS11EUgWq3tEu/xn+EzljlMYooDNdzWEnFha3R3NBMpMV1UqYIpjYHV/SgpFKMIX1Oh7o06SjM/oA==
   dependencies:
     run-applescript "^7.0.0"
+
+cac@^7.0.0:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/cac/-/cac-7.1.1.tgz#6f3dc1aeade084cbe246d9a41ef884dc8fc5d622"
+  integrity sha512-8zc+h51HxpodKsA7L4PpBNd+9qlrfuUcyUDE5a793BJfN4NZgwk7v9NmrY3ptZ+Sk0+ToigxSzkb47AsEgyizw==
 
 cacache@^12.0.2:
   version "12.0.4"
@@ -4827,6 +4837,15 @@ public-encrypt@^4.0.0:
     randombytes "^2.0.1"
     safe-buffer "^5.1.2"
 
+publish-browser-extension@6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/publish-browser-extension/-/publish-browser-extension-6.2.0.tgz#bcc2d0abbd34e0847381ad1aa8230785bb20160f"
+  integrity sha512-yIxoJ54RdTqyfdLrc+8mswCmEeh9x/03JrtF8Ney8zjzKplKgg4fdTs3hRP33IcWImak98yAHSI8ZBVAflsDNg==
+  dependencies:
+    "@topcli/prompts" "^4.0.0"
+    cac "^7.0.0"
+    tasuku "^2.3.0"
+
 pump@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/pump/-/pump-2.0.1.tgz#12399add6e4cf7526d973cbc8b5ce2e2908b3909"
@@ -5574,6 +5593,11 @@ tapable@^2.1.1, tapable@^2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/tapable/-/tapable-2.2.1.tgz#1967a73ef4060a82f12ab96af86d52fdb76eeca0"
   integrity sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==
+
+tasuku@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/tasuku/-/tasuku-2.3.0.tgz#3122dffdb1a8ad30748bb74e0bb4b8bf74cc0fb1"
+  integrity sha512-9Jtk+XAnttslCw4i9RceSZGr2PT5TLn0vUyWnoP2SdlSYzkiYRY6kB5qnPi5IQ/Em8e4oBow1rpaA39iijTIrA==
 
 terser-webpack-plugin@^1.4.3:
   version "1.4.5"
