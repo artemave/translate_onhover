@@ -72,7 +72,7 @@ function showPopup(e, content) {
 
   const $popup = createPopup('transover-popup')
   $('body').append($popup)
-  $popup.attr('options', JSON.stringify(options))
+  $popup.attr({ options: JSON.stringify(options), theme: options.theme })
 
   // Filled from here rather than by popup.js: popup.js runs in the page's
   // world, where pages enforcing Trusted Types (e.g. Gmail) block innerHTML.
@@ -628,6 +628,7 @@ chrome.runtime.onMessage.addListener(
           $popup.attr('data-languages', JSON.stringify(popupLanguages))
           $popup.attr('data-disable_on_this_page', disable_on_this_page)
           $popup.attr('data-disable_everywhere', disable_everywhere)
+          $popup.attr('theme', options.theme)
           $('body').append($popup)
           $popup.each(function() {
             $(this.shadowRoot.querySelector('main')).hide().fadeIn('fast')

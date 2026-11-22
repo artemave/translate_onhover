@@ -5,13 +5,22 @@
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="options_script.js"></script>
     <style type="text/css">
+      :root {
+        color-scheme: light dark;
+        --text: light-dark(#4f4f4f, #d4d4d4);
+        --border: light-dark(#ccc, #555);
+        --hint: light-dark(blue, #8ab4f8);
+        --success: light-dark(green, #6fcf6f);
+        --disabled: light-dark(#ccc, #666);
+      }
+
       body {
         margin: 10px auto;
         padding: 0 20px;
         width: 550px;
       }
       body, table {
-        color: #4f4f4f;
+        color: var(--text);
         font: normal normal normal 14px Verdana, Tahoma, sans-serif;
         border-spacing: 0px;
       }
@@ -46,7 +55,7 @@
         border-width: 1px;
         border-radius: 5px;
         border-style: solid;
-        border-color: #ccc;
+        border-color: var(--border);
       }
 
       div.button {
@@ -59,13 +68,13 @@
 
       .flash {
         display: none;
-        color: green;
+        color: var(--success);
         margin-top: 4px;
         margin-left: 8px;
       }
 
       .hint {
-        color: blue;
+        color: var(--hint);
       }
 
       .help {
@@ -74,7 +83,7 @@
       }
 
       .disabled {
-        color: #ccc;
+        color: var(--disabled);
       }
 
       .pulse {
@@ -181,6 +190,15 @@
         <div class="option">
           <label for="fontSize">Font size</label>
           <input type="number" name="fontSize" id="fontSize" min="10", max="24">&nbsp;px
+        </div>
+
+        <div class="option">
+          <label for="theme">Popup theme</label>
+          <select id="theme" name="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="auto">Same as system</option>
+          </select>
         </div>
 
         <div class="option firefox-option u-hidden">

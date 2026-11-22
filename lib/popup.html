@@ -1,5 +1,23 @@
 <template id="transover-popup-template">
   <style>
+    :host {
+      color-scheme: light dark;
+      --text: light-dark(#333, #e6e3d3);
+      --muted: light-dark(grey, #9e9b8f);
+      --error: light-dark(red, #ff6b6b);
+      --background: light-dark(#fcf7d9, #2e2c25);
+      --border: light-dark(#ccc, #55524a);
+      --shadow: light-dark(rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    }
+
+    :host([theme="light"]) {
+      color-scheme: light;
+    }
+
+    :host([theme="dark"]) {
+      color-scheme: dark;
+    }
+
     .pos_translation {
       padding-bottom: 3px;
     }
@@ -13,19 +31,19 @@
     }
 
     main {
-      color: #333;
+      color: var(--text);
       max-width: 800px;
       font-family: Arial, sans-serif;
       font-size: 14px;
       font-weight: 300;
       letter-spacing: initial;
 
-      background: #fcf7d9;
+      background: var(--background);
       text-align: left;
       border-style: solid;
       border-width: 1px;
-      border-color: #ccc;
-      box-shadow: rgba(0,0,0,0.2) 0px 2px 5px;
+      border-color: var(--border);
+      box-shadow: var(--shadow) 0px 2px 5px;
       border-radius: 5px;
       padding: 6px 8px 3px 8px;
       position: fixed;
@@ -54,11 +72,11 @@
     }
 
     .red {
-      color: red;
+      color: var(--error);
     }
 
     .from_lang {
-      color: grey;
+      color: var(--muted);
       font-size: 0.8em;
       line-height: 1.2em;
       margin-top: 2px;

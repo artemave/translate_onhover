@@ -1,5 +1,33 @@
 <template id="transover-tat-popup-template">
   <style>
+    :host {
+      color-scheme: light dark;
+      --text: light-dark(#333, #e6e3d3);
+      --link: light-dark(blue, #8ab4f8);
+      --background: light-dark(#fcf7d9, #2e2c25);
+      --border: light-dark(#ccc, #55524a);
+      --shadow: light-dark(rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    }
+
+    :host([theme="light"]) {
+      color-scheme: light;
+    }
+
+    :host([theme="dark"]) {
+      color-scheme: dark;
+    }
+
+    /* The swap icon is an image, so light-dark() can't recolour it. */
+    @media (prefers-color-scheme: dark) {
+      :host(:not([theme="light"])) {
+        --icon-filter: invert(0.85) hue-rotate(180deg);
+      }
+    }
+
+    :host([theme="dark"]) {
+      --icon-filter: invert(0.85) hue-rotate(180deg);
+    }
+
     #tat_input_container {
       display: flex;
       margin-bottom: 10px;
@@ -15,7 +43,7 @@
       font-size: 14px;
       line-height: 20px;
       border-radius: 2px;
-      border: 1px #ccc solid;
+      border: 1px var(--border) solid;
       padding-left: 5px;
     }
 
@@ -39,6 +67,7 @@
     }
 
     #swap_languages {
+      filter: var(--icon-filter);
       margin-left: 5px;
       margin-right: 5px;
       width: 24px;
@@ -54,19 +83,19 @@
     }
 
     main {
-      color: #333;
+      color: var(--text);
       font-family: Arial, sans-serif;
       font-size: 14px;
       font-weight: 300;
       line-height: 19px;
       letter-spacing: initial;
 
-      background: #fcf7d9;
+      background: var(--background);
       text-align: left;
       border-style: solid;
       border-width: 1px;
-      border-color: #ccc;
-      box-shadow: rgba(0,0,0,0.2) 0px 2px 5px;
+      border-color: var(--border);
+      box-shadow: var(--shadow) 0px 2px 5px;
       border-radius: 5px;
       padding: 10px 12px 12px 12px;
       position: fixed;
@@ -80,7 +109,7 @@
 
     #disable_on_this_page_container {
       margin-bottom: 8px;
-      color: blue;
+      color: var(--link);
     }
 
     #disable_on_this_page_container label {

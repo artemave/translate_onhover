@@ -44,6 +44,11 @@ export async function setDelay(optionsPage, ms) {
   await optionsPage.fill('#delay', String(ms))
 }
 
+export async function setTheme(optionsPage, theme) {
+  await showMoreOptions(optionsPage)
+  await optionsPage.selectOption('#theme', theme)
+}
+
 export async function setFromLang(optionsPage, code) {
   await showMoreOptions(optionsPage)
   await optionsPage.selectOption('#from_lang', code)
