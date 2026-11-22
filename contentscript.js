@@ -72,37 +72,43 @@ function showPopup(e, content) {
 
   const $popup = createPopup('transover-popup')
   $('body').append($popup)
+  $popup.attr('options', JSON.stringify(options))
 
-  $popup.on('transover-popup_content_updated', function() {
-    let textRect = {
-      top: e.clientY,
-      bottom: e.clientY,
-      left: e.clientX,
-      right: e.clientX,
-    }
+  // Filled from here rather than by popup.js: popup.js runs in the page's
+  // world, where pages enforcing Trusted Types (e.g. Gmail) block innerHTML.
+  const main = $popup[0].shadowRoot.querySelector('main')
+  main.innerHTML = content
 
-    const selection = window.getSelection()
-    if (selection.toString()) {
-      const selectionRect = selection.getRangeAt(0).getBoundingClientRect()
-      textRect = {
-        top: selectionRect.top,
-        bottom: selectionRect.bottom,
-        left: selectionRect.left,
-        right: selectionRect.right,
-      }
-    }
-    const pos = calculatePopupPosition(textRect, $popup)
-
-    $popup
-      .each(function() {
-        $(this.shadowRoot.querySelector('main')).hide()
-      })
-      .attr({ top: pos.y, left: pos.x })
-      .each(function() {
-        $(this.shadowRoot.querySelector('main')).fadeIn('fast')
-      })
+  const style = window.getComputedStyle(main)
+  $popup.attr({
+    'content-width': parseFloat(style.width),
+    'content-height': parseFloat(style.height),
+    'outer-width': main.offsetWidth,
+    'outer-height': main.offsetHeight,
   })
-  $popup.attr({content, options: JSON.stringify(options)})
+
+  let textRect = {
+    top: e.clientY,
+    bottom: e.clientY,
+    left: e.clientX,
+    right: e.clientX,
+  }
+
+  const selection = window.getSelection()
+  if (selection.toString()) {
+    const selectionRect = selection.getRangeAt(0).getBoundingClientRect()
+    textRect = {
+      top: selectionRect.top,
+      bottom: selectionRect.bottom,
+      left: selectionRect.left,
+      right: selectionRect.right,
+    }
+  }
+  const pos = calculatePopupPosition(textRect, $popup)
+
+  $(main).hide()
+  $popup.attr({ top: pos.y, left: pos.x })
+  $(main).fadeIn('fast')
 }
 
 function calculatePopupPosition(textRect, $popup) {

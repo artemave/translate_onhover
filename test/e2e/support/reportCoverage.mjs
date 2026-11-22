@@ -129,7 +129,7 @@ const THRESHOLDS = {
   //   waitForOptionsLoaded() before interacting - ironically, the race
   //   that guard exists for is the same one the timeout-review pass
   //   removed from this suite.
-  '/contentscript.js': { lines: 88.49, statements: 87.89, functions: 88.7, branches: 80 }
+  '/contentscript.js': { lines: 88.59, statements: 88, functions: 88.13, branches: 80 }
 }
 
 const metrics = ['lines', 'statements', 'functions', 'branches']
