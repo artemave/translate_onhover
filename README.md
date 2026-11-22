@@ -20,10 +20,10 @@ yarn install
 Then build:
 
 ```
-API_SECRET=1234 MEASUREMENT_ID=1234 yarn build
+GA_API_SECRET=1234 GA_MEASUREMENT_ID=1234 yarn build
 ```
 
-`API_SECRET` and `MEASUREMENT_ID` are Google Analytics 4 Measurement Protocol credentials; any values work for a local build. This runs the tests and produces `translate_onhover_v3.zip` (Chrome, Edge) and `translate_onhover_v2.zip` (Firefox).
+`GA_API_SECRET` and `GA_MEASUREMENT_ID` are Google Analytics 4 Measurement Protocol credentials; any values work for a local build. This runs the tests and produces `translate_onhover_v3.zip` (Chrome, Edge) and `translate_onhover_v2.zip` (Firefox).
 
 Now you can "Load unpacked" the `./dist` folder.
 

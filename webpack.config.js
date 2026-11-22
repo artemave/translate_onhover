@@ -60,12 +60,12 @@ const config = {
   plugins: [
     new EnvironmentPlugin(
       mode === 'production' ? [
-        'API_SECRET',
-        'MEASUREMENT_ID',
+        'GA_API_SECRET',
+        'GA_MEASUREMENT_ID',
         'MANIFEST_V3'
       ] : {
-        'API_SECRET': '123456',
-        'MEASUREMENT_ID': '343434',
+        'GA_API_SECRET': '123456',
+        'GA_MEASUREMENT_ID': '343434',
         'MANIFEST_V3': 'false'
       }
     ),

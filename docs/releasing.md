@@ -33,7 +33,7 @@ The workflow reads these [repository secrets](https://github.com/artemave/transl
 
 | Secret | What it is |
 |---|---|
-| `API_SECRET`, `MEASUREMENT_ID` | Google Analytics 4 Measurement Protocol credentials baked into the build (GA4 admin → Data streams → the stream → Measurement Protocol API secrets) |
+| `GA_API_SECRET`, `GA_MEASUREMENT_ID` | Google Analytics 4 Measurement Protocol credentials baked into the build (GA4 admin → Data streams → the stream → Measurement Protocol API secrets) |
 | `CHROME_PUBLISHER_ID`, `CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL`, `CHROME_SERVICE_ACCOUNT_PRIVATE_KEY` | Chrome Web Store API v2 access via a Google Cloud service account |
 | `FIREFOX_JWT_ISSUER`, `FIREFOX_JWT_SECRET` | AMO API key ([addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/developers/addon/api/key/)) |
 | `EDGE_PRODUCT_ID`, `EDGE_CLIENT_ID`, `EDGE_API_KEY` | Edge Add-ons API credentials (Partner Center → Microsoft Edge → Publish API) |

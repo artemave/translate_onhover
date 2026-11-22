@@ -44,8 +44,8 @@ jobs:
 
       - name: Build
         env:
-          API_SECRET: ${{ secrets.API_SECRET }}
-          MEASUREMENT_ID: ${{ secrets.MEASUREMENT_ID }}
+          GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
+          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
         run: |
           yarn build-v2
           yarn build-v3
