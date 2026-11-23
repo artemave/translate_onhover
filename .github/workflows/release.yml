@@ -67,7 +67,9 @@ jobs:
           CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
           CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
           CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
-          FIREFOX_EXTENSION_ID: '{73f6509a-074f-457f-bc32-e521bde682f7}'
+          # AMO's numeric id: publish-extension strips the braces from a guid,
+          # and AMO doesn't find the add-on without them.
+          FIREFOX_EXTENSION_ID: '2692152'
           FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
           FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
           EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
