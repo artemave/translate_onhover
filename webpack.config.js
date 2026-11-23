@@ -2,13 +2,12 @@ const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { EnvironmentPlugin } = require('webpack')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const coverage = process.env.COVERAGE === 'true'
 
 const config = {
-  devtool: 'inline-source-map',
+  devtool: mode === 'production' ? false : 'inline-source-map',
   mode,
   entry: {
     background: './background.js',
@@ -85,12 +84,6 @@ const config = {
       ]
     })
   ]
-}
-
-if (mode === 'production') {
-  config.optimization = {
-    minimizer: [new UglifyJsPlugin({test: /\.js(\?.*)?$/i})]
-  }
 }
 
 module.exports = config
