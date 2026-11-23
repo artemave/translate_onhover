@@ -20,7 +20,6 @@ import {
   saveOptions,
   waitForOptionsSaved
 } from './support/optionsPage.mjs'
-import { flushServiceWorker } from './support/coverage.mjs'
 
 describe('options page UI', () => {
   let extension
@@ -30,7 +29,6 @@ describe('options page UI', () => {
   })
 
   after(async () => {
-    await flushServiceWorker(extension)
     await extension.close()
   })
 

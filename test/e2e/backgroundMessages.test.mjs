@@ -3,7 +3,6 @@ import assert from 'node:assert'
 import { launchExtension, waitForPopupText, gotoFixture } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 // Covers a couple of background.js's chrome.runtime message handlers that
 // don't have a dedicated UI flow of their own to drive them through:
@@ -21,13 +20,10 @@ describe('background message handlers', () => {
     await saveOptions(optionsPage)
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
   })
 
   after(async () => {
-    await flushPage(page)
     await optionsPage.close()
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

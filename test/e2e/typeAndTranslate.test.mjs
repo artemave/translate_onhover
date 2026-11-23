@@ -10,7 +10,6 @@ import {
 } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, setDoNotShowOops, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 describe('type-and-translate popup', () => {
   let extension, fixtures, page
@@ -25,13 +24,10 @@ describe('type-and-translate popup', () => {
     await optionsPage.close()
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
     await gotoFixture(page, `${fixtures.baseUrl}/word.html`)
   })
 
   after(async () => {
-    await flushPage(page)
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

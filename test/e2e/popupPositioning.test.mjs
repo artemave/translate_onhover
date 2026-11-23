@@ -3,7 +3,6 @@ import assert from 'node:assert'
 import { launchExtension, waitForPopupText, gotoFixture } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 // calculatePopupPosition() has 5 horizontal and 3 vertical placement
 // branches, but every other e2e test leaves comfortable room to the right
@@ -23,12 +22,9 @@ describe('popup positioning', () => {
     await optionsPage.close()
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
   })
 
   after(async () => {
-    await flushPage(page)
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

@@ -3,7 +3,6 @@ import assert from 'node:assert'
 import { launchExtension, waitForPopupText, popupStaysEmpty, gotoFixture } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 describe('rate-limit backoff', () => {
   let extension, fixtures, page
@@ -27,12 +26,9 @@ describe('rate-limit backoff', () => {
     )
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
   })
 
   after(async () => {
-    await flushPage(page)
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

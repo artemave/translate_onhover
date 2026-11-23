@@ -2,8 +2,6 @@ dist
 node_modules
 .DS_Store
 .mise.toml
-coverage
-.coverage-e2e-raw
 .browser-profile
 .dev-build
 translate_onhover_*.zip

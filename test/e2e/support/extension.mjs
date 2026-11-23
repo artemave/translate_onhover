@@ -3,7 +3,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { dumpPageCoverage } from './coverage.mjs'
 import { stubTranslateApi } from './googleStub.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -58,10 +57,6 @@ export async function waitForOptionsLoaded(page) {
 // Navigates to a fixture page and waits for the content script's options
 // load to finish before returning.
 export async function gotoFixture(page, url) {
-  // A fresh document is a fresh JS realm - whatever coverage the content
-  // script on the current page accumulated has to be read out now, or it's
-  // gone the moment we navigate away.
-  await dumpPageCoverage(page)
   await page.goto(url)
   await waitForOptionsLoaded(page)
 }

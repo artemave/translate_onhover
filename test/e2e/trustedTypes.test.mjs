@@ -3,7 +3,6 @@ import assert from 'node:assert'
 import { launchExtension, waitForPopupText, gotoFixture, openTypeAndTranslate } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 describe('page enforcing Trusted Types', () => {
   let extension, fixtures, page
@@ -18,13 +17,10 @@ describe('page enforcing Trusted Types', () => {
     await optionsPage.close()
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
     await gotoFixture(page, `${fixtures.baseUrl}/trustedTypes.html`)
   })
 
   after(async () => {
-    await flushPage(page)
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

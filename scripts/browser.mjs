@@ -32,7 +32,7 @@ config.output.path = buildPath
 
 let onRebuild
 // The config's '*.png' copy pattern makes webpack watch the whole repo root.
-const ignored = ['**/.browser-profile/**', '**/.dev-build/**', '**/dist/**', '**/coverage/**', '**/node_modules/**']
+const ignored = ['**/.browser-profile/**', '**/.dev-build/**', '**/dist/**', '**/node_modules/**']
 const watching = webpack(config).watch({ ignored }, (err, stats) => {
   if (err) throw err
   console.log(stats.toString({ preset: 'minimal', colors: true }))

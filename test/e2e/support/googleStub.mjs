@@ -16,25 +16,27 @@ import { fixtureName } from './googleFixtureName.mjs'
 
 const fixturesDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../fixtures/google-responses')
 
+export async function capturedTranslateResponse(requestUrl) {
+  const url = new URL(requestUrl)
+  const word = url.searchParams.get('q')
+  const sl = url.searchParams.get('sl')
+  const tl = url.searchParams.get('tl')
+  const client = url.searchParams.get('client')
+  const name = fixtureName(word, sl, tl, client)
+
+  try {
+    return await readFile(path.join(fixturesDir, `${name}.json`), 'utf8')
+  } catch {
+    throw new Error(
+      `No captured Google response fixture for word=${word} sl=${sl} tl=${tl} client=${client} ` +
+      `(looked for ${name}.json) - add this combo to scripts/capture-translate-fixtures.mjs and run it.`
+    )
+  }
+}
+
 export async function stubTranslateApi(context) {
   await context.route('**/translate_a/single**', async route => {
-    const url = new URL(route.request().url())
-    const word = url.searchParams.get('q')
-    const sl = url.searchParams.get('sl')
-    const tl = url.searchParams.get('tl')
-    const client = url.searchParams.get('client')
-    const name = fixtureName(word, sl, tl, client)
-
-    let body
-    try {
-      body = await readFile(path.join(fixturesDir, `${name}.json`), 'utf8')
-    } catch {
-      throw new Error(
-        `No captured Google response fixture for word=${word} sl=${sl} tl=${tl} client=${client} ` +
-        `(looked for ${name}.json) - add this combo to scripts/capture-translate-fixtures.mjs and run it.`
-      )
-    }
-
+    const body = await capturedTranslateResponse(route.request().url())
     await route.fulfill({ contentType: 'application/json', body })
   })
 

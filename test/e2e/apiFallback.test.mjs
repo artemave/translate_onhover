@@ -3,7 +3,6 @@ import assert from 'node:assert'
 import { launchExtension, waitForPopupText, gotoFixture } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 describe('falling back from the primary translate API to the rate-limited one', () => {
   let extension, fixtures, page
@@ -18,12 +17,9 @@ describe('falling back from the primary translate API to the rate-limited one', 
     await optionsPage.close()
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
   })
 
   after(async () => {
-    await flushPage(page)
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

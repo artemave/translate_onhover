@@ -2,11 +2,9 @@
 // so the e2e suite exercises that code too instead of poking chrome.storage
 // directly.
 
-import { trackPage } from './coverage.mjs'
 
 export async function openOptions(context, optionsUrl) {
   const page = await context.newPage()
-  await trackPage(page)
   await page.goto(optionsUrl)
 
   // load()'s completion sets this marker itself (see options_script.js) -

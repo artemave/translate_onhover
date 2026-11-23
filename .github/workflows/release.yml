@@ -41,6 +41,7 @@ jobs:
 
       - run: yarn test:unit
       - run: yarn test:e2e
+      - run: yarn test:e2e:mv2
 
       - name: Build
         env:

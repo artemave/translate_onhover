@@ -3,7 +3,6 @@ import assert from 'node:assert'
 import { launchExtension, popupStaysEmpty, waitForPopupText, gotoFixture, waitForOptionsLoaded } from './support/extension.mjs'
 import { startFixtureServer } from './support/fixtureServer.mjs'
 import { openOptions, setTargetLang, setSelectionKeyOnly, saveOptions } from './support/optionsPage.mjs'
-import { trackContentScriptWorld, flushPage, flushServiceWorker } from './support/coverage.mjs'
 
 describe('interaction edge cases', () => {
   let extension, fixtures, page
@@ -18,12 +17,9 @@ describe('interaction edge cases', () => {
     await optionsPage.close()
 
     page = await extension.context.newPage()
-    await trackContentScriptWorld(page)
   })
 
   after(async () => {
-    await flushPage(page)
-    await flushServiceWorker(extension)
     await extension.close()
     await fixtures.close()
   })

@@ -1,7 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
 import { launchExtension } from './support/extension.mjs'
-import { trackPage, flushServiceWorker } from './support/coverage.mjs'
 
 describe('storage quota errors', () => {
   let extension, page
@@ -9,13 +8,11 @@ describe('storage quota errors', () => {
   before(async () => {
     extension = await launchExtension()
     page = await extension.context.newPage()
-    await trackPage(page)
     await page.goto(extension.optionsUrl)
   })
 
   after(async () => {
     await page.close()
-    await flushServiceWorker(extension)
     await extension.close()
   })
 
