@@ -1,5 +1,12 @@
 # CHANGELOG
 
+1.75
+  * Dark mode for the popups (Options → Popup theme) and the options page
+  * Fix popup not showing on sites that enforce Trusted Types (e.g. Gmail)
+  * Add 116 more languages and fix text direction for several
+  * Fix the popup and TTS keys doing nothing on a fresh install
+  * Fix rate-limit backoff never engaging
+
 1.74
   * Better popup positioning
 
