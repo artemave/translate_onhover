@@ -130,6 +130,44 @@ describe('translating on mouse stop', () => {
     })
   }
 
+  describe('moving away from the popup', () => {
+    async function showPopup() {
+      const content = await openContentPage(browser, 'word.html', { responses: { translate: giftTranslation } })
+      await content.page.click('#word')
+      await content.waitForPopupText()
+      await content.page.evaluate(() => Promise.all(
+        document.querySelector('transover-popup').shadowRoot.querySelector('main').getAnimations().map(animation => animation.finished)
+      ))
+      return content
+    }
+
+    function fadeOuts(content) {
+      return content.page.evaluate(() =>
+        document.querySelector('transover-popup').shadowRoot.querySelector('main').getAnimations()
+          .map(animation => animation.effect.getKeyframes().map(keyframe => keyframe.opacity))
+      )
+    }
+
+    it('fades the popup out once while the mouse keeps moving', async () => {
+      const content = await showPopup()
+      await content.page.mouse.move(600, 600)
+      await content.page.mouse.move(650, 650)
+
+      assert.deepStrictEqual(await fadeOuts(content), [['1', '0']])
+      await content.waitForNoPopup()
+    })
+
+    it('fades out from the popup\'s current opacity', async () => {
+      const content = await showPopup()
+      await content.page.evaluate(() => {
+        document.querySelector('transover-popup').shadowRoot.querySelector('main').style.opacity = '0.5'
+      })
+      await content.page.mouse.move(600, 600)
+
+      assert.deepStrictEqual(await fadeOuts(content), [['0.5', '0']])
+    })
+  })
+
   it('scrolling closes the popup', async () => {
     const content = await openContentPage(browser, 'text.html', { responses: { translate: giftTranslation } })
     await content.clickText('#delta', 'delta', 2)

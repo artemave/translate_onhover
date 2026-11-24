@@ -84,9 +84,7 @@ export async function addOnlyUrl(optionsPage, urlPattern) {
 // addExceptUrl/addOnlyUrl fill just populated), which is what actually
 // commits it to a removable "X" row and appends the next blank one -
 // addExceptUrl/addOnlyUrl alone only fill the input, they don't click it.
-// Waits for the row count to actually go up rather than a fixed delay: the
-// new row fades in over jQuery's default 400ms, and that turned out to be
-// a real, occasionally-missed race, not just a formality.
+// Waits for the row count to actually go up rather than a fixed delay.
 export async function commitLastUrlRow(optionsPage, tableId) {
   const before = await optionsPage.locator(`${tableId} tr`).count()
   await optionsPage.locator(`${tableId} tr`).last().locator('button').click()
@@ -98,9 +96,8 @@ export async function commitLastUrlRow(optionsPage, tableId) {
 
 // Clicks the "X" button on the table's first row - the one populated from
 // a previously-saved entry when the options page loaded. Waits for the row
-// count to actually go down rather than a fixed delay, for the same reason
-// as commitLastUrlRow: rm_callback's fadeOut('fast') is real animation time,
-// not a formality to wait out blindly.
+// count to actually go down rather than a fixed delay: the row fades out
+// for 200ms before it's removed.
 export async function removeFirstUrlRow(optionsPage, tableId) {
   await showMoreOptions(optionsPage)
   const before = await optionsPage.locator(`${tableId} tr`).count()

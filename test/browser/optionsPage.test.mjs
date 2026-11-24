@@ -96,6 +96,25 @@ describe('options page', () => {
     assert.ok(await page.locator('.flash').first().isVisible())
   })
 
+  it('the saved notice goes away once shown', async () => {
+    const options = await openOptionsPage(browser, { items: { target_lang: 'fr' } })
+    await options.save()
+    const flashes = options.page.locator('.flash')
+    assert.deepStrictEqual(await flashes.evaluateAll(all => all.map(flash => flash.checkVisibility())), [true, true])
+
+    await options.page.evaluate(() => document.getAnimations().forEach(animation => animation.finish()))
+
+    await options.page.waitForFunction(() => [...document.querySelectorAll('.flash')].every(flash => !flash.checkVisibility()))
+  })
+
+  it('saving again while the saved notice shows restarts it', async () => {
+    const options = await openOptionsPage(browser, { items: { target_lang: 'fr' } })
+    await options.save()
+    await options.save()
+
+    assert.deepStrictEqual(await options.page.locator('.flash').evaluateAll(all => all.map(flash => flash.getAnimations().length)), [1, 1])
+  })
+
   it('Enter saves, other keys do not', async () => {
     const options = await openOptionsPage(browser, { items: { target_lang: 'fr' } })
     await options.page.selectOption('#target_lang', 'de')

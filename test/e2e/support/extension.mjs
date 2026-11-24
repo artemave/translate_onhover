@@ -63,10 +63,8 @@ export async function gotoFixture(page, url) {
 
 // Each of the functions below finds the popup's shadow-root <main> by
 // grabbing the *last* 'transover-popup' element, not the first: showPopup()
-// in contentscript.js fades the previous popup out asynchronously
-// (removePopup's fadeOut callback) *after* already appending the new one,
-// so both can briefly coexist in the DOM, and jQuery always appends the
-// new one at the end of <body>.
+// in lib/content.js appends the new popup at the end of <body> while the
+// previous one is still fading out, so both can briefly coexist in the DOM.
 
 // Removes any leftover translation popup from an earlier action on this
 // page: contentscript.js only clears it as a side effect of a real
