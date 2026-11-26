@@ -4,7 +4,7 @@ import { createOptions } from './lib/options'
 import { createTracker } from './lib/tracking'
 
 const manifestV3 = process.env.MANIFEST_V3 === 'true'
-const localStorage = createLocalStorage(chrome)
+const localStorage = createLocalStorage({ storage: chrome.storage, runtime: chrome.runtime })
 
 init({
   runtime: chrome.runtime,
