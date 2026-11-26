@@ -34,6 +34,7 @@ describe('keyboard', () => {
 
       assert.match(await content.waitForPopupText(), /cadeau/)
       assert.deepStrictEqual(await translatedWords(content), ['alpha beta'])
+      assert.strictEqual((await content.sent('translate'))[0].selection, true)
     })
 
     it('the trigger key shows an error from the background', async () => {

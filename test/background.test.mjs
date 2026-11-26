@@ -203,6 +203,23 @@ describe('background', () => {
       assert.strictEqual(response.tl, 'fr')
     })
 
+    it('autodetects the language of a selection whatever from_lang says', async () => {
+      const background = startBackground({ items: { target_lang: 'fr', from_lang: 'de' } })
+      google.translate = async () => ({ json: { sentences: [{ trans: 'un cadeau' }], src: 'en' } })
+      const response = await background.send({ handler: 'translate', word: 'a gift', selection: true })
+
+      assert.strictEqual(response.sl, 'en')
+      assert.deepStrictEqual([google.translateRequests[0].searchParams.get('sl'), google.translateRequests[0].searchParams.get('tl')], ['auto', 'fr'])
+    })
+
+    it('translates a hovered word from from_lang', async () => {
+      const background = startBackground({ items: { target_lang: 'fr', from_lang: 'de' } })
+      google.translate = async () => ({ json: { sentences: [{ trans: 'cadeau' }], src: 'de' } })
+      await background.send({ handler: 'translate', word: 'Geschenk' })
+
+      assert.strictEqual(google.translateRequests[0].searchParams.get('sl'), 'de')
+    })
+
     it('uses the type-and-translate languages and remembers them', async () => {
       const background = startBackground()
       await background.send({ handler: 'translate', word: 'geschenk', sl: 'fr', tl: 'de' })

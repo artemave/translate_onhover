@@ -40,6 +40,7 @@ describe('translating on mouse stop', () => {
 
     await content.waitForPopupText()
     assert.deepStrictEqual(await translatedWords(content), ['alpha beta'])
+    assert.strictEqual((await content.sent('translate'))[0].selection, true)
     assert.strictEqual((await content.sent('trackEvent'))[0].event.params.action, 'select')
   })
 
@@ -75,6 +76,7 @@ describe('translating on mouse stop', () => {
 
       await content.waitForPopupText()
       assert.notDeepStrictEqual(await translatedWords(content), ['alpha beta'])
+      assert.strictEqual((await content.sent('translate'))[0].selection, false)
     })
 
     it(`hovering a word ${where} translates nothing in click mode`, async () => {
