@@ -1,5 +1,8 @@
 # CHANGELOG
 
+1.77
+  * Fix the Chrome Web Store rejecting 1.76; no other changes
+
 1.76
   * Always autodetect the language of selected text, so the 'Translate from' option no longer garbles sentences in other languages
   * Do nothing until a target language is chosen, instead of failing to translate
