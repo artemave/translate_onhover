@@ -1,5 +1,12 @@
 # CHANGELOG
 
+1.76
+  * Always autodetect the language of selected text, so the 'Translate from' option no longer garbles sentences in other languages
+  * Do nothing until a target language is chosen, instead of failing to translate
+  * Show errors when translating a selection with the trigger key
+  * Fit popups wider than the window into it
+  * Fix the popup flashing back to full opacity while the mouse moves
+
 1.75
   * Dark mode for the popups (Options → Popup theme) and the options page
   * Fix popup not showing on sites that enforce Trusted Types (e.g. Gmail)
