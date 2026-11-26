@@ -135,6 +135,22 @@ describe('keyboard', () => {
       await content.settle()
     })
 
+    it('releases the audio once it has played', async () => {
+      const content = await showTranslation({ word: 'gift', sl: 'en', tl: 'fr', isReverseTranslate: false, translation: 'cadeau' })
+      await content.page.evaluate(() => {
+        const load = HTMLMediaElement.prototype.load
+        window.audioLoads = []
+        HTMLMediaElement.prototype.load = function() {
+          window.audioLoads.push({ ended: this.ended, src: this.getAttribute('src') })
+          return load.call(this)
+        }
+      })
+      await pressTtsKey(content)
+      await content.page.waitForFunction(() => window.audioLoads.length > 0)
+
+      assert.deepStrictEqual(await content.page.evaluate(() => window.audioLoads), [{ ended: true, src: null }])
+    })
+
     it('holding the tts key speaks once', async () => {
       const content = await showTranslation({ word: 'gift', sl: 'en', tl: 'fr', isReverseTranslate: false, translation: 'cadeau' })
       await content.page.keyboard.down('Shift')
